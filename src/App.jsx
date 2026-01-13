@@ -1,0 +1,87 @@
+import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
+import { useEffect } from 'react';
+import Lenis from 'lenis';
+
+import Layout from './components/Layout';
+import Home from './pages/Home';
+import Login from './pages/Login';
+import Contact from './pages/Contact';
+import Post from './pages/Post';
+
+// Dashboard
+import DashboardLayout from './components/DashboardLayout';
+import DashboardHome from './pages/dashboard/DashboardHome';
+import AllStories from './pages/dashboard/AllStories';
+import AddStory from './pages/dashboard/AddStory';
+import EditStory from './pages/dashboard/EditStory';
+import Categories from './pages/dashboard/Categories';
+import Team from './pages/dashboard/Team';
+
+/* -----------------------------------------
+   Lenis wrapper – disables smooth scroll
+   on /dashboard routes
+------------------------------------------ */
+function LenisWrapper({ children }) {
+  const location = useLocation();
+
+  useEffect(() => {
+    // 🚫 Disable Lenis for dashboard
+    if (location.pathname.startsWith('/dashboard')) {
+      document.documentElement.style.overflow = 'auto';
+      document.body.style.overflow = 'auto';
+      return;
+    }
+
+    const lenis = new Lenis({
+      duration: 1.2,
+      easing: (t) => Math.min(1, 1.001 - Math.pow(2, -10 * t)),
+      smooth: true,
+      direction: 'vertical',
+      gestureDirection: 'vertical',
+      smoothTouch: false,
+    });
+
+    function raf(time) {
+      lenis.raf(time);
+      requestAnimationFrame(raf);
+    }
+
+    requestAnimationFrame(raf);
+
+    return () => {
+      lenis.destroy();
+    };
+  }, [location.pathname]);
+
+  return children;
+}
+
+function App() {
+  return (
+    <BrowserRouter basename="/kaivailayam/">
+      <LenisWrapper>
+        <Routes>
+          {/* Public Routes */}
+          <Route path="/" element={<Layout />}>
+            <Route index element={<Home />} />
+            <Route path="login" element={<Login />} />
+            <Route path="contact" element={<Contact />} />
+            <Route path="post/:id" element={<Post />} />
+          </Route>
+
+          {/* Dashboard Routes */}
+          <Route path="/dashboard" element={<DashboardLayout />}>
+            <Route index element={<DashboardHome />} />
+            <Route path="stories" element={<AllStories />} />
+            <Route path="stories/add" element={<AddStory />} />
+            <Route path="stories/edit/:id" element={<EditStory />} />
+            <Route path="categories" element={<Categories />} />
+            <Route path="team" element={<Team />} />
+          </Route>
+        </Routes>
+      </LenisWrapper>
+    </BrowserRouter>
+  );
+}
+
+export default App;
