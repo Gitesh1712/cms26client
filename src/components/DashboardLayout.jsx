@@ -1,5 +1,5 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, FolderOpen, Users, LogOut, Menu, X } from 'lucide-react';
+import { LayoutDashboard, FileText, FolderOpen, Users, LogOut, Menu, X, Clock, CheckCircle, XCircle } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
 const DashboardLayout = () => {
@@ -32,9 +32,11 @@ const DashboardLayout = () => {
         { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
         { icon: FileText, label: "All Stories", path: "/dashboard/stories" },
         { icon: FolderOpen, label: "Categories", path: "/dashboard/categories" },
-        // { icon: Users, label: "Team", path: "/dashboard/team" },
     ];
     if(JSON.parse(sessionStorage.getItem('userInfo') || '{}').role === 'admin'){
+        navItems.push({ icon: Clock, label: "Pending Approval", path: "/dashboard/pending-approval" });
+        navItems.push({ icon: CheckCircle, label: "Approved Posts", path: "/dashboard/approved-posts" });
+        navItems.push({ icon: XCircle, label: "Rejected Posts", path: "/dashboard/rejected-posts" });
         navItems.push({ icon: Users, label: "Team", path: "/dashboard/team" });
     }
 

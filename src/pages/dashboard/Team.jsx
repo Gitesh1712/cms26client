@@ -10,6 +10,7 @@ import {
   Search,
   Shield,
   User as UserIcon,
+  Phone,
 } from "lucide-react";
 import { api } from "../../services/api";
 import { useNavigate } from 'react-router-dom';
@@ -31,7 +32,9 @@ const Team = () => {
 
   // Form State
   const [formData, setFormData] = useState({
+    name: "",
     email: "",
+    mobile: "",
     password: "",
     role: "member",
   });
@@ -64,7 +67,7 @@ const Team = () => {
   }, []);
 
   const resetForm = () => {
-    setFormData({ email: "", password: "", role: "member" });
+    setFormData({ name: "", email: "", mobile: "", password: "", role: "member" });
     setEditingUser(null);
   };
 
@@ -76,7 +79,9 @@ const Team = () => {
 
   const openEditModal = (user) => {
     setFormData({
+      name: user.name || "",
       email: user.email,
+      mobile: user.mobile || "",
       password: "",
       role: user.role,
     });
@@ -107,7 +112,12 @@ const Team = () => {
           Authorization: `Bearer ${token}`,
         });
       } else {
-        const updateData = { email: formData.email, role: formData.role };
+        const updateData = { 
+          name: formData.name,
+          email: formData.email, 
+          mobile: formData.mobile,
+          role: formData.role 
+        };
         if (formData.password) {
           updateData.password = formData.password;
         }
@@ -140,7 +150,8 @@ const Team = () => {
   };
 
   const filteredUsers = users.filter((user) =>
-    user.email.toLowerCase().includes(searchTerm.toLowerCase())
+    user.email.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (user.name && user.name.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
   return (
@@ -173,7 +184,7 @@ const Team = () => {
         />
         <input
           type="text"
-          placeholder="Search by email..."
+          placeholder="Search by name or email..."
           value={searchTerm}
           onChange={(e) => setSearchTerm(e.target.value)}
           className="w-full bg-slate-900 border border-white/10 rounded-xl py-3 pl-12 pr-4 text-slate-200 placeholder-slate-500 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50"
@@ -220,6 +231,9 @@ const Team = () => {
                   <th className="text-left px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold text-slate-300 uppercase tracking-wider">
                     User
                   </th>
+                  <th className="text-left px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold text-slate-300 uppercase tracking-wider hidden md:table-cell">
+                    Mobile
+                  </th>
                   <th className="text-left px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold text-slate-300 uppercase tracking-wider">
                     Role
                   </th>
@@ -240,16 +254,28 @@ const Team = () => {
                     <td className="px-4 md:px-6 py-3 md:py-4">
                       <div className="flex items-center gap-2 md:gap-3">
                         <div className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white font-bold text-sm md:text-base">
-                          {user.email.charAt(0).toUpperCase()}
+                          {(user.name || user.email).charAt(0).toUpperCase()}
                         </div>
                         <div className="min-w-0">
                           <p className="text-white font-medium text-sm md:text-base truncate max-w-[120px] sm:max-w-none">
+                            {user.name || 'No name'}
+                          </p>
+                          <p className="text-slate-500 text-xs truncate max-w-[120px] sm:max-w-none">
                             {user.email}
                           </p>
-                          <p className="text-slate-500 text-xs">
-                            ID: {user._id.slice(-6)}
-                          </p>
                         </div>
+                      </div>
+                    </td>
+                    <td className="px-4 md:px-6 py-3 md:py-4 hidden md:table-cell">
+                      <div className="flex items-center gap-2 text-slate-400 text-sm">
+                        {user.mobile ? (
+                          <>
+                            <Phone size={14} className="text-slate-500" />
+                            <span>{user.mobile}</span>
+                          </>
+                        ) : (
+                          <span className="text-slate-600">—</span>
+                        )}
                       </div>
                     </td>
                     <td className="px-4 md:px-6 py-3 md:py-4">
@@ -323,6 +349,20 @@ const Team = () => {
             <form onSubmit={handleSubmit} className="p-6 space-y-6">
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-300">
+                  Name
+                </label>
+                <input
+                  name="name"
+                  type="text"
+                  value={formData.name}
+                  onChange={handleInputChange}
+                  className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 px-4 text-slate-200 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50"
+                  placeholder="John Doe"
+                />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-300">
                   Email <span className="text-red-400">*</span>
                 </label>
                 <input
@@ -334,6 +374,23 @@ const Team = () => {
                   className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 px-4 text-slate-200 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50"
                   placeholder="user@example.com"
                 />
+              </div>
+
+              <div className="space-y-2">
+                <label className="text-sm font-medium text-slate-300">
+                  Mobile
+                </label>
+                <input
+                  name="mobile"
+                  type="tel"
+                  value={formData.mobile}
+                  onChange={handleInputChange}
+                  maxLength={15}
+                  pattern="^[+]?[0-9\s\-]{0,15}$"
+                  className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 px-4 text-slate-200 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50"
+                  placeholder="+91 98765 43210"
+                />
+                <p className="text-xs text-slate-500">Only numbers, spaces, dashes and + allowed (max 15 chars)</p>
               </div>
 
               <div className="space-y-2">

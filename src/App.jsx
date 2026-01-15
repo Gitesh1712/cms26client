@@ -16,6 +16,9 @@ import AddStory from './pages/dashboard/AddStory';
 import EditStory from './pages/dashboard/EditStory';
 import Categories from './pages/dashboard/Categories';
 import Team from './pages/dashboard/Team';
+import PendingApproval from './pages/dashboard/PendingApproval';
+import ApprovedPosts from './pages/dashboard/ApprovedPosts';
+import RejectedPosts from './pages/dashboard/RejectedPosts';
 
 /* -----------------------------------------
    Lenis wrapper – disables smooth scroll
@@ -77,6 +80,9 @@ function App() {
             <Route path="stories/edit/:id" element={<EditStory />} />
             <Route path="categories" element={<Categories />} />
             <Route path="team" element={<Team />} />
+            <Route path="pending-approval" element={<PendingApproval />} />
+            <Route path="approved-posts" element={<ApprovedPosts />} />
+            <Route path="rejected-posts" element={<RejectedPosts />} />
           </Route>
         </Routes>
       </LenisWrapper>

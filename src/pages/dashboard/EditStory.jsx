@@ -30,6 +30,24 @@ const EditStory = () => {
     const [mediaType, setMediaType] = useState('file'); // 'file' or 'url'
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [existingMedia, setExistingMedia] = useState([]);
+    //helper functions for video embed
+    const isEmbedVideo = (url) =>
+        url.includes('youtube.com') ||
+        url.includes('youtu.be') ||
+        url.includes('vimeo.com');
+
+    const getEmbedUrl = (url) => {
+        if (url.includes('youtu.be')) {
+            return `https://www.youtube.com/embed/${url.split('/').pop()}`;
+        }
+        if (url.includes('youtube.com')) {
+            return `https://www.youtube.com/embed/${new URL(url).searchParams.get('v')}`;
+        }
+        if (url.includes('vimeo.com')) {
+            return `https://player.vimeo.com/video/${url.split('/').pop()}`;
+        }
+        return url;
+    };
 
     useEffect(() => {
         window.scrollTo(0, 0);
@@ -51,7 +69,7 @@ const EditStory = () => {
                     heroContent: response.heroContent || false,
                     topStory: response.topStory || false,
                     categoryHighlight: response.categoryHighlight || false,
-                    mediaUrl: ''
+                    mediaUrl: response.media[0]?.url || ''
                 });
 
                 setExistingMedia(response.media || []);
@@ -250,13 +268,57 @@ const EditStory = () => {
                             <label className="text-sm font-medium text-slate-300 block">Current Media</label>
                             <div className="flex gap-4 flex-wrap">
                                 {existingMedia.map((media, idx) => (
-                                    <div key={idx} className="relative w-32 h-32 rounded-lg overflow-hidden border border-slate-700">
+                                    // <div key={idx} className="relative w-32 h-32 rounded-lg overflow-hidden border border-slate-700">
+                                    //     {media.mediaType === 'video' ? (
+                                    //         <video src={media.url.startsWith('http') ? media.url : `${import.meta.env.VITE_API_URL}${media.url}`} className="w-full h-full object-cover" />
+                                    //     ) : (
+                                    //         <img src={media.url.startsWith('http') ? media.url : `${import.meta.env.VITE_API_URL}${media.url}`} alt="Media" className="w-full h-full object-cover" />
+                                    //     )}
+                                    // </div>
+                                    // <div
+                                    //     key={idx}
+                                    //     className="relative w-32 h-32 rounded-lg overflow-hidden border border-slate-700 bg-black"
+                                    // >
+                                    <div
+                                        key={idx}
+                                        className="relative w-56 h-56 md:w-64 md:h-64 rounded-xl overflow-hidden border border-slate-700 bg-black"
+                                    >
+
                                         {media.mediaType === 'video' ? (
-                                            <video src={media.url.startsWith('http') ? media.url : `${import.meta.env.VITE_API_URL}${media.url}`} className="w-full h-full object-cover" />
+                                            isEmbedVideo(media.url) ? (
+                                                <iframe
+                                                    src={getEmbedUrl(media.url)}
+                                                    className="w-full h-full"
+                                                    frameBorder="0"
+                                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                                    allowFullScreen
+                                                    loading="lazy"
+                                                />
+                                            ) : (
+                                                <video
+                                                    src={
+                                                        media.url.startsWith('http')
+                                                            ? media.url
+                                                            : `${import.meta.env.VITE_API_URL}${media.url}`
+                                                    }
+                                                    className="w-full h-full object-cover"
+                                                    muted
+                                                    preload="metadata"
+                                                />
+                                            )
                                         ) : (
-                                            <img src={media.url.startsWith('http') ? media.url : `${import.meta.env.VITE_API_URL}${media.url}`} alt="Media" className="w-full h-full object-cover" />
+                                            <img
+                                                src={
+                                                    media.url.startsWith('http')
+                                                        ? media.url
+                                                        : `${import.meta.env.VITE_API_URL}${media.url}`
+                                                }
+                                                alt="Media"
+                                                className="w-full h-full object-cover"
+                                            />
                                         )}
                                     </div>
+
                                 ))}
                             </div>
                             <p className="text-xs text-slate-500">Upload new media to replace existing</p>
