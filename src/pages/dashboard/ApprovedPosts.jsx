@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
-import { Eye, Edit2, Loader2, AlertCircle, Image as ImageIcon, CheckCircle, XCircle } from 'lucide-react';
+import { Eye, Edit2, Loader2, AlertCircle, Image as ImageIcon, CheckCircle, XCircle, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 import { api } from '../../services/api';
 
 const ApprovedPosts = () => {
@@ -9,7 +10,22 @@ const ApprovedPosts = () => {
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [rejectModal, setRejectModal] = useState({ open: false, postId: null, postTitle: '' });
+    const [hideModal, setHideModal] = useState({ open: false, postId: null, postTitle: '' });
     const [updating, setUpdating] = useState(false);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        // Check if user is admin
+        const userInfo = sessionStorage.getItem('userInfo');
+        if (userInfo) {
+            try {
+                const { role } = JSON.parse(userInfo);
+                setIsAdmin(role === 'admin');
+            } catch (err) {
+                console.error('Failed to parse user info:', err);
+            }
+        }
+    }, []);
 
     const fetchApprovedPosts = async () => {
         try {
@@ -38,6 +54,14 @@ const ApprovedPosts = () => {
         setRejectModal({ open: false, postId: null, postTitle: '' });
     };
 
+    const openHideModal = (postId, postTitle) => {
+        setHideModal({ open: true, postId, postTitle });
+    };
+
+    const closeHideModal = () => {
+        setHideModal({ open: false, postId: null, postTitle: '' });
+    };
+
     const handleEditStory = (id) => {
         navigate(`/dashboard/stories/edit/${id}`);
     };
@@ -51,9 +75,32 @@ const ApprovedPosts = () => {
             // Refresh the list after successful update
             await fetchApprovedPosts();
             closeRejectModal();
+            
+            // Show success message
+            toast.success("Post has been rejected successfully!");
         } catch (err) {
             console.error("Failed to reject post:", err);
-            alert("Failed to reject story. Please try again.");
+            toast.error("Failed to reject story. Please try again.");
+        } finally {
+            setUpdating(false);
+        }
+    };
+
+    const handleHidePost = async () => {
+        try {
+            setUpdating(true);
+            const token = sessionStorage.getItem('token');
+            await api.patch(`/posts/${hideModal.postId}/status`, { status: 4 }, { Authorization: `Bearer ${token}` });
+            
+            // Refresh the list after successful update
+            await fetchApprovedPosts();
+            closeHideModal();
+            
+            // Show success message
+            toast.success("Post has been hidden successfully!");
+        } catch (err) {
+            console.error("Failed to hide post:", err);
+            toast.error("Failed to hide story. Please try again.");
         } finally {
             setUpdating(false);
         }
@@ -98,6 +145,36 @@ const ApprovedPosts = () => {
                             </button>
                             <button
                                 onClick={closeRejectModal}
+                                disabled={updating}
+                                className="flex-1 px-4 py-3 bg-slate-700/50 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition-all border border-white/10 disabled:opacity-50"
+                            >
+                                Cancel
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Hide Confirmation Modal */}
+            {hideModal.open && (
+                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+                    <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl">
+                        <h3 className="text-xl font-bold text-white mb-2">Hide Post</h3>
+                        <p className="text-slate-400 mb-6">
+                            Are you sure you want to hide "<span className="text-white">{hideModal.postTitle}</span>"? This will make it invisible to the public.
+                        </p>
+                        
+                        <div className="flex flex-col sm:flex-row gap-3">
+                            <button
+                                onClick={handleHidePost}
+                                disabled={updating}
+                                className="flex-1 px-4 py-3 bg-slate-600/20 hover:bg-slate-600/30 text-slate-300 font-semibold rounded-xl transition-all border border-slate-600/20 flex items-center justify-center gap-2 disabled:opacity-50"
+                            >
+                                {updating ? <Loader2 size={18} className="animate-spin" /> : <EyeOff size={18} />}
+                                Hide Post
+                            </button>
+                            <button
+                                onClick={closeHideModal}
                                 disabled={updating}
                                 className="flex-1 px-4 py-3 bg-slate-700/50 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition-all border border-white/10 disabled:opacity-50"
                             >
@@ -249,13 +326,24 @@ const ApprovedPosts = () => {
                                         >
                                             <Edit2 size={16} />
                                         </button>
-                                        <button
-                                            onClick={() => openRejectModal(post._id, post.title)}
-                                            className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-semibold rounded-lg transition-all text-sm flex items-center gap-2 border border-red-500/20"
-                                        >
-                                            <XCircle size={16} />
-                                            Reject
-                                        </button>
+                                        {isAdmin && (
+                                            <>
+                                                <button
+                                                    onClick={() => openHideModal(post._id, post.title)}
+                                                    className="p-2 text-slate-400 hover:text-white hover:bg-slate-600 rounded-lg transition-all"
+                                                    title="Hide Post"
+                                                >
+                                                    <EyeOff size={16} />
+                                                </button>
+                                                <button
+                                                    onClick={() => openRejectModal(post._id, post.title)}
+                                                    className="px-4 py-2 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-semibold rounded-lg transition-all text-sm flex items-center gap-2 border border-red-500/20"
+                                                >
+                                                    <XCircle size={16} />
+                                                    Reject
+                                                </button>
+                                            </>
+                                        )}
                                     </div>
                                 </div>
                             </div>

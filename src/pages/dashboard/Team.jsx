@@ -428,7 +428,7 @@ const Team = () => {
                   className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 px-4 text-slate-200 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50"
                 >
                   <option value="member">Member</option>
-                  <option value="admin">Admin</option>
+                  {/*<option value="admin">Admin</option>*/}
                 </select>
               </div>
 

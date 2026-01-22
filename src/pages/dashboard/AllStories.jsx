@@ -8,6 +8,20 @@ const AllStories = () => {
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
+    const [isAdmin, setIsAdmin] = useState(false);
+
+    useEffect(() => {
+        // Check if user is admin
+        const userInfo = sessionStorage.getItem('userInfo');
+        if (userInfo) {
+            try {
+                const { role } = JSON.parse(userInfo);
+                setIsAdmin(role === 'admin');
+            } catch (err) {
+                console.error('Failed to parse user info:', err);
+            }
+        }
+    }, []);
 
     const fetchPosts = async () => {
         try {
@@ -245,13 +259,15 @@ const AllStories = () => {
                                         >
                                             <Edit2 size={16} />
                                         </button>
-                                        <button
-                                            onClick={() => handleDeleteStory(post._id)}
-                                            className="p-2 text-slate-400 hover:text-white hover:bg-red-500 rounded-lg transition-all"
-                                            title="Delete"
-                                        >
-                                            <Trash2 size={16} />
-                                        </button>
+                                        {isAdmin && (
+                                            <button
+                                                onClick={() => handleDeleteStory(post._id)}
+                                                className="p-2 text-slate-400 hover:text-white hover:bg-red-500 rounded-lg transition-all"
+                                                title="Delete"
+                                            >
+                                                <Trash2 size={16} />
+                                            </button>
+                                        )}
                                     </div>
                                 </div>
                             </div>

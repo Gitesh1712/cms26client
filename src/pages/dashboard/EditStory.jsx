@@ -247,7 +247,19 @@ const EditStory = () => {
                                 name="author"
                                 value={formData.author}
                                 onChange={handleInputChange}
-                                className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 px-4 text-slate-200 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50"
+                                disabled={(() => {
+                                    const userInfo = sessionStorage.getItem('userInfo');
+                                    if (userInfo) {
+                                        try {
+                                            const { role } = JSON.parse(userInfo);
+                                            return role !== 'admin';
+                                        } catch (err) {
+                                            return true;
+                                        }
+                                    }
+                                    return true;
+                                })()}
+                                className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 px-4 text-slate-200 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50 disabled:opacity-50 disabled:cursor-not-allowed"
                             />
                         </div>
                     </div>

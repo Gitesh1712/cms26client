@@ -32,6 +32,7 @@ const Login = () => {
             // Store user info
             if (response.user) {
                 sessionStorage.setItem('userInfo', JSON.stringify({
+                    name: response.user.name,
                     email: response.user.email,
                     role: response.user.role
                 }));

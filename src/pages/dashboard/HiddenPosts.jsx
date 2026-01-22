@@ -1,40 +1,26 @@
 import { useState, useEffect } from 'react';
-import { Eye, Edit2, Loader2, AlertCircle, Image as ImageIcon, CheckCircle, XCircle, EyeOff } from 'lucide-react';
+import { Eye, Edit2, Loader2, AlertCircle, Image as ImageIcon, EyeOff } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api } from '../../services/api';
 
-const PendingApproval = () => {
+const HiddenPosts = () => {
     const navigate = useNavigate();
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [statusModal, setStatusModal] = useState({ open: false, postId: null, postTitle: '' });
+    const [unhideModal, setUnhideModal] = useState({ open: false, postId: null, postTitle: '' });
     const [updating, setUpdating] = useState(false);
-    const [isAdmin, setIsAdmin] = useState(false);
 
-    useEffect(() => {
-        // Check if user is admin
-        const userInfo = sessionStorage.getItem('userInfo');
-        if (userInfo) {
-            try {
-                const { role } = JSON.parse(userInfo);
-                setIsAdmin(role === 'admin');
-            } catch (err) {
-                console.error('Failed to parse user info:', err);
-            }
-        }
-    }, []);
-
-    const fetchPendingPosts = async () => {
+    const fetchHiddenPosts = async () => {
         try {
             setLoading(true);
             const token = sessionStorage.getItem('token');
-            const response = await api.get('/posts/posts-by-status?status=0', { Authorization: `Bearer ${token}` });
+            const response = await api.get('/posts/posts-by-status?status=4', { Authorization: `Bearer ${token}` });
             setPosts(Array.isArray(response) ? response : (response.data || []));
         } catch (err) {
-            console.error("Failed to fetch pending posts:", err);
-            setError("Failed to load pending stories.");
+            console.error("Failed to fetch hidden posts:", err);
+            setError("Failed to load hidden stories.");
         } finally {
             setLoading(false);
         }
@@ -42,40 +28,36 @@ const PendingApproval = () => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        fetchPendingPosts();
+        fetchHiddenPosts();
     }, []);
 
-    const openStatusModal = (postId, postTitle) => {
-        setStatusModal({ open: true, postId, postTitle });
+    const openUnhideModal = (postId, postTitle) => {
+        setUnhideModal({ open: true, postId, postTitle });
     };
 
-    const closeStatusModal = () => {
-        setStatusModal({ open: false, postId: null, postTitle: '' });
+    const closeUnhideModal = () => {
+        setUnhideModal({ open: false, postId: null, postTitle: '' });
     };
 
     const handleEditStory = (id) => {
         navigate(`/dashboard/stories/edit/${id}`);
     };
 
-    const handleUpdateStatus = async (status, postId = null, postTitle = null) => {
+    const handleUnhidePost = async () => {
         try {
             setUpdating(true);
             const token = sessionStorage.getItem('token');
-            const targetPostId = postId || statusModal.postId;
-            const targetPostTitle = postTitle || statusModal.postTitle;
-            
-            await api.patch(`/posts/${targetPostId}/status`, { status }, { Authorization: `Bearer ${token}` });
+            await api.patch(`/posts/${unhideModal.postId}/status`, { status: 0 }, { Authorization: `Bearer ${token}` });
             
             // Refresh the list after successful update
-            await fetchPendingPosts();
-            if (!postId) closeStatusModal();
+            await fetchHiddenPosts();
+            closeUnhideModal();
             
             // Show success message
-            const statusText = status === 1 ? 'approved' : status === 2 ? 'rejected' : 'hidden';
-            toast.success(`Post has been ${statusText} successfully!`);
+            toast.success("Post has been unhidden and moved to pending successfully!");
         } catch (err) {
-            console.error("Failed to update post status:", err);
-            toast.error("Failed to update story status. Please try again.");
+            console.error("Failed to unhide post:", err);
+            toast.error("Failed to unhide story. Please try again.");
         } finally {
             setUpdating(false);
         }
@@ -100,34 +82,26 @@ const PendingApproval = () => {
 
     return (
         <div className="space-y-8">
-            {/* Status Update Modal */}
-            {statusModal.open && (
+            {/* Unhide Confirmation Modal */}
+            {unhideModal.open && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl">
-                        <h3 className="text-xl font-bold text-white mb-2">Update Post Status</h3>
+                        <h3 className="text-xl font-bold text-white mb-2">Unhide Post</h3>
                         <p className="text-slate-400 mb-6">
-                            Do you want to update the status of "<span className="text-white">{statusModal.postTitle}</span>"?
+                            Are you sure you want to unhide "<span className="text-white">{unhideModal.postTitle}</span>"? This will move it to pending approval.
                         </p>
                         
                         <div className="flex flex-col sm:flex-row gap-3">
                             <button
-                                onClick={() => handleUpdateStatus(1)}
+                                onClick={handleUnhidePost}
                                 disabled={updating}
                                 className="flex-1 px-4 py-3 bg-green-500/20 hover:bg-green-500/30 text-green-400 font-semibold rounded-xl transition-all border border-green-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
                             >
-                                {updating ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />}
-                                Approve
+                                {updating ? <Loader2 size={18} className="animate-spin" /> : <Eye size={18} />}
+                                Unhide
                             </button>
                             <button
-                                onClick={() => handleUpdateStatus(2)}
-                                disabled={updating}
-                                className="flex-1 px-4 py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-semibold rounded-xl transition-all border border-red-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
-                            >
-                                {updating ? <Loader2 size={18} className="animate-spin" /> : <XCircle size={18} />}
-                                Reject
-                            </button>
-                            <button
-                                onClick={closeStatusModal}
+                                onClick={closeUnhideModal}
                                 disabled={updating}
                                 className="flex-1 px-4 py-3 bg-slate-700/50 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition-all border border-white/10 disabled:opacity-50"
                             >
@@ -140,15 +114,15 @@ const PendingApproval = () => {
 
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-white">Pending Approval</h2>
-                    <p className="text-slate-400 mt-1 text-sm md:text-base">Review and approve pending stories</p>
+                    <h2 className="text-2xl md:text-3xl font-bold text-white">Hidden Posts</h2>
+                    <p className="text-slate-400 mt-1 text-sm md:text-base">Manage hidden stories</p>
                 </div>
             </div>
 
             {loading ? (
                 <div className="flex flex-col items-center justify-center py-20">
                     <Loader2 size={40} className="animate-spin text-orange-500 mb-4" />
-                    <p className="text-slate-400">Loading pending stories...</p>
+                    <p className="text-slate-400">Loading hidden stories...</p>
                 </div>
             ) : error ? (
                 <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-2xl text-center text-red-400">
@@ -161,10 +135,10 @@ const PendingApproval = () => {
             ) : posts.length === 0 ? (
                 <div className="p-12 bg-slate-900 border border-white/10 rounded-2xl text-center text-slate-500">
                     <div className="flex justify-center mb-4">
-                        <CheckCircle size={48} className="opacity-20 text-green-500" />
+                        <EyeOff size={48} className="opacity-20 text-slate-500" />
                     </div>
-                    <p className="text-lg mb-2">No pending stories</p>
-                    <p className="text-sm text-slate-600">All stories have been reviewed</p>
+                    <p className="text-lg mb-2">No hidden stories</p>
+                    <p className="text-sm text-slate-600">Hidden posts will appear here</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
@@ -249,8 +223,8 @@ const PendingApproval = () => {
                                         <span className="text-xs font-medium text-orange-400 bg-orange-500/10 px-2 py-1 rounded-md border border-orange-500/20 uppercase tracking-wider">
                                             {post.category}
                                         </span>
-                                        <span className="text-xs font-medium px-2 py-1 rounded-md border text-yellow-400 bg-yellow-500/10 border-yellow-500/20">
-                                            Pending
+                                        <span className="text-xs font-medium px-2 py-1 rounded-md border text-slate-400 bg-slate-500/10 border-slate-500/20">
+                                            Hidden
                                         </span>
                                     </div>
                                     <div className="flex items-center gap-1 text-slate-500 text-xs">
@@ -279,20 +253,12 @@ const PendingApproval = () => {
                                         >
                                             <Edit2 size={16} />
                                         </button>
-                                        {isAdmin && (
-                                            <button
-                                                onClick={() => handleUpdateStatus(4, post._id, post.title)}
-                                                className="p-2 text-slate-400 hover:text-white hover:bg-slate-600 rounded-lg transition-all"
-                                                title="Hide Post"
-                                            >
-                                                <EyeOff size={16} />
-                                            </button>
-                                        )}
                                         <button
-                                            onClick={() => openStatusModal(post._id, post.title)}
-                                            className="px-4 py-2 bg-gradient-to-r from-[#FFCC66] to-[#FF7A18] hover:opacity-90 text-slate-900 font-bold rounded-lg transition-all text-sm flex items-center gap-2"
+                                            onClick={() => openUnhideModal(post._id, post.title)}
+                                            className="px-4 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 font-semibold rounded-lg transition-all text-sm flex items-center gap-2 border border-green-500/20"
                                         >
-                                            Review
+                                            <Eye size={16} />
+                                            Unhide
                                         </button>
                                     </div>
                                 </div>
@@ -305,4 +271,4 @@ const PendingApproval = () => {
     );
 };
 
-export default PendingApproval;
+export default HiddenPosts;

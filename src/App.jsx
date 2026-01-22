@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import Lenis from 'lenis';
+import { Toaster } from 'react-hot-toast';
 
 import Layout from './components/Layout';
 import Home from './pages/Home';
@@ -19,6 +20,7 @@ import Team from './pages/dashboard/Team';
 import PendingApproval from './pages/dashboard/PendingApproval';
 import ApprovedPosts from './pages/dashboard/ApprovedPosts';
 import RejectedPosts from './pages/dashboard/RejectedPosts';
+import HiddenPosts from './pages/dashboard/HiddenPosts';
 
 /* -----------------------------------------
    Lenis wrapper – disables smooth scroll
@@ -62,6 +64,29 @@ function LenisWrapper({ children }) {
 function App() {
   return (
     <BrowserRouter basename="/kaivailayam/">
+      <Toaster 
+        position="top-right"
+        toastOptions={{
+          duration: 3000,
+          style: {
+            background: '#1e293b',
+            color: '#fff',
+            border: '1px solid rgba(255, 255, 255, 0.1)',
+          },
+          success: {
+            iconTheme: {
+              primary: '#10b981',
+              secondary: '#fff',
+            },
+          },
+          error: {
+            iconTheme: {
+              primary: '#ef4444',
+              secondary: '#fff',
+            },
+          },
+        }}
+      />
       <LenisWrapper>
         <Routes>
           {/* Public Routes */}
@@ -83,6 +108,7 @@ function App() {
             <Route path="pending-approval" element={<PendingApproval />} />
             <Route path="approved-posts" element={<ApprovedPosts />} />
             <Route path="rejected-posts" element={<RejectedPosts />} />
+            <Route path="hidden-posts" element={<HiddenPosts />} />
           </Route>
         </Routes>
       </LenisWrapper>
