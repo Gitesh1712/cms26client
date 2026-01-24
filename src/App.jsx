@@ -21,6 +21,7 @@ import PendingApproval from './pages/dashboard/PendingApproval';
 import ApprovedPosts from './pages/dashboard/ApprovedPosts';
 import RejectedPosts from './pages/dashboard/RejectedPosts';
 import HiddenPosts from './pages/dashboard/HiddenPosts';
+import Newsletter from './pages/dashboard/Newsletter';
 
 /* -----------------------------------------
    Lenis wrapper – disables smooth scroll
@@ -109,6 +110,7 @@ function App() {
             <Route path="approved-posts" element={<ApprovedPosts />} />
             <Route path="rejected-posts" element={<RejectedPosts />} />
             <Route path="hidden-posts" element={<HiddenPosts />} />
+            <Route path="newsletter" element={<Newsletter />} />
           </Route>
         </Routes>
       </LenisWrapper>
