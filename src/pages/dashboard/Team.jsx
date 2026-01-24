@@ -11,9 +11,11 @@ import {
   Shield,
   User as UserIcon,
   Phone,
+  Power,
 } from "lucide-react";
 import { api } from "../../services/api";
 import { useNavigate } from 'react-router-dom';
+import toast from 'react-hot-toast';
 
 
 
@@ -111,6 +113,7 @@ const Team = () => {
         await api.post("/users", formData, {
           Authorization: `Bearer ${token}`,
         });
+        toast.success("User created successfully!");
       } else {
         const updateData = { 
           name: formData.name,
@@ -124,28 +127,44 @@ const Team = () => {
         await api.put(`/users/${editingUser._id}`, updateData, {
           Authorization: `Bearer ${token}`,
         });
+        toast.success("User updated successfully!");
       }
 
       closeModal();
       fetchUsers();
     } catch (err) {
       console.error("Failed to save user:", err);
-      alert(err.message || "Failed to save user. Please try again.");
+      toast.error(err.message || "Failed to save user. Please try again.");
     } finally {
       setSubmitLoading(false);
     }
   };
 
   const handleDelete = async (id) => {
-    if (confirm("Are you sure you want to delete this user?")) {
-      try {
-        const token = sessionStorage.getItem("token");
-        await api.delete(`/users/${id}`, { Authorization: `Bearer ${token}` });
-        fetchUsers();
-      } catch (err) {
-        console.error("Failed to delete user:", err);
-        alert(err.message || "Failed to delete user.");
-      }
+    try {
+      const token = sessionStorage.getItem("token");
+      await api.delete(`/users/${id}`, { Authorization: `Bearer ${token}` });
+      toast.success("User deleted successfully!");
+      fetchUsers();
+    } catch (err) {
+      console.error("Failed to delete user:", err);
+      toast.error(err.message || "Failed to delete user.");
+    }
+  };
+
+  const handleToggleActive = async (id) => {
+    try {
+      const token = sessionStorage.getItem("token");
+      await api.post(
+        '/users/toggle-status',
+        { userId: id },
+        { Authorization: `Bearer ${token}` }
+      );
+      toast.success("User status updated successfully!");
+      fetchUsers();
+    } catch (err) {
+      console.error("Failed to toggle user status:", err);
+      toast.error(err.message || "Failed to update user status.");
     }
   };
 
@@ -238,7 +257,7 @@ const Team = () => {
                     Role
                   </th>
                   <th className="text-left px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold text-slate-300 uppercase tracking-wider hidden sm:table-cell">
-                    Created
+                    Status
                   </th>
                   <th className="text-right px-4 md:px-6 py-3 md:py-4 text-xs md:text-sm font-semibold text-slate-300 uppercase tracking-wider">
                     Actions
@@ -297,15 +316,35 @@ const Team = () => {
                         </span>
                       </span>
                     </td>
-                    <td className="px-4 md:px-6 py-3 md:py-4 text-slate-400 text-xs md:text-sm hidden sm:table-cell">
-                      {new Date(user.createdAt).toLocaleDateString("en-US", {
-                        month: "short",
-                        day: "numeric",
-                        year: "numeric",
-                      })}
+                    <td className="px-4 md:px-6 py-3 md:py-4 hidden sm:table-cell">
+                      <span
+                        className={`inline-flex items-center gap-1.5 px-2 md:px-3 py-1 rounded-full text-xs font-semibold ${
+                          user.isActive
+                            ? "bg-green-500/20 text-green-400 border border-green-500/30"
+                            : "bg-red-500/20 text-red-400 border border-red-500/30"
+                        }`}
+                      >
+                        <div className={`w-2 h-2 rounded-full ${
+                          user.isActive ? "bg-green-400" : "bg-red-400"
+                        }`}></div>
+                        {user.isActive ? "Active" : "Inactive"}
+                      </span>
                     </td>
                     <td className="px-4 md:px-6 py-3 md:py-4">
                       <div className="flex justify-end gap-1 md:gap-2">
+                        {user.role !== "admin" && (
+                          <button
+                            onClick={() => handleToggleActive(user._id)}
+                            className={`p-2 rounded-lg transition-all ${
+                              user.isActive
+                                ? "text-slate-400 hover:text-white hover:bg-red-500"
+                                : "text-slate-400 hover:text-white hover:bg-green-500"
+                            }`}
+                            title={user.isActive ? "Deactivate" : "Activate"}
+                          >
+                            <Power size={16} />
+                          </button>
+                        )}
                         <button
                           onClick={() => openEditModal(user)}
                           className="p-2 text-slate-400 hover:text-white hover:bg-blue-500 rounded-lg transition-all"

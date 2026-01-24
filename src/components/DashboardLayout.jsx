@@ -31,9 +31,9 @@ const DashboardLayout = () => {
     const navItems = [
         { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
         { icon: FileText, label: "All Stories", path: "/dashboard/stories" },
-        { icon: FolderOpen, label: "Categories", path: "/dashboard/categories" },
     ];
     if(JSON.parse(sessionStorage.getItem('userInfo') || '{}').role === 'admin'){
+        navItems.push({ icon: FolderOpen, label: "Categories", path: "/dashboard/categories" });
         navItems.push({ icon: Clock, label: "Pending Approval", path: "/dashboard/pending-approval" });
         navItems.push({ icon: CheckCircle, label: "Approved Posts", path: "/dashboard/approved-posts" });
         navItems.push({ icon: XCircle, label: "Rejected Posts", path: "/dashboard/rejected-posts" });
