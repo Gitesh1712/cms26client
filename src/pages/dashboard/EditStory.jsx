@@ -222,9 +222,9 @@ const EditStory = () => {
                             value={formData.description}
                             onChange={handleInputChange}
                             required
-                            rows="4"
-                            className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 px-4 text-slate-200 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50 resize-none"
-                            placeholder="Enter story description"
+                            rows="8"
+                            className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 px-4 text-slate-200 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50 resize-y"
+                            placeholder="Enter story description..."
                         />
                     </div>
 
