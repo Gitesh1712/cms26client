@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, Upload, Link as LinkIcon, ArrowLeft } from 'lucide-react';
 import { api } from '../../services/api';
+import LexicalEditor from '../../components/LexicalEditor';
 
 const AddStory = () => {
     const navigate = useNavigate();
@@ -174,13 +175,9 @@ const AddStory = () => {
 
                     <div className="space-y-2">
                         <label className="text-sm font-medium text-slate-300">Description <span className="text-red-400">*</span></label>
-                        <textarea
-                            name="description"
+                        <LexicalEditor
                             value={formData.description}
-                            onChange={handleInputChange}
-                            required
-                            rows="8"
-                            className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 px-4 text-slate-200 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50 resize-y"
+                            onChange={(content) => setFormData(prev => ({ ...prev, description: content }))}
                             placeholder="Enter story description..."
                         />
                     </div>
