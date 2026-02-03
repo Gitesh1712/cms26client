@@ -148,7 +148,7 @@ const Home = () => {
     };
 
     const getShareUrl = (postId) => {
-        return `${window.location.origin}/post/${postId}`;
+        return `${window.location.origin}/kaivailayam/post/${postId}`;
     };
 
     const shareVia = (platform) => {
