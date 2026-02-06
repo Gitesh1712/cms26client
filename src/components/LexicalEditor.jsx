@@ -62,7 +62,7 @@ function onError(error) {
   console.error(error);
 }
 
-// Toolbar component
+
 function ToolbarPlugin() {
   const [editor] = useLexicalComposerContext();
 
@@ -156,7 +156,7 @@ function ToolbarPlugin() {
   );
 }
 
-// Plugin to set initial content from plain text
+
 function InitialContentPlugin({ initialContent }) {
   const [editor] = useLexicalComposerContext();
 
@@ -164,7 +164,7 @@ function InitialContentPlugin({ initialContent }) {
     if (initialContent && typeof initialContent === 'string') {
       editor.update(() => {
         const root = $getRoot();
-        // Only set if editor is empty
+        
         if (root.getTextContent().trim() === '') {
           root.clear();
           const paragraph = $createParagraphNode();
@@ -188,7 +188,7 @@ export default function LexicalEditor({ value, onChange, placeholder = "Enter st
 
   const handleChange = (editorState) => {
     editorState.read(() => {
-      // Get plain text content for storage
+      
       const root = $getRoot();
       const textContent = root.getTextContent();
       onChange(textContent);

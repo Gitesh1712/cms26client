@@ -3,6 +3,7 @@ import { useNavigate, useParams } from 'react-router-dom';
 import { Loader2, Upload, Link as LinkIcon, ArrowLeft } from 'lucide-react';
 import { api } from '../../services/api';
 import LexicalEditor from '../../components/LexicalEditor';
+import Swal from 'sweetalert2';
 
 const EditStory = () => {
     const navigate = useNavigate();
@@ -12,7 +13,7 @@ const EditStory = () => {
     const [categories, setCategories] = useState([]);
     const [loadingCategories, setLoadingCategories] = useState(true);
 
-    // Form State
+   
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -27,11 +28,11 @@ const EditStory = () => {
         mediaUrl: ''
     });
 
-    // Media State
-    const [mediaType, setMediaType] = useState('file'); // 'file' or 'url'
+   
+    const [mediaType, setMediaType] = useState('file'); 
     const [selectedFiles, setSelectedFiles] = useState([]);
     const [existingMedia, setExistingMedia] = useState([]);
-    //helper functions for video embed
+   
     const isEmbedVideo = (url) =>
         url.includes('youtube.com') ||
         url.includes('youtu.be') ||
@@ -58,7 +59,7 @@ const EditStory = () => {
                 const token = sessionStorage.getItem('token');
                 const response = await api.get(`/posts/${id}`, { Authorization: `Bearer ${token}` });
 
-                // Populate form with existing data
+                
                 setFormData({
                     title: response.title || '',
                     description: response.description || '',
@@ -76,8 +77,16 @@ const EditStory = () => {
                 setExistingMedia(response.media || []);
             } catch (err) {
                 console.error("Failed to fetch post:", err);
-                alert("Failed to load story. Redirecting...");
-                navigate('/dashboard/stories');
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to load story. Redirecting...',
+                    confirmButtonColor: '#FF7A18',
+                    timer: 2000,
+                    timerProgressBar: true
+                }).then(() => {
+                    navigate('/dashboard/stories');
+                });
             } finally {
                 setLoading(false);
             }
@@ -85,7 +94,7 @@ const EditStory = () => {
 
         fetchPost();
 
-        // Fetch categories
+       
         const fetchCategories = async () => {
             try {
                 const response = await api.get('/public/categories');
@@ -101,7 +110,7 @@ const EditStory = () => {
         fetchCategories();
     }, [id, navigate]);
 
-    // Auto-switch to URL mode when video type is selected
+   
     useEffect(() => {
         if (formData.type === 'video') {
             setMediaType('url');
@@ -116,20 +125,20 @@ const EditStory = () => {
             const token = sessionStorage.getItem('token');
             const data = new FormData();
 
-            // Append simple fields
+            
             Object.keys(formData).forEach(key => {
                 if (key !== 'mediaUrl') {
                     data.append(key, formData[key]);
                 }
             });
 
-            // Handle Media
+          
             if (mediaType === 'url' && formData.mediaUrl) {
                 data.append('mediaUrl', formData.mediaUrl);
             } else if (mediaType === 'file' && selectedFiles.length > 0) {
-                const fieldName = formData.type === 'video' ? 'videos' : 'images';
+             
                 Array.from(selectedFiles).forEach(file => {
-                    data.append(fieldName, file);
+                    data.append('images', file);
                 });
             }
 
@@ -138,7 +147,12 @@ const EditStory = () => {
             navigate('/dashboard/stories');
         } catch (err) {
             console.error("Failed to update post:", err);
-            alert("Failed to update post. Please try again.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Failed to update post. Please try again.',
+                confirmButtonColor: '#FF7A18'
+            });
         } finally {
             setSubmitLoading(false);
         }
@@ -275,45 +289,33 @@ const EditStory = () => {
                     {existingMedia.length > 0 && (
                         <div className="space-y-2">
                             <label className="text-sm font-medium text-slate-300 block">Current Media</label>
-                            <div className="flex gap-4 flex-wrap">
+                            <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4">
                                 {existingMedia.map((media, idx) => (
-                                    // <div key={idx} className="relative w-32 h-32 rounded-lg overflow-hidden border border-slate-700">
-                                    //     {media.mediaType === 'video' ? (
-                                    //         <video src={media.url.startsWith('http') ? media.url : `${import.meta.env.VITE_API_URL}${media.url}`} className="w-full h-full object-cover" />
-                                    //     ) : (
-                                    //         <img src={media.url.startsWith('http') ? media.url : `${import.meta.env.VITE_API_URL}${media.url}`} alt="Media" className="w-full h-full object-cover" />
-                                    //     )}
-                                    // </div>
-                                    // <div
-                                    //     key={idx}
-                                    //     className="relative w-32 h-32 rounded-lg overflow-hidden border border-slate-700 bg-black"
-                                    // >
                                     <div
                                         key={idx}
-                                        className="relative w-56 h-56 md:w-64 md:h-64 rounded-xl overflow-hidden border border-slate-700 bg-black"
+                                        className="relative rounded-xl overflow-hidden border border-slate-700 bg-black group"
                                     >
-
                                         {media.mediaType === 'video' ? (
                                             isEmbedVideo(media.url) ? (
                                                 <iframe
                                                     src={getEmbedUrl(media.url)}
-                                                    className="w-full h-full"
+                                                    className="w-full aspect-video"
                                                     frameBorder="0"
                                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                                                     allowFullScreen
                                                     loading="lazy"
                                                 />
                                             ) : (
-                                                <video
-                                                    src={
-                                                        media.url.startsWith('http')
-                                                            ? media.url
-                                                            : `${import.meta.env.VITE_API_URL}${media.url}`
-                                                    }
-                                                    className="w-full h-full object-cover"
-                                                    muted
-                                                    preload="metadata"
-                                                />
+                                                <div className="relative w-full aspect-video bg-slate-800 flex items-center justify-center">
+                                                    <div className="text-center">
+                                                        <div className="w-12 h-12 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                            <svg className="w-6 h-6 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                                <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                                                            </svg>
+                                                        </div>
+                                                        <p className="text-xs text-slate-400 px-2 truncate">Video Content</p>
+                                                    </div>
+                                                </div>
                                             )
                                         ) : (
                                             <img
@@ -323,11 +325,15 @@ const EditStory = () => {
                                                         : `${import.meta.env.VITE_API_URL}${media.url}`
                                                 }
                                                 alt="Media"
-                                                className="w-full h-full object-cover"
+                                                className="w-full aspect-square object-cover"
                                             />
                                         )}
+                                        <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                                            <span className="text-white text-sm font-medium bg-black/70 px-3 py-1 rounded-lg">
+                                                {media.mediaType === 'video' ? 'Video' : 'Image'}
+                                            </span>
+                                        </div>
                                     </div>
-
                                 ))}
                             </div>
                             <p className="text-xs text-slate-500">Upload new media to replace existing</p>
@@ -361,12 +367,12 @@ const EditStory = () => {
                             </div>
                         )}
 
-                        {mediaType === 'file' && formData.type === 'article' ? (
+                        {mediaType === 'file' ? (
                             <div className="border-2 border-dashed border-slate-700 rounded-xl p-8 text-center hover:border-orange-500/30 transition-colors bg-slate-950/30">
                                 <input
                                     type="file"
                                     multiple
-                                    accept={formData.type === 'video' ? "video/*" : "image/*"}
+                                    accept="image/*,video/*"
                                     onChange={handleFileChange}
                                     className="hidden"
                                     id="file-upload"
@@ -375,9 +381,38 @@ const EditStory = () => {
                                     <Upload size={32} className="text-slate-500" />
                                     <span className="text-slate-300 font-medium">Click to upload files</span>
                                     <span className="text-slate-500 text-xs">
-                                        {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : `Support for JPG, PNG, WebP`}
+                                        {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : `Support for JPG, PNG, WebP, MP4, MOV, AVI`}
                                     </span>
                                 </label>
+                                {selectedFiles.length > 0 && (
+                                    <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-60 overflow-y-auto">
+                                        {Array.from(selectedFiles).map((file, index) => (
+                                            <div key={index} className="relative group">
+                                                {file.type.startsWith('video/') ? (
+                                                    <div className="aspect-video bg-slate-800 rounded-lg flex items-center justify-center border border-slate-700">
+                                                        <div className="text-center">
+                                                            <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                                                                </svg>
+                                                            </div>
+                                                            <p className="text-xs text-slate-400 truncate px-1">{file.name}</p>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <img
+                                                        src={URL.createObjectURL(file)}
+                                                        alt={`Preview ${index}`}
+                                                        className="w-full aspect-square object-cover rounded-lg border border-slate-700"
+                                                    />
+                                                )}
+                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 rounded-lg flex items-center justify-center transition-opacity">
+                                                    <span className="text-white text-xs font-medium">{Math.round(file.size / 1024)} KB</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <input
@@ -385,7 +420,7 @@ const EditStory = () => {
                                 value={formData.mediaUrl}
                                 onChange={handleInputChange}
                                 className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 px-4 text-slate-200 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50"
-                                placeholder={formData.type === 'video' ? "https://youtube.com/watch?v=... or https://youtu.be/..." : "https://example.com/image.jpg"}
+                                placeholder="https://example.com/media.jpg or https://youtube.com/watch?v=..."
                             />
                         )}
                     </div>

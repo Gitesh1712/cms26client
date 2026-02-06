@@ -6,7 +6,7 @@ import { api } from '../services/api';
 const Footer = () => {
     const [email, setEmail] = useState('');
     const [loading, setLoading] = useState(false);
-    const [status, setStatus] = useState(null); // 'success' or 'error'
+    const [status, setStatus] = useState(null); 
     const [message, setMessage] = useState('');
 
     const handleSubscribe = async (e) => {
@@ -18,7 +18,7 @@ const Footer = () => {
         setMessage('');
 
         try {
-            // Using the public newsletter endpoint provided
+           
             await api.post('/public/newsletter', { email, source: 'footer' });
             setStatus('success');
             setMessage('Thanks for subscribing!');
@@ -36,7 +36,7 @@ const Footer = () => {
         <footer className="relative mt-12 md:mt-20 border-t border-white/5 bg-slate-950/50 backdrop-blur-xl">
             <div className="max-w-7xl mx-auto px-4 md:px-6 py-10 md:py-16">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-8 md:gap-12">
-                    {/* Brand & Stats */}
+                    
                     <div className="space-y-6">
                         <Link to="/" className="hover:opacity-80 transition-opacity block">
                             <img src="logo.png" alt="No Noise Stories" className="h-20 w-auto" />
@@ -46,7 +46,7 @@ const Footer = () => {
                         </p>
                     </div>
 
-                    {/* Quick Links */}
+                  
                     <div className="space-y-6">
                         <h4 className="text-lg font-bold text-white uppercase tracking-wider">Quick Links</h4>
                         <ul className="space-y-4">
@@ -63,7 +63,7 @@ const Footer = () => {
                         </ul>
                     </div>
 
-                    {/* Newsletter */}
+                
                     <div className="space-y-6">
                         <h4 className="text-lg font-bold text-white uppercase tracking-wider">Newsletter</h4>
                         <p className="text-slate-400 text-sm">
@@ -95,7 +95,7 @@ const Footer = () => {
                     </div>
                 </div>
 
-                {/* Bottom Bar */}
+          
                 <div className="mt-10 md:mt-16 pt-6 md:pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-slate-500 text-sm">
                         © 2026 no noise stories all rights reserved
@@ -106,8 +106,7 @@ const Footer = () => {
                     </div>
                 </div>
             </div>
-
-            {/* Ambient Background Elements */}
+        
             <div className="absolute -z-10 bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-orange-500/5 to-transparent pointer-events-none"></div>
         </footer>
     );

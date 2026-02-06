@@ -2,6 +2,46 @@ import { useState, useEffect } from 'react';
 import { Eye, Edit2, Trash2, Plus, Loader2, AlertCircle, Image as ImageIcon } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../../services/api';
+import Swal from 'sweetalert2';
+
+
+const isVideoUrl = (url) => {
+    if (!url) return false;
+    const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'wmv'];
+    const lowerUrl = url.toLowerCase();
+    
+   
+    if (videoExtensions.some(ext => lowerUrl.includes(`.${ext}`))) return true;
+    
+   
+    if (lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be') || lowerUrl.includes('vimeo.com')) return true;
+    
+    return false;
+};
+
+const getYoutubeId = (url) => {
+    if (!url) return null;
+    const regExp = /(?:youtube\.com\/(?:[^\/]+\/.*\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(regExp);
+    return match ? match[1] : null;
+};
+
+const isEmbedVideo = (url) => {
+    return url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com');
+};
+
+const getEmbedUrl = (url) => {
+    if (url.includes('youtu.be')) {
+        return `https://www.youtube.com/embed/${url.split('/').pop()}`;
+    }
+    if (url.includes('youtube.com')) {
+        return `https://www.youtube.com/embed/${new URL(url).searchParams.get('v')}`;
+    }
+    if (url.includes('vimeo.com')) {
+        return `https://player.vimeo.com/video/${url.split('/').pop()}`;
+    }
+    return url;
+};
 
 const AllStories = () => {
     const navigate = useNavigate();
@@ -11,7 +51,7 @@ const AllStories = () => {
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
-        // Check if user is admin
+    
         const userInfo = sessionStorage.getItem('userInfo');
         if (userInfo) {
             try {
@@ -47,16 +87,31 @@ const AllStories = () => {
     };
 
     const handleDeleteStory = async (id) => {
-        if (confirm("Are you sure you want to delete this story?")) {
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#FF7A18',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        });
+        
+        if (result.isConfirmed) {
             try {
                 const token = sessionStorage.getItem('token');
                 await api.delete(`/posts/${id}`, { Authorization: `Bearer ${token}` });
 
-                // Refresh the list after successful deletion
+              
                 fetchPosts();
             } catch (err) {
                 console.error("Failed to delete post:", err);
-                alert("Failed to delete story. Please try again.");
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: 'Failed to delete story. Please try again.',
+                    confirmButtonColor: '#FF7A18'
+                });
             }
         }
     };
@@ -125,45 +180,13 @@ const AllStories = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     {posts.map((post) => (
                         <div key={post._id} className="bg-slate-900 border border-white/10 rounded-2xl overflow-hidden group hover:border-orange-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-orange-500/10 flex flex-col h-full">
-                            {/* Image Section */}
-                            {/* <div className="aspect-video relative overflow-hidden bg-slate-800">
-                                {post.media && post.media.length > 0 && post.media[0].url ? (
-                                    <img
-                                        src={post.media[0].url.startsWith('http') ? post.media[0].url : `${import.meta.env.VITE_API_URL}${post.media[0].url}`}
-                                        alt={post.title}
-                                        className="w-full h-full object-contain bg-slate-950 transition-transform duration-500 group-hover:scale-105"
-                                        onError={(e) => {
-                                            e.target.onerror = null;
-                                            e.target.src = 'https://placehold.co/600x400/1e293b/475569?text=No+Image';
-                                        }}
-                                    />
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-slate-600">
-                                        <ImageIcon size={32} />
-                                    </div>
-                                )}
-
-                                <div className="absolute top-4 left-4">
-                                    <span className={`text-xs font-bold px-3 py-1 rounded-full border backdrop-blur-md ${post.postType === 'article'
-                                        ? 'bg-blue-500/80 border-blue-500/20 text-white'
-                                        : 'bg-purple-500/80 border-purple-500/20 text-white'
-                                        }`}>
-                                        {post.postType || 'article'}
-                                    </span>
-                                </div>
-
-                                {post.featured && (
-                                    <div className="absolute top-4 right-4">
-                                        <span className="text-xs font-bold px-3 py-1 rounded-full bg-amber-500/80 border border-amber-500/20 text-white backdrop-blur-md shadow-lg">
-                                            Featured
-                                        </span>
-                                    </div>
-                                )}
-                            </div> */}
+                            
                             <div className="aspect-video relative overflow-hidden bg-slate-800">
                                 {post.media?.[0]?.url ? (
-                                    post.postType === 'video' ? (
+                                  
+                                    isVideoUrl(post.media[0].url) ? (
                                         isEmbedVideo(post.media[0].url) ? (
+                                           
                                             <iframe
                                                 src={getEmbedUrl(post.media[0].url)}
                                                 className="w-full h-full"
@@ -173,6 +196,7 @@ const AllStories = () => {
                                                 loading="lazy"
                                             />
                                         ) : (
+                                           
                                             <>
                                                 <video
                                                     src={
@@ -185,7 +209,7 @@ const AllStories = () => {
                                                     preload="metadata"
                                                 />
 
-                                                {/* Play Overlay */}
+                                               
                                                 <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
                                                     <div className="w-14 h-14 rounded-full bg-orange-500/90 flex items-center justify-center text-white text-xl">
                                                         ▶
@@ -194,20 +218,38 @@ const AllStories = () => {
                                             </>
                                         )
                                     ) : (
-                                        <img
-                                            src={
-                                                post.media[0].url.startsWith('http')
-                                                    ? post.media[0].url
-                                                    : `${import.meta.env.VITE_API_URL}${post.media[0].url}`
+                                      
+                                        (() => {
+                                            const imageUrl = post.media[0].url.startsWith('http')
+                                                ? post.media[0].url
+                                                : `${import.meta.env.VITE_API_URL}${post.media[0].url}`;
+                                            
+                                            const youtubeId = getYoutubeId(imageUrl);
+                                            if (youtubeId) {
+                                               
+                                                return (
+                                                    <img
+                                                        src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`}
+                                                        alt={post.title}
+                                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                    />
+                                                );
                                             }
-                                            alt={post.title}
-                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                            onError={(e) => {
-                                                e.target.onerror = null;
-                                                e.target.src =
-                                                    'https://placehold.co/600x400/1e293b/475569?text=No+Image';
-                                            }}
-                                        />
+                                            
+                                            
+                                            return (
+                                                <img
+                                                    src={imageUrl}
+                                                    alt={post.title}
+                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                    onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src =
+                                                            'https://placehold.co/600x400/1e293b/475569?text=No+Image';
+                                                    }}
+                                                />
+                                            );
+                                        })()
                                     )
                                 ) : (
                                     <div className="w-full h-full flex items-center justify-center text-slate-600">
@@ -217,7 +259,7 @@ const AllStories = () => {
                             </div>
 
 
-                            {/* Content Section */}
+                            
                             <div className="p-6 flex-1 flex flex-col">
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">

@@ -7,10 +7,10 @@ const DashboardLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    // Get user info from sessionStorage
+   
     const userInfo = JSON.parse(sessionStorage.getItem('userInfo') || '{}');
 
-    // Close mobile menu on resize to desktop
+   
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth >= 768) {
@@ -22,7 +22,7 @@ const DashboardLayout = () => {
     }, []);
 
     const handleLogout = () => {
-        // Clear session storage
+       
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('userInfo');
         navigate('/login');
@@ -50,7 +50,7 @@ const DashboardLayout = () => {
 
     return (
         <div className="flex h-screen bg-slate-900 text-slate-200 font-sans overflow-hidden">
-            {/* Mobile Menu Overlay */}
+           
             {isMobileMenuOpen && (
                 <div 
                     className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"
@@ -58,7 +58,7 @@ const DashboardLayout = () => {
                 />
             )}
 
-            {/* Sidebar - Hidden on mobile by default, shown via overlay */}
+          
             <aside className={`
                 bg-slate-950 border-r border-white/5 transition-all duration-300 flex flex-col z-40
                 fixed inset-y-0 left-0 w-64
@@ -114,9 +114,9 @@ const DashboardLayout = () => {
                 </div>
             </aside>
 
-            {/* Main Content - Takes full width on mobile */}
+          
             <main className="flex-1 overflow-y-auto relative w-full min-w-0">
-                {/* Header (optional or part of pages) */}
+                
                 <div className="sticky top-0 z-10 bg-slate-900/80 backdrop-blur-xl border-b border-white/5 px-4 md:px-8 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <button 

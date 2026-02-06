@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Loader2, Upload, Link as LinkIcon, ArrowLeft } from 'lucide-react';
 import { api } from '../../services/api';
 import LexicalEditor from '../../components/LexicalEditor';
+import Swal from 'sweetalert2';
 
 const AddStory = () => {
     const navigate = useNavigate();
@@ -10,7 +11,7 @@ const AddStory = () => {
     const [categories, setCategories] = useState([]);
     const [loadingCategories, setLoadingCategories] = useState(true);
 
-    // Form State
+ 
     const [formData, setFormData] = useState({
         title: '',
         description: '',
@@ -25,14 +26,19 @@ const AddStory = () => {
         mediaUrl: ''
     });
 
-    // Media State
-    const [mediaType, setMediaType] = useState('file'); // 'file' or 'url'
+   
+    const [mediaType, setMediaType] = useState('file'); 
     const [selectedFiles, setSelectedFiles] = useState([]);
 
     useEffect(() => {
         window.scrollTo(0, 0);
         
-        // Get user name from sessionStorage and set author name
+      
+        if (import.meta.env.DEV) {
+            console.log('SweetAlert2 loaded successfully');
+        }
+        
+       
         const userInfo = sessionStorage.getItem('userInfo');
         if (userInfo) {
             try {
@@ -53,7 +59,7 @@ const AddStory = () => {
                 const categoriesData = response?.data || [];
                 setCategories(categoriesData);
 
-                // Set default category if available
+              
                 if (categoriesData.length > 0 && !formData.category) {
                     setFormData(prev => ({ ...prev, category: categoriesData[0].id }));
                 }
@@ -67,12 +73,7 @@ const AddStory = () => {
         fetchCategories();
     }, []);
 
-    // Auto-switch to URL mode when video type is selected
-    useEffect(() => {
-        if (formData.type === 'video') {
-            setMediaType('url');
-        }
-    }, [formData.type]);
+    
 
     const handleAddStory = async (e) => {
         e.preventDefault();
@@ -82,20 +83,20 @@ const AddStory = () => {
             const token = sessionStorage.getItem('token');
             const data = new FormData();
 
-            // Append simple fields
+            
             Object.keys(formData).forEach(key => {
-                if (key !== 'mediaUrl') { // mediaUrl handled specifically
+                if (key !== 'mediaUrl') { 
                     data.append(key, formData[key]);
                 }
             });
 
-            // Handle Media
+            
             if (mediaType === 'url' && formData.mediaUrl) {
                 data.append('mediaUrl', formData.mediaUrl);
             } else if (mediaType === 'file' && selectedFiles.length > 0) {
-                const fieldName = formData.type === 'video' ? 'videos' : 'images';
+                
                 Array.from(selectedFiles).forEach(file => {
-                    data.append(fieldName, file);
+                    data.append('images', file);
                 });
             }
 
@@ -104,7 +105,12 @@ const AddStory = () => {
             navigate('/dashboard/stories');
         } catch (err) {
             console.error("Failed to create post:", err);
-            alert("Failed to create post. Please try again.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Oops...',
+                text: 'Failed to create post. Please try again.',
+                confirmButtonColor: '#FF7A18'
+            });
         } finally {
             setSubmitLoading(false);
         }
@@ -135,6 +141,9 @@ const AddStory = () => {
                 </button>
                 <h2 className="text-3xl font-bold text-white">Create New Story</h2>
             </div>
+
+
+            
 
             <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 shadow-xl max-w-4xl">
                 <form onSubmit={handleAddStory} className="space-y-6">
@@ -256,12 +265,12 @@ const AddStory = () => {
                             </div>
                         )}
 
-                        {mediaType === 'file' && formData.type === 'article' ? (
+                        {mediaType === 'file' ? (
                             <div className="border-2 border-dashed border-slate-700 rounded-xl p-8 text-center hover:border-orange-500/30 transition-colors bg-slate-950/30">
                                 <input
                                     type="file"
                                     multiple
-                                    accept={formData.type === 'video' ? "video/*" : "image/*"}
+                                    accept="image/*,video/*"
                                     onChange={handleFileChange}
                                     className="hidden"
                                     id="file-upload"
@@ -270,9 +279,38 @@ const AddStory = () => {
                                     <Upload size={32} className="text-slate-500" />
                                     <span className="text-slate-300 font-medium">Click to upload files</span>
                                     <span className="text-slate-500 text-xs">
-                                        {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : `Support for JPG, PNG, WebP`}
+                                        {selectedFiles.length > 0 ? `${selectedFiles.length} file(s) selected` : `Support for JPG, PNG, WebP, MP4, MOV, AVI`}
                                     </span>
                                 </label>
+                                {selectedFiles.length > 0 && (
+                                    <div className="mt-4 grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 max-h-60 overflow-y-auto">
+                                        {Array.from(selectedFiles).map((file, index) => (
+                                            <div key={index} className="relative group">
+                                                {file.type.startsWith('video/') ? (
+                                                    <div className="aspect-video bg-slate-800 rounded-lg flex items-center justify-center border border-slate-700">
+                                                        <div className="text-center">
+                                                            <div className="w-8 h-8 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-2">
+                                                                <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                                                                    <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                                                                </svg>
+                                                            </div>
+                                                            <p className="text-xs text-slate-400 truncate px-1">{file.name}</p>
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <img
+                                                        src={URL.createObjectURL(file)}
+                                                        alt={`Preview ${index}`}
+                                                        className="w-full aspect-square object-cover rounded-lg border border-slate-700"
+                                                    />
+                                                )}
+                                                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 rounded-lg flex items-center justify-center transition-opacity">
+                                                    <span className="text-white text-xs font-medium">{Math.round(file.size / 1024)} KB</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                )}
                             </div>
                         ) : (
                             <input
@@ -280,7 +318,7 @@ const AddStory = () => {
                                 value={formData.mediaUrl}
                                 onChange={handleInputChange}
                                 className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 px-4 text-slate-200 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50"
-                                placeholder={formData.type === 'video' ? "https://youtube.com/watch?v=... or https://youtu.be/..." : "https://example.com/image.jpg"}
+                                placeholder="https://example.com/media.jpg or https://youtube.com/watch?v=..."
                             />
                         )}
                     </div>

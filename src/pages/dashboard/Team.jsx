@@ -26,13 +26,13 @@ const Team = () => {
   const [error, setError] = useState(null);
   const [searchTerm, setSearchTerm] = useState("");
   const navigate = useNavigate();
-  // Modal State
+
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [modalMode, setModalMode] = useState("add"); // 'add' or 'edit'
+  const [modalMode, setModalMode] = useState("add"); 
   const [editingUser, setEditingUser] = useState(null);
   const [submitLoading, setSubmitLoading] = useState(false);
 
-  // Form State
+ 
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -175,7 +175,7 @@ const Team = () => {
 
   return (
     <div className="space-y-8">
-      {/* Header */}
+    
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
         <div>
           <h2 className="text-2xl md:text-3xl font-bold text-white flex items-center gap-3">
@@ -195,7 +195,7 @@ const Team = () => {
         </button>
       </div>
 
-      {/* Search Bar */}
+     
       <div className="relative max-w-md">
         <Search
           size={20}
@@ -210,7 +210,7 @@ const Team = () => {
         />
       </div>
 
-      {/* Content */}
+     
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
           <Loader2 size={40} className="animate-spin text-orange-500 mb-4" />
@@ -369,7 +369,7 @@ const Team = () => {
         </div>
       )}
 
-      {/* Modal */}
+   
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-md shadow-2xl">
@@ -467,7 +467,9 @@ const Team = () => {
                   className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 px-4 text-slate-200 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50"
                 >
                   <option value="member">Member</option>
-                  {/*<option value="admin">Admin</option>*/}
+                  
+                 
+                
                 </select>
               </div>
 
