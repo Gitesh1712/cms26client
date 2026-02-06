@@ -16,7 +16,7 @@ import { api } from '../services/api';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
-// ---------------- helpers ----------------
+
 const getImageUrl = (url) => {
     if (!url) return '';
     if (url.startsWith('http')) return url;
@@ -27,11 +27,32 @@ const getImageUrl = (url) => {
 const getYoutubeId = (url) => {
     if (!url) return null;
     const regExp =
-        /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+        /(?:youtube\.com\/(?:[^\/]+\/.*\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
     const match = url.match(regExp);
     return match ? match[1] : null;
 };
-// -----------------------------------------
+
+
+const isVideoUrl = (url) => {
+    if (!url) return false;
+    const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'wmv'];
+    const lowerUrl = url.toLowerCase();
+    
+   
+    if (videoExtensions.some(ext => lowerUrl.includes(`.${ext}`))) return true;
+    
+    
+    if (lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be') || lowerUrl.includes('vimeo.com')) return true;
+    
+    return false;
+};
+
+
+const getYoutubeThumbnail = (url) => {
+    const youtubeId = getYoutubeId(url);
+    return youtubeId ? `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg` : null;
+};
+
 
 const Home = () => {
     const navigate = useNavigate();
@@ -45,54 +66,83 @@ const Home = () => {
     const [selectedPost, setSelectedPost] = useState(null);
     const [copied, setCopied] = useState(false);
 
-    /* ---------------- Hero autoplay ---------------- */
+  
     useEffect(() => {
-        // const timer = setInterval(() => {
-        //     if (heroSlides.length) {
-        //         setCurrentSlide((p) => (p + 1) % heroSlides.length);
-        //     }
-        // }, 10000);
-        // return () => clearInterval(timer);
+        
     }, [heroSlides.length]);
 
-    /* ---------------- Data fetch ---------------- */
-    useEffect(() => {
-        window.scrollTo(0, 0);
-        const fetchData = async () => {
-            setLoading(true);
-            try {
-                const catRes = await api.get('/public/categories');
-                const categoriesData = catRes?.data || [];
-                setCategories(categoriesData);
+    
+    const fetchData = async (filterCategory = null) => {
+        setLoading(true);
+        try {
+            const catRes = await api.get('/public/categories');
+            const categoriesData = catRes?.data || [];
+            setCategories(categoriesData);
 
-                const postsData = await api.get('/allposts');
+            const postsData = await api.get('/allposts');
 
-                /* Hero posts */
-                const heroPosts = postsData
-                    .filter(p => p.heroContent === true)
-                    .slice(0, 5);
+          
+            const heroPosts = postsData
+                .filter(p => p.heroContent === true)
+                .slice(0, 5);
 
-                setHeroSlides(
-                    heroPosts.map(p => ({
+            setHeroSlides(
+                heroPosts.map(p => ({
+                    id: p._id,
+                    title: p.title,
+                    excerpt: p.description,
+                    image: p.media?.[0]?.url
+                        ? getImageUrl(p.media[0].url)
+                        : 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200',
+                    mediaUrl: p.media?.[0]?.url ? getImageUrl(p.media[0].url) : null,
+                    isVideo: p.media?.[0]?.url ? isVideoUrl(p.media[0].url) : false,
+                    postType: p.postType,
+                    category: p.category,
+                    author: p.author,
+                    date: new Date(p.createdAt).toLocaleDateString('en-US', {
+                        month: 'short',
+                        day: 'numeric',
+                        year: 'numeric',
+                    }),
+                }))
+            );
+
+           
+            let filteredPosts = postsData;
+            
+           
+            if (filterCategory) {
+                filteredPosts = postsData.filter(
+                    p => p.category?.toLowerCase() === filterCategory.toLowerCase()
+                );
+            }
+
+            const grouped = {};
+            
+            if (filterCategory) {
+             
+                const categoryName = categoriesData.find(c => c.id === filterCategory)?.name || filterCategory;
+                if (filteredPosts.length > 0) {
+                    grouped[categoryName] = filteredPosts.slice(0, 12).map(p => ({
                         id: p._id,
                         title: p.title,
                         excerpt: p.description,
                         image: p.media?.[0]?.url
                             ? getImageUrl(p.media[0].url)
-                            : 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200',
+                            : null,
+                        mediaUrl: p.media?.[0]?.url ? getImageUrl(p.media[0].url) : null,
+                        isVideo: p.media?.[0]?.url ? isVideoUrl(p.media[0].url) : false,
                         postType: p.postType,
-                        category: p.category,
                         author: p.author,
                         date: new Date(p.createdAt).toLocaleDateString('en-US', {
                             month: 'short',
                             day: 'numeric',
                             year: 'numeric',
                         }),
-                    }))
-                );
-
-                /* Grouped posts */
-                const grouped = {};
+                    }));
+                }
+            } else {
+             
                 categoriesData.forEach(cat => {
                     const catPosts = postsData.filter(
                         p =>
@@ -108,6 +158,8 @@ const Home = () => {
                             image: p.media?.[0]?.url
                                 ? getImageUrl(p.media[0].url)
                                 : null,
+                            mediaUrl: p.media?.[0]?.url ? getImageUrl(p.media[0].url) : null,
+                            isVideo: p.media?.[0]?.url ? isVideoUrl(p.media[0].url) : false,
                             postType: p.postType,
                             author: p.author,
                             date: new Date(p.createdAt).toLocaleDateString('en-US', {
@@ -118,14 +170,32 @@ const Home = () => {
                         }));
                     }
                 });
-
-                setGroupedPosts(grouped);
-            } finally {
-                setLoading(false);
             }
+
+            setGroupedPosts(grouped);
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        window.scrollTo(0, 0);
+        fetchData();
+    }, []);
+
+  
+    useEffect(() => {
+        const handleCategoryFilter = (event) => {
+            const { category } = event.detail;
+            setSelectedCategory(category);
+            fetchData(category);
         };
 
-        fetchData();
+        window.addEventListener('categoryFilterChange', handleCategoryFilter);
+        
+        return () => {
+            window.removeEventListener('categoryFilterChange', handleCategoryFilter);
+        };
     }, []);
 
     if (loading) {
@@ -136,9 +206,7 @@ const Home = () => {
         );
     }
 
-    const filteredGroupedPosts = selectedCategory
-        ? Object.entries(groupedPosts).filter(([n]) => n === selectedCategory)
-        : Object.entries(groupedPosts);
+    const displayPosts = Object.entries(groupedPosts);
 
     const handleShare = (post, e) => {
         e.stopPropagation();
@@ -180,7 +248,7 @@ const Home = () => {
     };
 
     return (
-        <div className="flex flex-col">{/* Share Modal */}
+        <div className="flex flex-col">
             {shareModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm px-4" onClick={() => setShareModalOpen(false)}>
                     <div className="bg-slate-800 rounded-2xl p-6 max-w-md w-full border border-white/10 shadow-2xl" onClick={(e) => e.stopPropagation()}>
@@ -267,7 +335,7 @@ const Home = () => {
                 </div>
             )}
 
-            {/* ================= HERO SECTION ================= */}
+          
             {heroSlides.length > 0 && (
                 <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] overflow-hidden rounded-2xl md:rounded-3xl mb-10 md:mb-20 mx-2 sm:mx-4 md:mx-6 lg:mx-8">
                     {heroSlides.map((slide, index) => (
@@ -333,7 +401,7 @@ const Home = () => {
                         </div>
                     ))}
 
-                    {/* Controls */}
+                  
                     <button
                         onClick={() =>
                             setCurrentSlide((p) =>
@@ -353,7 +421,7 @@ const Home = () => {
                         <ChevronRight size={20} className="md:w-6 md:h-6" />
                     </button>
 
-                    {/* Slider Indicators */}
+                  
                     <div className="absolute bottom-6 left-1/2 -translate-x-1/2 z-30 flex gap-2">
                         {heroSlides.map((_, index) => (
                             <button
@@ -367,9 +435,16 @@ const Home = () => {
                 </div>
             )}
 
-            {/* ================= POSTS ================= */}
+
+
+
+
+
+
+
+          
             <div className="mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 pb-12 md:pb-20 w-full">
-                {filteredGroupedPosts.map(([categoryName, posts]) => (
+                {displayPosts.map(([categoryName, posts]) => (
                     <div key={categoryName} className="mb-12 md:mb-20">
                         <h2 className="text-2xl md:text-3xl font-black mb-6 md:mb-10 text-orange-400">
                             {categoryName}
@@ -389,22 +464,57 @@ const Home = () => {
                                         className="group rounded-3xl bg-slate-800/20 border border-white/5 overflow-hidden hover:-translate-y-1 transition cursor-pointer"
                                     >
                                         <div className="relative h-48 overflow-hidden">
-                                            {youtubeId ? (
-                                                <>
-                                                    <img
-                                                        src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`}
-                                                        className="w-full h-full object-cover"
-                                                    />
-                                                    <iframe
-                                                        className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition"
-                                                        src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${youtubeId}`}
-                                                        allow="autoplay"
-                                                    />
-                                                </>
+                                            {post.isVideo ? (
+                                                (() => {
+                                                    const youtubeId = getYoutubeId(post.mediaUrl);
+                                                    if (youtubeId) {
+                                                      
+                                                        return (
+                                                            <>
+                                                                <img
+                                                                    src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`}
+                                                                    className="w-full h-full object-cover"
+                                                                    alt={post.title}
+                                                                />
+                                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                                    <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center opacity-90 group-hover:opacity-100 transition-opacity">
+                                                                        <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                                                                        </svg>
+                                                                    </div>
+                                                                </div>
+                                                                <iframe
+                                                                    className="absolute inset-0 w-full h-full opacity-0 group-hover:opacity-100 transition"
+                                                                    src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${youtubeId}`}
+                                                                    allow="autoplay"
+                                                                />
+                                                            </>
+                                                        );
+                                                    } else {
+                                                       
+                                                        return (
+                                                            <div className="w-full h-full bg-slate-800 flex items-center justify-center relative">
+                                                                <div className="text-center">
+                                                                    <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-3">
+                                                                        <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 20 20">
+                                                                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                                                                        </svg>
+                                                                    </div>
+                                                                    <p className="text-slate-400 text-sm">Video Content</p>
+                                                                </div>
+                                                            </div>
+                                                        );
+                                                    }
+                                                })()
                                             ) : (
                                                 <img
                                                     src={post.image}
                                                     className="w-full h-full object-cover"
+                                                    alt={post.title}
+                                                    onError={(e) => {
+                                                        e.target.onerror = null;
+                                                        e.target.src = 'https://placehold.co/600x400/1e293b/475569?text=No+Image';
+                                                    }}
                                                 />
                                             )}
                                         </div>

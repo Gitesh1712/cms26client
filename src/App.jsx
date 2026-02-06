@@ -9,7 +9,7 @@ import Login from './pages/Login';
 import Contact from './pages/Contact';
 import Post from './pages/Post';
 
-// Dashboard
+
 import DashboardLayout from './components/DashboardLayout';
 import DashboardHome from './pages/dashboard/DashboardHome';
 import AllStories from './pages/dashboard/AllStories';
@@ -23,15 +23,12 @@ import RejectedPosts from './pages/dashboard/RejectedPosts';
 import HiddenPosts from './pages/dashboard/HiddenPosts';
 import Newsletter from './pages/dashboard/Newsletter';
 
-/* -----------------------------------------
-   Lenis wrapper – disables smooth scroll
-   on /dashboard routes
------------------------------------------- */
+
 function LenisWrapper({ children }) {
   const location = useLocation();
 
   useEffect(() => {
-    // 🚫 Disable Lenis for dashboard
+    
     if (location.pathname.startsWith('/dashboard')) {
       document.documentElement.style.overflow = 'auto';
       document.body.style.overflow = 'auto';
@@ -90,7 +87,7 @@ function App() {
       />
       <LenisWrapper>
         <Routes>
-          {/* Public Routes */}
+        
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
             <Route path="login" element={<Login />} />
@@ -98,7 +95,7 @@ function App() {
             <Route path="post/:id" element={<Post />} />
           </Route>
 
-          {/* Dashboard Routes */}
+         
           <Route path="/dashboard" element={<DashboardLayout />}>
             <Route index element={<DashboardHome />} />
             <Route path="stories" element={<AllStories />} />

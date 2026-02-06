@@ -7,6 +7,7 @@ import {
 import { api } from '../services/api';
 import { Link } from 'react-router-dom';
 import logo from '../assets/logo.png';
+import Swal from 'sweetalert2';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
@@ -45,7 +46,7 @@ const Post = () => {
                 setLoading(true);
                 const data = await api.get(`/public/posts/${id}`);
                 setPost(data);
-                // Check if user liked it locally? For now, we don't have user authentication for likes, so just showing stats.
+               
             } catch (err) {
                 console.error("Failed to fetch post:", err);
                 setError("Post not found or failed to load.");
@@ -88,7 +89,12 @@ const Post = () => {
             setCommentUser('');
         } catch (err) {
             console.error("Failed to add comment:", err);
-            alert("Failed to add comment. Please try again.");
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to add comment. Please try again.',
+                confirmButtonColor: '#FF7A18'
+            });
         } finally {
             setCommentLoading(false);
         }
@@ -119,13 +125,15 @@ const Post = () => {
         );
     }
 
-    const youtubeId = post.postType === 'video' ? getYoutubeId(post.media?.[0]?.url) : null;
+    
     const mediaUrl = post.media?.[0]?.url ? getImageUrl(post.media[0].url) : '';
+    const isVideo = mediaUrl ? (mediaUrl.includes('youtube.com') || mediaUrl.includes('youtu.be') || mediaUrl.includes('vimeo.com') || mediaUrl.match(/\.(mp4|webm|ogg|mov|avi|wmv)$/i)) : false;
+    const youtubeId = getYoutubeId(mediaUrl);
 
     return (
         <div className="min-h-screen bg-slate-950 text-slate-200">
             <main className="w-full px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 pt-6 md:pt-8 pb-8 md:pb-12">
-                {/* Back Button */}
+              
                 <button
                     onClick={() => navigate(-1)}
                     className="mb-6 flex items-center gap-2 p-2 px-4 hover:bg-white/5 rounded-full transition-all text-slate-400 hover:text-white group"
@@ -133,17 +141,17 @@ const Post = () => {
                     <ArrowLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
                     <span className="text-sm font-medium">Back</span>
                 </button>
-                {/* Post Category Badge */}
+            
                 <span className="inline-block px-4 py-1.5 bg-orange-500/10 border border-orange-500/20 text-orange-400 font-bold text-xs rounded-full mb-6 uppercase tracking-wider">
                     {post.category}
                 </span>
 
-                {/* Title */}
+              
                 <h1 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-black text-white mb-6 md:mb-8 leading-tight">
                     {post.title}
                 </h1>
 
-                {/* Meta Info */}
+               
                 <div className="flex flex-wrap items-center gap-4 md:gap-6 mb-8 md:mb-12 text-xs md:text-sm text-slate-400">
                     <div className="flex items-center gap-2">
                         <div className="w-8 h-8 rounded-full bg-gradient-to-br from-orange-500 to-amber-500 flex items-center justify-center text-white text-xs font-bold">
@@ -161,23 +169,42 @@ const Post = () => {
                     </div>
                 </div>
 
-                {/* Media Container */}
+           
                 <div className="relative rounded-3xl overflow-hidden mb-12 shadow-2xl bg-slate-900 border border-white/5">
-                    {youtubeId ? (
-                        <div className="aspect-video w-full">
-                            <iframe
-                                className="w-full h-full"
-                                src={`https://www.youtube.com/embed/${youtubeId}?autoplay=0&rel=0`}
-                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                allowFullScreen
-                            />
-                        </div>
+                    {isVideo ? (
+                        youtubeId ? (
+                          
+                            <div className="aspect-video w-full relative">
+                                <iframe
+                                    className="w-full h-full"
+                                    src={`https://www.youtube.com/embed/${youtubeId}?autoplay=0&rel=0`}
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                />
+                            </div>
+                        ) : (
+                            
+                            <div className="aspect-video w-full flex items-center justify-center bg-slate-800 relative">
+                                <div className="text-center">
+                                    <div className="w-16 h-16 bg-orange-500 rounded-full flex items-center justify-center mx-auto mb-4">
+                                        <svg className="w-8 h-8 text-white ml-1" fill="currentColor" viewBox="0 0 20 20">
+                                            <path d="M6.3 2.841A1.5 1.5 0 004 4.11V15.89a1.5 1.5 0 002.3 1.269l9.344-5.89a1.5 1.5 0 000-2.538L6.3 2.84z" />
+                                        </svg>
+                                    </div>
+                                    <p className="text-slate-400 text-lg">Video Content</p>
+                                    <p className="text-slate-500 text-sm mt-2">Direct video playback not supported</p>
+                                </div>
+                            </div>
+                        )
                     ) : mediaUrl ? (
                         <img
                             src={mediaUrl}
                             alt={post.title}
-                            // className="w-full h-auto object-cover max-h-[600px]"
-                            className="w-[80%] h-auto object-cover max-h-[600px] md:rounded-3xl"
+                            className="w-full h-auto object-cover max-h-[600px] md:rounded-3xl"
+                            onError={(e) => {
+                                e.target.onerror = null;
+                                e.target.src = 'https://placehold.co/600x400/1e293b/475569?text=Image+Not+Found';
+                            }}
                         />
                     ) : (
                         <div className="h-64 flex items-center justify-center bg-slate-800">
@@ -186,14 +213,14 @@ const Post = () => {
                     )}
                 </div>
 
-                {/* Content */}
+                
                 <div className="prose prose-invert prose-orange max-w-none text-base md:text-lg leading-relaxed text-slate-300 mb-10 md:mb-16">
                     {post.description?.split('\n').map((para, i) => (
                         <p key={i} className="mb-4 md:mb-6 last:mb-0 whitespace-pre-wrap">{para}</p>
                     ))}
                 </div>
 
-                {/* Engagement Bar */}
+              
                 <div className="flex items-center justify-between py-6 md:py-8 border-y border-white/5 mb-10 md:mb-16">
                     <div className="flex items-center gap-4 md:gap-8">
                         <button
@@ -215,12 +242,10 @@ const Post = () => {
                         </div>
                     </div>
 
-                    {/* <button className="hidden sm:flex items-center gap-2 px-4 md:px-6 py-2 bg-white/5 rounded-full hover:bg-white/10 text-slate-300 font-medium text-sm md:text-base transition-all">
-                        Share Article
-                    </button> */}
+                   
                 </div>
 
-                {/* Comments Section */}
+               
                 <div className="space-y-8 md:space-y-12">
                     <h3 className="text-xl md:text-2xl font-black text-white flex items-center gap-3">
                         Comments
@@ -229,7 +254,7 @@ const Post = () => {
                         </span>
                     </h3>
 
-                    {/* Comment Form */}
+                   
                     <form onSubmit={handleCommentSubmit} className="bg-slate-900/50 p-4 md:p-6 rounded-2xl md:rounded-3xl border border-white/5 space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <input
@@ -258,7 +283,7 @@ const Post = () => {
                         </div>
                     </form>
 
-                    {/* Comments List */}
+                  
                     <div className="space-y-4 md:space-y-6">
                         {post.comments && post.comments.length > 0 ? (
                             [...post.comments].reverse().map((comment, index) => (

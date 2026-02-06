@@ -14,7 +14,7 @@ const PendingApproval = () => {
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
-        // Check if user is admin
+      
         const userInfo = sessionStorage.getItem('userInfo');
         if (userInfo) {
             try {
@@ -66,11 +66,11 @@ const PendingApproval = () => {
             
             await api.patch(`/posts/${targetPostId}/status`, { status }, { Authorization: `Bearer ${token}` });
             
-            // Refresh the list after successful update
+        
             await fetchPendingPosts();
             if (!postId) closeStatusModal();
             
-            // Show success message
+         
             const statusText = status === 1 ? 'approved' : status === 2 ? 'rejected' : 'hidden';
             toast.success(`Post has been ${statusText} successfully!`);
         } catch (err) {
@@ -100,7 +100,7 @@ const PendingApproval = () => {
 
     return (
         <div className="space-y-8">
-            {/* Status Update Modal */}
+          
             {statusModal.open && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl">
@@ -170,7 +170,7 @@ const PendingApproval = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     {posts.map((post) => (
                         <div key={post._id} className="bg-slate-900 border border-white/10 rounded-2xl overflow-hidden group hover:border-orange-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-orange-500/10 flex flex-col h-full">
-                            {/* Image/Video Section */}
+                           
                             <div className="aspect-video relative overflow-hidden bg-slate-800">
                                 {post.media?.[0]?.url ? (
                                     post.postType === 'video' ? (
@@ -242,7 +242,7 @@ const PendingApproval = () => {
                                 )}
                             </div>
 
-                            {/* Content Section */}
+                           
                             <div className="p-6 flex-1 flex flex-col">
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">

@@ -19,17 +19,17 @@ const DashboardHome = () => {
   const [stats, setStats] = useState({ total: 0, active: 0, unsubscribed: 0 });
   const [isAdmin, setIsAdmin] = useState(false);
 
-  // Leads State
+ 
   const [leadsStats, setLeadsStats] = useState({
     totalLeads: 0,
     todayLeads: 0,
   });
 
-  // Category Counts State
+
   const [categoryCounts, setCategoryCounts] = useState([]);
   const [categoryLoading, setCategoryLoading] = useState(true);
 
-  // Admin Stats State
+
   const [adminStats, setAdminStats] = useState({
     totalPosts: 0,
     totalCategories: 0,
@@ -60,7 +60,7 @@ const DashboardHome = () => {
       setCategoryLoading(true);
       const token = sessionStorage.getItem("token");
       
-      // Fetch all categories and all posts
+    
       const [categoriesRes, postsRes] = await Promise.all([
         api.get("/public/categories"),
         api.get("/posts", { Authorization: `Bearer ${token}` })
@@ -69,7 +69,7 @@ const DashboardHome = () => {
       const categories = categoriesRes?.data || [];
       const posts = Array.isArray(postsRes) ? postsRes : (postsRes?.data || []);
 
-      // Count posts per category
+      
       const countMap = {};
       posts.forEach(post => {
         const cat = post.category;
@@ -78,7 +78,7 @@ const DashboardHome = () => {
         }
       });
 
-      // Merge counts with categories
+      
       const result = categories.map(cat => ({
         ...cat,
         count: countMap[cat.id] || 0
@@ -86,13 +86,13 @@ const DashboardHome = () => {
 
       setCategoryCounts(result);
       
-      // Count posts by status (0=pending, 1=approved, 2=rejected, 4=hidden)
+      
       const approvedPosts = posts.filter(p => p.status === 1).length;
       const pendingPosts = posts.filter(p => p.status === 0).length;
       const rejectedPosts = posts.filter(p => p.status === 2).length;
       const hiddenPosts = posts.filter(p => p.status === 4).length;
       
-      // Update admin stats for posts and categories
+      
       setAdminStats(prev => ({
         ...prev,
         totalPosts: posts.length,
@@ -156,7 +156,7 @@ const DashboardHome = () => {
 
   return (
     <div className="space-y-8">
-      {/* Leads Section - Admin Only */}
+      
       {isAdmin && (
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-white mb-4">
@@ -191,7 +191,7 @@ const DashboardHome = () => {
         </div>
       )}
 
-      {/* Category Counts Section */}
+    
       <div>
         <h2 className="text-xl md:text-2xl font-bold text-white mb-4">
           Posts by Category
@@ -233,7 +233,7 @@ const DashboardHome = () => {
         )}
       </div>
 
-      {/* Newsletter Subscribers Stats - Admin Only */}
+   
       {isAdmin && (
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-white mb-4 flex items-center gap-2">
@@ -285,7 +285,10 @@ const DashboardHome = () => {
         </div>
       )}
 
-      {/* Admin Quick Stats - Admin Only */}
+
+
+
+     
       {isAdmin && (
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-white mb-4 flex items-center gap-2">
@@ -306,6 +309,9 @@ const DashboardHome = () => {
                 </div>
                 <FileText className="text-blue-500" size={28} />
               </div>
+
+              
+
             </div>
             <div className="bg-gradient-to-br from-slate-900 to-slate-800 border border-white/10 rounded-2xl p-4 md:p-6 relative overflow-hidden">
               <div className="absolute top-0 right-0 w-24 md:w-32 h-24 md:h-32 bg-amber-500/10 rounded-full -mr-12 md:-mr-16 -mt-12 md:-mt-16"></div>
@@ -339,7 +345,7 @@ const DashboardHome = () => {
         </div>
       )}
 
-      {/* Post Status Stats - Admin Only */}
+     
       {isAdmin && (
         <div>
           <h2 className="text-xl md:text-2xl font-bold text-white mb-4 flex items-center gap-2">

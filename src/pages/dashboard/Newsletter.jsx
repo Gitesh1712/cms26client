@@ -13,6 +13,7 @@ import {
   XCircle,
 } from "lucide-react";
 import { api } from "../../services/api";
+import Swal from 'sweetalert2';
 
 const Newsletter = () => {
   const [subscribers, setSubscribers] = useState([]);
@@ -22,7 +23,7 @@ const Newsletter = () => {
   const [statusFilter, setStatusFilter] = useState("");
   const [stats, setStats] = useState({ total: 0, active: 0, unsubscribed: 0 });
 
-  // Modal State
+ 
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [submitLoading, setSubmitLoading] = useState(false);
   const [formData, setFormData] = useState({ email: "", source: "manual" });
@@ -38,7 +39,7 @@ const Newsletter = () => {
 
       setSubscribers(response?.subscribers || []);
 
-      // Calculate stats
+   
       const allSubs = await api.get("/newsletter", {
         Authorization: `Bearer ${token}`,
       });
@@ -88,7 +89,12 @@ const Newsletter = () => {
       fetchSubscribers();
     } catch (err) {
       console.error("Failed to add subscriber:", err);
-      alert(err.message || "Failed to add subscriber. Please try again.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: err.message || 'Failed to add subscriber. Please try again.',
+        confirmButtonColor: '#FF7A18'
+      });
     } finally {
       setSubmitLoading(false);
     }
@@ -106,14 +112,27 @@ const Newsletter = () => {
       fetchSubscribers();
     } catch (err) {
       console.error("Failed to update status:", err);
-      alert("Failed to update subscriber status.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to update subscriber status.',
+        confirmButtonColor: '#FF7A18'
+      });
     }
   };
 
   const handleDelete = async (id) => {
-    if (
-      confirm("Are you sure you want to permanently delete this subscriber?")
-    ) {
+    const result = await Swal.fire({
+      title: 'Are you sure?',
+      text: "You won't be able to revert this!",
+      icon: 'warning',
+      showCancelButton: true,
+      confirmButtonColor: '#FF7A18',
+      cancelButtonColor: '#d33',
+      confirmButtonText: 'Yes, delete it!'
+    });
+    
+    if (result.isConfirmed) {
       try {
         const token = sessionStorage.getItem("token");
         await api.delete(`/newsletter/${id}`, {
@@ -122,7 +141,12 @@ const Newsletter = () => {
         fetchSubscribers();
       } catch (err) {
         console.error("Failed to delete subscriber:", err);
-        alert("Failed to delete subscriber.");
+        Swal.fire({
+          icon: 'error',
+          title: 'Error',
+          text: 'Failed to delete subscriber.',
+          confirmButtonColor: '#FF7A18'
+        });
       }
     }
   };
@@ -150,7 +174,12 @@ const Newsletter = () => {
       window.URL.revokeObjectURL(url);
     } catch (err) {
       console.error("Failed to export:", err);
-      alert("Failed to export subscribers.");
+      Swal.fire({
+        icon: 'error',
+        title: 'Error',
+        text: 'Failed to export subscribers.',
+        confirmButtonColor: '#FF7A18'
+      });
     }
   };
 
@@ -192,7 +221,7 @@ const Newsletter = () => {
           </div>
         </div>
 
-        {/* Stats Cards */}
+    
         <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 md:gap-6 mb-6">
           <div className="bg-slate-900 border border-white/10 rounded-2xl p-4 md:p-6">
             <div className="flex items-center justify-between">
@@ -234,7 +263,7 @@ const Newsletter = () => {
         </div>
       </div>
 
-      {/* Search & Filter */}
+   
       <div className="flex flex-col md:flex-row gap-4">
         <div className="relative flex-1">
           <Search
@@ -266,7 +295,7 @@ const Newsletter = () => {
         </div>
       </div>
 
-      {/* Content */}
+     
       {loading ? (
         <div className="flex flex-col items-center justify-center py-20">
           <Loader2 size={40} className="animate-spin text-orange-500 mb-4" />
@@ -394,7 +423,7 @@ const Newsletter = () => {
         </div>
       )}
 
-      {/* Add Subscriber Modal */}
+   
       {isModalOpen && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-sm">
           <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-md shadow-2xl">

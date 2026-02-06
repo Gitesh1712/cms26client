@@ -22,14 +22,14 @@ const Login = () => {
         try {
             const response = await api.post('/login', { email, password });
 
-            // Assuming response contains a token or user session
+           
             sessionStorage.clear
             console.log("Login successful:", response);
             if (response.token) {
                 sessionStorage.setItem('token', response.token);
             }
 
-            // Store user info
+          
             if (response.user) {
                 sessionStorage.setItem('userInfo', JSON.stringify({
                     name: response.user.name,
@@ -50,7 +50,7 @@ const Login = () => {
     return (
         <div className="flex items-center justify-center min-h-[80vh] px-4">
             <div className="w-full max-w-md relative group">
-                {/* Glow effect behind card */}
+              
                 <div className="absolute -inset-1 bg-gradient-to-r from-orange-600 to-amber-600 rounded-2xl blur opacity-25 group-hover:opacity-50 transition duration-1000 group-hover:duration-200"></div>
 
                 <div className="relative bg-slate-900 border border-white/10 rounded-2xl p-8 backdrop-blur-xl shadow-2xl">
@@ -85,7 +85,7 @@ const Login = () => {
                         <div className="space-y-2">
                             <div className="flex justify-between items-center ml-1">
                                 <label className="text-sm font-medium text-slate-300">Password</label>
-                                {/* <a href="#" className="text-xs text-orange-400 hover:text-orange-300">Forgot password?</a> */}
+                               
                             </div>
                             <div className="relative">
                                 <Lock className="absolute left-4 top-1/2 -translate-y-1/2 text-slate-500" size={20} />
@@ -100,11 +100,7 @@ const Login = () => {
                             </div>
                         </div>
 
-                        {/* <div className="flex items-center space-x-2 ml-1">
-                            <input type="checkbox" id="remember" className="rounded border-slate-700 bg-slate-800 text-orange-500 focus:ring-offset-slate-900 focus:ring-orange-500" />
-                            <label htmlFor="remember" className="text-sm text-slate-400 select-none cursor-pointer">Remember me for 30 days</label>
-                        </div> */}
-
+                        
                         <button
                             type="submit"
                             disabled={loading}
@@ -114,12 +110,7 @@ const Login = () => {
                         </button>
                     </form>
 
-                    {/* <div className="mt-8 text-center">
-                        <p className="text-slate-500 text-sm">
-                            Don't have an account?{' '}
-                            <a href="#" className="text-orange-400 hover:text-orange-300 font-medium">Create one now</a>
-                        </p>
-                    </div> */}
+                    
                 </div>
             </div>
         </div>

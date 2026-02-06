@@ -1,6 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Trash2, Plus, Loader2, AlertCircle } from 'lucide-react';
 import { api } from '../../services/api';
+import Swal from 'sweetalert2';
 
 const Categories = () => {
     const [categories, setCategories] = useState([]);
@@ -61,14 +62,29 @@ const Categories = () => {
             await fetchCategories(); // Refresh list
         } catch (err) {
             console.error("Failed to add category:", err);
-            alert(err.data.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: err.data?.message || 'Failed to add category',
+                confirmButtonColor: '#FF7A18'
+            });
         } finally {
             setActionLoading(false);
         }
     };
 
     const handleDeleteCategory = async (id) => {
-        if (!window.confirm("Are you sure you want to delete this category?")) return;
+        const result = await Swal.fire({
+            title: 'Are you sure?',
+            text: "You won't be able to revert this!",
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#FF7A18',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!'
+        });
+        
+        if (!result.isConfirmed) return;
 
         setActionLoading(true);
         try {
@@ -78,7 +94,12 @@ const Categories = () => {
             await fetchCategories(); // Refresh list
         } catch (err) {
             console.error("Failed to delete category:", err);
-            alert(err.message);
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: err.message || 'Failed to delete category',
+                confirmButtonColor: '#FF7A18'
+            });
         } finally {
             setActionLoading(false);
         }

@@ -15,7 +15,7 @@ const Contact = () => {
         message: ''
     });
     const [loading, setLoading] = useState(false);
-    const [status, setStatus] = useState(null); // 'success' | 'error' | null
+    const [status, setStatus] = useState(null); 
     const [statusMessage, setStatusMessage] = useState('');
 
     const handleChange = (e) => {
@@ -44,7 +44,7 @@ const Contact = () => {
     return (
         <div className="max-w-6xl mx-auto px-4 py-8 md:py-12 lg:py-20">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-8 md:gap-12 lg:gap-20 items-start">
-                {/* Contact Info */}
+            
                 <div className="space-y-6 md:space-y-8 mt-0 md:mt-4">
                     <div>
                         <h2 className="text-3xl md:text-4xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-[#FFCC66] to-[#FF7A18] mb-4 md:mb-6">Let's Talk</h2>
@@ -71,7 +71,7 @@ const Contact = () => {
                     </div>
                 </div>
 
-                {/* Contact Form */}
+           
                 <div className="relative bg-slate-900 border border-white/10 rounded-2xl md:rounded-3xl p-6 md:p-8 backdrop-blur-xl shadow-2xl">
                     <form onSubmit={handleSubmit} className="space-y-6">
                         {status && (
