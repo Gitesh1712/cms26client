@@ -9,7 +9,8 @@ import {
     X,
     Mail,
     Copy,
-    Check
+    Check,
+    Play
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
@@ -26,6 +27,12 @@ const getImageUrl = (url) => {
 
 const getYoutubeId = (url) => {
     if (!url) return null;
+    
+    // Handle YouTube Shorts URLs specifically
+    const shortsMatch = url.match(/youtube\.com\/shorts\/([^?&\/\s]{11})/);
+    if (shortsMatch) return shortsMatch[1];
+    
+    // Handle regular YouTube URLs
     const regExp =
         /(?:youtube\.com\/(?:[^\/]+\/.*\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
     const match = url.match(regExp);
@@ -65,6 +72,70 @@ const Home = () => {
     const [shareModalOpen, setShareModalOpen] = useState(false);
     const [selectedPost, setSelectedPost] = useState(null);
     const [copied, setCopied] = useState(false);
+
+    // Static short videos data - replace these URLs with your actual video links
+    const shortVideos = [
+        {
+            id: 1,
+            videoUrl: 'https://www.youtube.com/shorts/JN2WWXCTam0',
+            title: 'Short Video 1',
+            views: '1.2M'
+        },
+        {
+            id: 2,
+            videoUrl: 'https://www.youtube.com/shorts/_wJYzwIOCq0',
+            title: 'Short Video 2',
+            views: '890K'
+        },
+        {
+            id: 3,
+            videoUrl: 'https://www.youtube.com/shorts/gqEwSY4-UIY',
+            title: 'Short Video 3',
+            views: '2.1M'
+        },
+        {
+            id: 4,
+            videoUrl: 'https://www.youtube.com/shorts/EmJdJDw2cmU',
+            title: 'Short Video 4',
+            views: '756K'
+        },
+        {
+            id: 5,
+            videoUrl: 'https://www.youtube.com/shorts/Szzb98owcuc',
+            title: 'Short Video 5',
+            views: '1.5M'
+        },
+        {
+            id: 6,
+            videoUrl: 'https://www.youtube.com/shorts/1S_orL3ziu4',
+            title: 'Short Video 6',
+            views: '3.2M'
+        },
+        {
+            id: 7,
+            videoUrl: 'https://www.youtube.com/shorts/2-AVkI4Stcs',
+            title: 'Short Video 7',
+            views: '980K'
+        },
+        {
+            id: 8,
+            videoUrl: 'https://www.youtube.com/shorts/WF1ZtXYFM2k',
+            title: 'Short Video 8',
+            views: '1.8M'
+        },
+        {
+            id: 9,
+            videoUrl: 'https://www.youtube.com/shorts/RnP9yuCWu0o',
+            title: 'Short Video 9',
+            views: '625K'
+        },
+        {
+            id: 10,
+            videoUrl: 'https://www.youtube.com/shorts/CokYT_oIhE8',
+            title: 'Short Video 10',
+            views: '1.1M'
+        }
+    ];
 
   
     useEffect(() => {
@@ -244,6 +315,35 @@ const Home = () => {
                 setCopied(true);
                 setTimeout(() => setCopied(false), 2000);
                 break;
+        }
+    };
+
+    const handleVideoClick = (videoUrl) => {
+        window.open(videoUrl, '_blank');
+    };
+
+    const scrollVideos = (direction) => {
+        const container = document.getElementById('short-videos-container');
+        if (container) {
+            // Responsive scroll amount based on screen width
+            const screenWidth = window.innerWidth;
+            let scrollAmount;
+            
+            if (screenWidth < 640) {
+                scrollAmount = 160; // Mobile
+            } else if (screenWidth < 768) {
+                scrollAmount = 200; // Small tablet
+            } else if (screenWidth < 1024) {
+                scrollAmount = 220; // Tablet
+            } else {
+                scrollAmount = 240; // Desktop
+            }
+            
+            if (direction === 'left') {
+                container.scrollBy({ left: -scrollAmount, behavior: 'smooth' });
+            } else {
+                container.scrollBy({ left: scrollAmount, behavior: 'smooth' });
+            }
         }
     };
 
@@ -435,12 +535,112 @@ const Home = () => {
                 </div>
             )}
 
+            {/* Short Videos Section */}
+            <div className="mx-2 sm:mx-4 md:mx-6 lg:mx-8 mb-12 md:mb-20">
+                <h2 className="text-2xl md:text-3xl font-black mb-6 md:mb-10 text-orange-400 px-2 sm:px-4">
+                    Short Videos
+                </h2>
+                
+                <div className="relative group/scroll">
+                    {/* Left Arrow - Hidden on mobile */}
+                    <button
+                        onClick={() => scrollVideos('left')}
+                        className="hidden md:block absolute left-0 top-1/2 -translate-y-1/2 z-20 p-2 lg:p-3 bg-slate-800/90 hover:bg-slate-700/90 rounded-full backdrop-blur-sm transition-all text-white border border-white/10 hover:border-orange-500/30 opacity-0 group-hover/scroll:opacity-100 shadow-lg"
+                    >
+                        <ChevronLeft size={20} className="lg:w-6 lg:h-6" />
+                    </button>
 
+                    {/* Right Arrow - Hidden on mobile */}
+                    <button
+                        onClick={() => scrollVideos('right')}
+                        className="hidden md:block absolute right-0 top-1/2 -translate-y-1/2 z-20 p-2 lg:p-3 bg-slate-800/90 hover:bg-slate-700/90 rounded-full backdrop-blur-sm transition-all text-white border border-white/10 hover:border-orange-500/30 opacity-0 group-hover/scroll:opacity-100 shadow-lg"
+                    >
+                        <ChevronRight size={20} className="lg:w-6 lg:h-6" />
+                    </button>
 
+                    <div className="overflow-x-auto scrollbar-hide scroll-smooth" id="short-videos-container">
+                        <div className="flex gap-3 sm:gap-4 pb-4 px-2 sm:px-4">
+                            {shortVideos.map((video) => {
+                                const youtubeId = getYoutubeId(video.videoUrl);
+                                
+                                // Multiple thumbnail options for better quality
+                                const getThumbnailUrl = () => {
+                                    if (!youtubeId) return 'https://placehold.co/300x533/1e293b/475569?text=Short+Video';
+                                    // Try different YouTube thumbnail qualities
+                                    return `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`;
+                                };
 
+                                return (
+                                    <div
+                                        key={video.id}
+                                        onClick={() => handleVideoClick(video.videoUrl)}
+                                        className="flex-shrink-0 w-[140px] xs:w-[160px] sm:w-[180px] md:w-[200px] lg:w-[220px] group cursor-pointer"
+                                    >
+                                        <div className="relative rounded-xl sm:rounded-2xl overflow-hidden bg-slate-800/30 border border-white/5 hover:border-orange-500/30 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-orange-500/20">
+                                            {/* Video Thumbnail with 9:16 aspect ratio */}
+                                            <div className="relative aspect-[9/16] overflow-hidden bg-slate-900">
+                                                <img
+                                                    src={getThumbnailUrl()}
+                                                    alt={video.title}
+                                                    className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
+                                                    onError={(e) => {
+                                                        const currentSrc = e.target.src;
+                                                        // Try different fallback URLs
+                                                        if (currentSrc.includes('maxresdefault')) {
+                                                            e.target.src = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
+                                                        } else if (currentSrc.includes('hqdefault')) {
+                                                            e.target.src = `https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg`;
+                                                        } else if (currentSrc.includes('mqdefault')) {
+                                                            e.target.src = `https://img.youtube.com/vi/${youtubeId}/default.jpg`;
+                                                        } else {
+                                                            e.target.onerror = null;
+                                                            e.target.src = 'https://placehold.co/300x533/1e293b/475569?text=Short+Video';
+                                                        }
+                                                    }}
+                                                />
+                                                
+                                                {/* Gradient Overlay */}
+                                                <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-black/20 to-transparent" />
+                                                
+                                                {/* Play Button */}
+                                                <div className="absolute inset-0 flex items-center justify-center">
+                                                    <div className="w-12 h-12 sm:w-14 sm:h-14 bg-orange-500/90 group-hover:bg-orange-500 rounded-full flex items-center justify-center backdrop-blur-sm transition-all duration-300 group-hover:scale-110 shadow-lg">
+                                                        <Play size={20} className="sm:w-6 sm:h-6 text-white ml-0.5 sm:ml-1" fill="white" />
+                                                    </div>
+                                                </div>
 
+                                                {/* Video Info Overlay */}
+                                                <div className="absolute bottom-0 left-0 right-0 p-2 sm:p-3 z-10">
+                                                    <h3 className="text-white font-bold text-xs sm:text-sm mb-0.5 sm:mb-1 line-clamp-2">
+                                                        {video.title}
+                                                    </h3>
+                                                    <div className="flex items-center gap-1.5 sm:gap-2 text-[10px] sm:text-xs text-slate-300">
+                                                        <svg className="w-3 h-3 sm:w-4 sm:h-4" fill="currentColor" viewBox="0 0 20 20">
+                                                            <path d="M10 12a2 2 0 100-4 2 2 0 000 4z" />
+                                                            <path fillRule="evenodd" d="M.458 10C1.732 5.943 5.522 3 10 3s8.268 2.943 9.542 7c-1.274 4.057-5.064 7-9.542 7S1.732 14.057.458 10zM14 10a4 4 0 11-8 0 4 4 0 018 0z" clipRule="evenodd" />
+                                                        </svg>
+                                                        <span>{video.views}</span>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                    </div>
 
-
+                    {/* Scroll Progress Indicator - Hidden on mobile, shown on tablet+ */}
+                    <div className="hidden md:flex justify-center mt-4 gap-1">
+                        {[...Array(Math.ceil(shortVideos.length / 4))].map((_, index) => (
+                            <div
+                                key={index}
+                                className="h-1 w-8 bg-slate-700 rounded-full"
+                            />
+                        ))}
+                    </div>
+                </div>
+            </div>
 
           
             <div className="mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 pb-12 md:pb-20 w-full">
@@ -552,6 +752,27 @@ const Home = () => {
                     </div>
                 ))}
             </div>
+
+            {/* Custom scrollbar styles */}
+            <style jsx>{`
+                .scrollbar-hide::-webkit-scrollbar {
+                    display: none;
+                }
+                .scrollbar-hide {
+                    -ms-overflow-style: none;
+                    scrollbar-width: none;
+                }
+                .scroll-smooth {
+                    scroll-behavior: smooth;
+                }
+                
+                /* Touch scrolling optimization for mobile */
+                @media (max-width: 768px) {
+                    #short-videos-container {
+                        -webkit-overflow-scrolling: touch;
+                    }
+                }
+            `}</style>
         </div>
     );
 };
