@@ -72,75 +72,40 @@ const Home = () => {
     const [shareModalOpen, setShareModalOpen] = useState(false);
     const [selectedPost, setSelectedPost] = useState(null);
     const [copied, setCopied] = useState(false);
+    const [shortVideos, setShortVideos] = useState([]);
 
-    // Static short videos data - replace these URLs with your actual video links
-    const shortVideos = [
-        {
-            id: 1,
-            videoUrl: 'https://www.youtube.com/shorts/JN2WWXCTam0',
-            title: 'Short Video 1',
-            views: '1.2M'
-        },
-        {
-            id: 2,
-            videoUrl: 'https://www.youtube.com/shorts/_wJYzwIOCq0',
-            title: 'Short Video 2',
-            views: '890K'
-        },
-        {
-            id: 3,
-            videoUrl: 'https://www.youtube.com/shorts/gqEwSY4-UIY',
-            title: 'Short Video 3',
-            views: '2.1M'
-        },
-        {
-            id: 4,
-            videoUrl: 'https://www.youtube.com/shorts/EmJdJDw2cmU',
-            title: 'Short Video 4',
-            views: '756K'
-        },
-        {
-            id: 5,
-            videoUrl: 'https://www.youtube.com/shorts/Szzb98owcuc',
-            title: 'Short Video 5',
-            views: '1.5M'
-        },
-        {
-            id: 6,
-            videoUrl: 'https://www.youtube.com/shorts/1S_orL3ziu4',
-            title: 'Short Video 6',
-            views: '3.2M'
-        },
-        {
-            id: 7,
-            videoUrl: 'https://www.youtube.com/shorts/2-AVkI4Stcs',
-            title: 'Short Video 7',
-            views: '980K'
-        },
-        {
-            id: 8,
-            videoUrl: 'https://www.youtube.com/shorts/WF1ZtXYFM2k',
-            title: 'Short Video 8',
-            views: '1.8M'
-        },
-        {
-            id: 9,
-            videoUrl: 'https://www.youtube.com/shorts/RnP9yuCWu0o',
-            title: 'Short Video 9',
-            views: '625K'
-        },
-        {
-            id: 10,
-            videoUrl: 'https://www.youtube.com/shorts/CokYT_oIhE8',
-            title: 'Short Video 10',
-            views: '1.1M'
+    // Format view count
+    const formatViews = (views) => {
+        if (views >= 1000000) {
+            return (views / 1000000).toFixed(1) + 'M';
+        } else if (views >= 1000) {
+            return (views / 1000).toFixed(0) + 'K';
         }
-    ];
+        return views.toString();
+    };
 
-  
+    // Fetch shorts from API
+    const fetchShorts = async () => {
+        try {
+            const response = await api.get('/public/shorts?limit=20');
+            if (response?.shorts) {
+                setShortVideos(response.shorts.map(short => ({
+                    id: short._id,
+                    videoUrl: short.videoUrl,
+                    title: short.title,
+                    views: formatViews(short.views || 0),
+                    thumbnail: short.thumbnail,
+                    platform: short.platform || 'youtube'
+                })));
+            }
+        } catch (error) {
+            console.error('Failed to fetch shorts:', error);
+        }
+    };
+
     useEffect(() => {
-        
-    }, [heroSlides.length]);
+        fetchShorts();
+    }, []);
 
     
     const fetchData = async (filterCategory = null) => {
@@ -535,7 +500,8 @@ const Home = () => {
                 </div>
             )}
 
-            {/* Short Videos Section */}
+            {/* Short Videos Section - Only show if there are shorts */}
+            {shortVideos.length > 0 && (
             <div className="mx-2 sm:mx-4 md:mx-6 lg:mx-8 mb-12 md:mb-20">
                 <h2 className="text-2xl md:text-3xl font-black mb-6 md:mb-10 text-orange-400 px-2 sm:px-4">
                     Short Videos
@@ -562,12 +528,24 @@ const Home = () => {
                         <div className="flex gap-3 sm:gap-4 pb-4 px-2 sm:px-4">
                             {shortVideos.map((video) => {
                                 const youtubeId = getYoutubeId(video.videoUrl);
+                                const isInstagram = video.platform === 'instagram';
                                 
-                                // Multiple thumbnail options for better quality
+                                // Get thumbnail URL - handle local uploads properly
                                 const getThumbnailUrl = () => {
-                                    if (!youtubeId) return 'https://placehold.co/300x533/1e293b/475569?text=Short+Video';
-                                    // Try different YouTube thumbnail qualities
-                                    return `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`;
+                                    if (video.thumbnail) {
+                                        // Check if it's a local path or full URL
+                                        if (video.thumbnail.startsWith('http')) {
+                                            return video.thumbnail;
+                                        }
+                                        // Local upload - prepend API base URL
+                                        const baseUrl = API_BASE_URL.replace(/\/api$/, '');
+                                        return `${baseUrl}${video.thumbnail}`;
+                                    }
+                                    // Fallback to YouTube thumbnail for YouTube videos
+                                    if (!isInstagram && youtubeId) {
+                                        return `https://img.youtube.com/vi/${youtubeId}/maxresdefault.jpg`;
+                                    }
+                                    return 'https://placehold.co/300x533/1e293b/475569?text=Short+Video';
                                 };
 
                                 return (
@@ -585,13 +563,18 @@ const Home = () => {
                                                     className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-300"
                                                     onError={(e) => {
                                                         const currentSrc = e.target.src;
-                                                        // Try different fallback URLs
-                                                        if (currentSrc.includes('maxresdefault')) {
-                                                            e.target.src = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
-                                                        } else if (currentSrc.includes('hqdefault')) {
-                                                            e.target.src = `https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg`;
-                                                        } else if (currentSrc.includes('mqdefault')) {
-                                                            e.target.src = `https://img.youtube.com/vi/${youtubeId}/default.jpg`;
+                                                        // Try different fallback URLs for YouTube
+                                                        if (!isInstagram && youtubeId) {
+                                                            if (currentSrc.includes('maxresdefault')) {
+                                                                e.target.src = `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`;
+                                                            } else if (currentSrc.includes('hqdefault')) {
+                                                                e.target.src = `https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg`;
+                                                            } else if (currentSrc.includes('mqdefault')) {
+                                                                e.target.src = `https://img.youtube.com/vi/${youtubeId}/default.jpg`;
+                                                            } else {
+                                                                e.target.onerror = null;
+                                                                e.target.src = 'https://placehold.co/300x533/1e293b/475569?text=Short+Video';
+                                                            }
                                                         } else {
                                                             e.target.onerror = null;
                                                             e.target.src = 'https://placehold.co/300x533/1e293b/475569?text=Short+Video';
@@ -641,6 +624,7 @@ const Home = () => {
                     </div>
                 </div>
             </div>
+            )}
 
           
             <div className="mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 pb-12 md:pb-20 w-full">

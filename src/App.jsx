@@ -22,6 +22,7 @@ import ApprovedPosts from './pages/dashboard/ApprovedPosts';
 import RejectedPosts from './pages/dashboard/RejectedPosts';
 import HiddenPosts from './pages/dashboard/HiddenPosts';
 import Newsletter from './pages/dashboard/Newsletter';
+import Shorts from './pages/dashboard/Shorts';
 
 
 function LenisWrapper({ children }) {
@@ -108,6 +109,7 @@ function App() {
             <Route path="rejected-posts" element={<RejectedPosts />} />
             <Route path="hidden-posts" element={<HiddenPosts />} />
             <Route path="newsletter" element={<Newsletter />} />
+            <Route path="shorts" element={<Shorts />} />
           </Route>
         </Routes>
       </LenisWrapper>
