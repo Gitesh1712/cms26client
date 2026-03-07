@@ -1,21 +1,15 @@
 import { useState, useEffect } from 'react';
-import { Eye, Edit2, Trash2, Plus, Loader2, AlertCircle, Image as ImageIcon } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { Eye, Edit2, Trash2, Plus, Loader2, AlertCircle, Image as ImageIcon, X } from 'lucide-react';
+import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../services/api';
 import Swal from 'sweetalert2';
-
 
 const isVideoUrl = (url) => {
     if (!url) return false;
     const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'wmv'];
     const lowerUrl = url.toLowerCase();
-    
-   
     if (videoExtensions.some(ext => lowerUrl.includes(`.${ext}`))) return true;
-    
-   
     if (lowerUrl.includes('youtube.com') || lowerUrl.includes('youtu.be') || lowerUrl.includes('vimeo.com')) return true;
-    
     return false;
 };
 
@@ -31,27 +25,26 @@ const isEmbedVideo = (url) => {
 };
 
 const getEmbedUrl = (url) => {
-    if (url.includes('youtu.be')) {
-        return `https://www.youtube.com/embed/${url.split('/').pop()}`;
-    }
-    if (url.includes('youtube.com')) {
-        return `https://www.youtube.com/embed/${new URL(url).searchParams.get('v')}`;
-    }
-    if (url.includes('vimeo.com')) {
-        return `https://player.vimeo.com/video/${url.split('/').pop()}`;
-    }
+    if (url.includes('youtu.be')) return `https://www.youtube.com/embed/${url.split('/').pop()}`;
+    if (url.includes('youtube.com')) return `https://www.youtube.com/embed/${new URL(url).searchParams.get('v')}`;
+    if (url.includes('vimeo.com')) return `https://player.vimeo.com/video/${url.split('/').pop()}`;
     return url;
 };
 
 const AllStories = () => {
     const navigate = useNavigate();
+    const [searchParams, setSearchParams] = useSearchParams();
+
     const [posts, setPosts] = useState([]);
+    const [categories, setCategories] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
     const [isAdmin, setIsAdmin] = useState(false);
 
+  
+    const activeCategoryId = searchParams.get('category') || '';
+
     useEffect(() => {
-    
         const userInfo = sessionStorage.getItem('userInfo');
         if (userInfo) {
             try {
@@ -67,8 +60,12 @@ const AllStories = () => {
         try {
             setLoading(true);
             const token = sessionStorage.getItem('token');
-            const response = await api.get('/posts', { Authorization: `Bearer ${token}` });
-            setPosts(Array.isArray(response) ? response : (response.data || []));
+            const [postsRes, categoriesRes] = await Promise.all([
+                api.get('/posts', { Authorization: `Bearer ${token}` }),
+                api.get('/public/categories'),
+            ]);
+            setPosts(Array.isArray(postsRes) ? postsRes : (postsRes?.data || []));
+            setCategories(categoriesRes?.data || []);
         } catch (err) {
             console.error("Failed to fetch posts:", err);
             setError("Failed to load stories.");
@@ -82,6 +79,29 @@ const AllStories = () => {
         fetchPosts();
     }, []);
 
+
+    const getCategoryName = (categoryId) => {
+        if (!categoryId) return categoryId;
+        const found = categories.find(
+            c => String(c.id).toLowerCase() === String(categoryId).toLowerCase()
+        );
+        return found ? found.name : categoryId;
+    };
+
+  
+    const filteredPosts = activeCategoryId
+        ? posts.filter(p =>
+            String(p.category).toLowerCase() === String(activeCategoryId).toLowerCase()
+          )
+        : posts;
+
+  
+    const activeCategoryName = activeCategoryId ? getCategoryName(activeCategoryId) : '';
+
+    const clearFilter = () => {
+        setSearchParams({});
+    };
+
     const handleEditStory = (id) => {
         navigate(`edit/${id}`);
     };
@@ -94,15 +114,15 @@ const AllStories = () => {
             showCancelButton: true,
             confirmButtonColor: '#FF7A18',
             cancelButtonColor: '#d33',
-            confirmButtonText: 'Yes, delete it!'
+            confirmButtonText: 'Yes, delete it!',
+            background: '#0f172a',
+            color: '#e2e8f0',
         });
-        
+
         if (result.isConfirmed) {
             try {
                 const token = sessionStorage.getItem('token');
                 await api.delete(`/posts/${id}`, { Authorization: `Bearer ${token}` });
-
-              
                 fetchPosts();
             } catch (err) {
                 console.error("Failed to delete post:", err);
@@ -110,45 +130,83 @@ const AllStories = () => {
                     icon: 'error',
                     title: 'Error',
                     text: 'Failed to delete story. Please try again.',
-                    confirmButtonColor: '#FF7A18'
+                    confirmButtonColor: '#FF7A18',
+                    background: '#0f172a',
+                    color: '#e2e8f0',
                 });
             }
         }
     };
 
-    const isEmbedVideo = (url) => {
-        return url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com');
-    };
-
-    const getEmbedUrl = (url) => {
-        if (url.includes('youtu.be')) {
-            return `https://www.youtube.com/embed/${url.split('/').pop()}`;
-        }
-        if (url.includes('youtube.com')) {
-            return `https://www.youtube.com/embed/${new URL(url).searchParams.get('v')}`;
-        }
-        if (url.includes('vimeo.com')) {
-            return `https://player.vimeo.com/video/${url.split('/').pop()}`;
-        }
-        return url;
-    };
-
-
     return (
         <div className="space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-white">All Stories</h2>
-                    <p className="text-slate-400 mt-1 text-sm md:text-base">Manage your content library</p>
+                    <h2 className="text-2xl md:text-3xl font-bold text-white">
+                    
+                        {activeCategoryName ? `${activeCategoryName} Stories` : 'All Stories'}
+                    </h2>
+                    <p className="text-slate-400 mt-1 text-sm md:text-base">
+                        {activeCategoryName
+                            ? `Showing posts in "${activeCategoryName}"`
+                            : 'Manage your content library'}
+                    </p>
                 </div>
-                <button
-                    onClick={() => navigate('add')}
-                    className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#FFCC66] to-[#FF7A18] hover:opacity-90 text-slate-900 font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(255,122,24,0.3)] hover:shadow-[0_0_30px_rgba(255,122,24,0.5)] flex items-center justify-center gap-2 text-sm md:text-base"
-                >
-                    <Plus size={20} />
-                    New Story
-                </button>
+                <div className="flex items-center gap-3">
+               
+                    {activeCategoryId && (
+                        <button
+                            onClick={clearFilter}
+                            className="px-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-slate-300 font-medium rounded-xl transition-all flex items-center gap-2 text-sm border border-white/10"
+                        >
+                            <X size={16} />
+                            Clear Filter
+                        </button>
+                    )}
+                    <button
+                        onClick={() => navigate('add')}
+                        className="px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-[#FFCC66] to-[#FF7A18] hover:opacity-90 text-slate-900 font-bold rounded-xl transition-all shadow-[0_0_20px_rgba(255,122,24,0.3)] hover:shadow-[0_0_30px_rgba(255,122,24,0.5)] flex items-center justify-center gap-2 text-sm md:text-base"
+                    >
+                        <Plus size={20} />
+                        New Story
+                    </button>
+                </div>
             </div>
+
+         
+            {!loading && categories.length > 0 && (
+                <div className="flex flex-wrap gap-2">
+                    <button
+                        onClick={clearFilter}
+                        className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                            !activeCategoryId
+                                ? 'bg-orange-500/20 text-orange-400 border-orange-500/30'
+                                : 'bg-slate-800 text-slate-400 border-white/5 hover:border-white/20'
+                        }`}
+                    >
+                        All ({posts.length})
+                    </button>
+                    {categories.map(cat => {
+                        const count = posts.filter(
+                            p => String(p.category).toLowerCase() === String(cat.id).toLowerCase()
+                        ).length;
+                        const isActive = String(activeCategoryId).toLowerCase() === String(cat.id).toLowerCase();
+                        return (
+                            <button
+                                key={cat.id}
+                                onClick={() => setSearchParams({ category: cat.id })}
+                                className={`px-3 py-1.5 rounded-lg text-xs font-medium transition-all border ${
+                                    isActive
+                                        ? 'bg-orange-500/20 text-orange-400 border-orange-500/30'
+                                        : 'bg-slate-800 text-slate-400 border-white/5 hover:border-white/20'
+                                }`}
+                            >
+                                {cat.name} ({count})
+                            </button>
+                        );
+                    })}
+                </div>
+            )}
 
             {loading ? (
                 <div className="flex flex-col items-center justify-center py-20">
@@ -163,12 +221,16 @@ const AllStories = () => {
                     </div>
                     {error}
                 </div>
-            ) : posts.length === 0 ? (
+            ) : filteredPosts.length === 0 ? (
                 <div className="p-12 bg-slate-900 border border-white/10 rounded-2xl text-center text-slate-500">
                     <div className="flex justify-center mb-4">
                         <ImageIcon size={48} className="opacity-20" />
                     </div>
-                    <p className="text-lg mb-4">No stories found</p>
+                    <p className="text-lg mb-4">
+                        {activeCategoryName
+                            ? `No stories found in "${activeCategoryName}"`
+                            : 'No stories found'}
+                    </p>
                     <button
                         onClick={() => navigate('add')}
                         className="text-orange-400 hover:text-orange-300 font-medium"
@@ -178,15 +240,13 @@ const AllStories = () => {
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                    {posts.map((post) => (
+                    {filteredPosts.map((post) => (
                         <div key={post._id} className="bg-slate-900 border border-white/10 rounded-2xl overflow-hidden group hover:border-orange-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-orange-500/10 flex flex-col h-full">
-                            
+
                             <div className="aspect-video relative overflow-hidden bg-slate-800">
                                 {post.media?.[0]?.url ? (
-                                  
                                     isVideoUrl(post.media[0].url) ? (
                                         isEmbedVideo(post.media[0].url) ? (
-                                           
                                             <iframe
                                                 src={getEmbedUrl(post.media[0].url)}
                                                 className="w-full h-full"
@@ -196,37 +256,26 @@ const AllStories = () => {
                                                 loading="lazy"
                                             />
                                         ) : (
-                                           
                                             <>
                                                 <video
-                                                    src={
-                                                        post.media[0].url.startsWith('http')
-                                                            ? post.media[0].url
-                                                            : `${import.meta.env.VITE_API_URL}${post.media[0].url}`
-                                                    }
+                                                    src={post.media[0].url.startsWith('http')
+                                                        ? post.media[0].url
+                                                        : `${import.meta.env.VITE_API_URL}${post.media[0].url}`}
                                                     className="w-full h-full object-cover bg-black"
-                                                    muted
-                                                    preload="metadata"
+                                                    muted preload="metadata"
                                                 />
-
-                                               
                                                 <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
-                                                    <div className="w-14 h-14 rounded-full bg-orange-500/90 flex items-center justify-center text-white text-xl">
-                                                        ▶
-                                                    </div>
+                                                    <div className="w-14 h-14 rounded-full bg-orange-500/90 flex items-center justify-center text-white text-xl">▶</div>
                                                 </div>
                                             </>
                                         )
                                     ) : (
-                                      
                                         (() => {
                                             const imageUrl = post.media[0].url.startsWith('http')
                                                 ? post.media[0].url
                                                 : `${import.meta.env.VITE_API_URL}${post.media[0].url}`;
-                                            
                                             const youtubeId = getYoutubeId(imageUrl);
                                             if (youtubeId) {
-                                               
                                                 return (
                                                     <img
                                                         src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`}
@@ -235,8 +284,6 @@ const AllStories = () => {
                                                     />
                                                 );
                                             }
-                                            
-                                            
                                             return (
                                                 <img
                                                     src={imageUrl}
@@ -244,8 +291,7 @@ const AllStories = () => {
                                                     className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
                                                     onError={(e) => {
                                                         e.target.onerror = null;
-                                                        e.target.src =
-                                                            'https://placehold.co/600x400/1e293b/475569?text=No+Image';
+                                                        e.target.src = 'https://placehold.co/600x400/1e293b/475569?text=No+Image';
                                                     }}
                                                 />
                                             );
@@ -258,20 +304,20 @@ const AllStories = () => {
                                 )}
                             </div>
 
-
-                            
                             <div className="p-6 flex-1 flex flex-col">
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">
+                                       
                                         <span className="text-xs font-medium text-orange-400 bg-orange-500/10 px-2 py-1 rounded-md border border-orange-500/20 uppercase tracking-wider">
-                                            {post.category}
+                                            {getCategoryName(post.category)}
                                         </span>
-                                        <span className={`text-xs font-medium px-2 py-1 rounded-md border ${post.status === 1
-                                            ? 'text-green-400 bg-green-500/10 border-green-500/20'
-                                            : post.status === 2
-                                                ? 'text-red-400 bg-red-500/10 border-red-500/20'
-                                                : 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20'
-                                            }`}>
+                                        <span className={`text-xs font-medium px-2 py-1 rounded-md border ${
+                                            post.status === 1
+                                                ? 'text-green-400 bg-green-500/10 border-green-500/20'
+                                                : post.status === 2
+                                                    ? 'text-red-400 bg-red-500/10 border-red-500/20'
+                                                    : 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20'
+                                        }`}>
                                             {post.status === 1 ? 'Approved' : post.status === 2 ? 'Rejected' : 'Pending'}
                                         </span>
                                     </div>
@@ -320,4 +366,5 @@ const AllStories = () => {
         </div>
     );
 };
+
 export default AllStories;
