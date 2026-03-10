@@ -183,7 +183,6 @@ const AddStory = () => {
                     <div className="space-y-4">
                         <label className="text-sm font-medium text-slate-300 block">Media Upload</label>
 
-                        {/* ── FIXED: File/URL toggle always visible for both article and video ── */}
                         <div className="flex gap-4 mb-2">
                             <button type="button" onClick={() => setMediaType('file')}
                                 className={`px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center gap-2 ${mediaType === 'file' ? 'bg-orange-500/20 text-orange-400 border border-orange-500/30' : 'bg-slate-800 text-slate-400 border border-transparent'}`}>

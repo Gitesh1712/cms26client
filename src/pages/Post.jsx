@@ -6,7 +6,8 @@ import {
     Share2, X, Mail, Copy, Check
 } from 'lucide-react';
 import { api } from '../services/api';
-import Swal from 'sweetalert2';
+import Swal from'sweetalert2';
+import SEO from '../components/SEO';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
@@ -123,7 +124,7 @@ const Post = () => {
         }
     };
 
-    // ── LOADING ──
+
     if (loading) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-4">
@@ -136,7 +137,7 @@ const Post = () => {
         );
     }
 
-    // ── ERROR ──
+  
     if (error || !post) {
         return (
             <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
@@ -167,7 +168,13 @@ const Post = () => {
 
     return (
         <div className="min-h-screen text-slate-200">
-            <style>{`
+          <SEO 
+            title={post.title}
+            description={post.excerpt || post.content?.substring(0, 150) + '...'}
+            image={post.image?.startsWith('http') ? post.image : `/logo.png`}
+            type="article"
+          />
+         <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
 
                 @keyframes postFadeUp {
@@ -206,7 +213,7 @@ const Post = () => {
                 }
             `}</style>
 
-            {/* ══ SHARE MODAL ══ */}
+        
             {shareModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4"
                     onClick={() => setShareModalOpen(false)}>
@@ -264,11 +271,11 @@ const Post = () => {
                 </div>
             )}
 
-            {/* ══ PAGE CONTENT ══ */}
+   
             <div className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8 py-8 md:py-12">
                 <main className="w-full">
 
-                    {/* Back */}
+              
                     <button onClick={() => navigate(-1)}
                         className="p-fu mb-10 flex items-center gap-2.5 group"
                         style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -278,7 +285,7 @@ const Post = () => {
                         <span className="text-xs tracking-widest uppercase text-slate-500 group-hover:text-slate-300 transition-colors">Back</span>
                     </button>
 
-                    {/* Category */}
+                
                     <div className="p-fu mb-5">
                         <span className="inline-block text-[11px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-full text-slate-900"
                             style={{ fontFamily: "'DM Sans', sans-serif", background: 'linear-gradient(135deg, #FFCC66, #FF7A18)' }}>
@@ -286,7 +293,7 @@ const Post = () => {
                         </span>
                     </div>
 
-                    {/* Title */}
+                  
                     <h1 className="p-fu-1 text-white font-black mb-7 leading-none"
                         style={{
                             fontFamily: "'Playfair Display', serif",
@@ -297,7 +304,7 @@ const Post = () => {
                         {post.title}
                     </h1>
 
-                    {/* Meta */}
+                 
                     <div className="p-fu-2 flex flex-wrap items-center gap-4 md:gap-5 mb-10 pb-8 border-b border-white/5">
                         <div className="flex items-center gap-2.5">
                             <div className="w-8 h-8 rounded-full flex items-center justify-center text-slate-900 text-xs font-black flex-shrink-0"
@@ -332,7 +339,7 @@ const Post = () => {
                         </button>
                     </div>
 
-                    {/* Media */}
+                  
                     <div className="p-fi relative rounded-2xl md:rounded-3xl overflow-hidden mb-12 md:mb-16 border border-white/5 shadow-2xl"
                         style={{ background: 'rgba(15,15,20,0.8)' }}>
                         <div className="absolute top-0 left-0 right-0 h-px z-10"
@@ -373,7 +380,7 @@ const Post = () => {
                         )}
                     </div>
 
-                    {/* Article body */}
+                 
                     <div className="p-fu-3 mb-14 md:mb-20">
                         {post.description?.split('\n').map((para, i) => (
                             para.trim()
@@ -385,7 +392,7 @@ const Post = () => {
                         ))}
                     </div>
 
-                    {/* Like / Comment / Share bar */}
+              
                     <div className="flex items-center justify-between py-5 mb-14 border-y border-white/5">
                         <div className="flex items-center gap-2.5">
                             <button onClick={handleLike} disabled={likeLoading}
@@ -418,10 +425,10 @@ const Post = () => {
                         </button>
                     </div>
 
-                    {/* Comments section */}
+               
                     <div className="space-y-7 md:space-y-9">
 
-                        {/* Heading */}
+                  
                         <div className="flex items-center gap-4">
                             <div className="w-1 h-7 rounded-full"
                                 style={{ background: 'linear-gradient(to bottom, #FFCC66, #FF7A18)' }} />
@@ -435,7 +442,7 @@ const Post = () => {
                             </span>
                         </div>
 
-                        {/* Form */}
+                    
                         <div className="relative rounded-2xl p-5 md:p-6 border border-white/5"
                             style={{ background: 'linear-gradient(135deg, rgba(20,12,4,0.6), rgba(15,15,20,0.8))' }}>
                             <div className="absolute top-0 left-0 right-0 h-px rounded-t-2xl"
@@ -463,7 +470,7 @@ const Post = () => {
                             </form>
                         </div>
 
-                        {/* List */}
+                  
                         <div className="space-y-3">
                             {post.comments && post.comments.length > 0 ? (
                                 [...post.comments].reverse().map((comment, index) => (

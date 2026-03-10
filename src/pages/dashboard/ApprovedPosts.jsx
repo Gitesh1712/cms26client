@@ -15,7 +15,7 @@ const ApprovedPosts = () => {
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
-        // Check if user is admin
+      
         const userInfo = sessionStorage.getItem('userInfo');
         if (userInfo) {
             try {
@@ -72,11 +72,11 @@ const ApprovedPosts = () => {
             const token = sessionStorage.getItem('token');
             await api.patch(`/posts/${rejectModal.postId}/status`, { status: 2 }, { Authorization: `Bearer ${token}` });
             
-            // Refresh the list after successful update
+       
             await fetchApprovedPosts();
             closeRejectModal();
             
-            // Show success message
+  
             toast.success("Post has been rejected successfully!");
         } catch (err) {
             console.error("Failed to reject post:", err);
@@ -92,11 +92,11 @@ const ApprovedPosts = () => {
             const token = sessionStorage.getItem('token');
             await api.patch(`/posts/${hideModal.postId}/status`, { status: 4 }, { Authorization: `Bearer ${token}` });
             
-            // Refresh the list after successful update
+    
             await fetchApprovedPosts();
             closeHideModal();
             
-            // Show success message
+ 
             toast.success("Post has been hidden successfully!");
         } catch (err) {
             console.error("Failed to hide post:", err);
@@ -125,7 +125,7 @@ const ApprovedPosts = () => {
 
     return (
         <div className="space-y-8">
-            {/* Reject Confirmation Modal */}
+
             {rejectModal.open && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl">
@@ -155,7 +155,7 @@ const ApprovedPosts = () => {
                 </div>
             )}
 
-            {/* Hide Confirmation Modal */}
+      
             {hideModal.open && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
                     <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl">
@@ -289,7 +289,7 @@ const ApprovedPosts = () => {
                                 )}
                             </div>
 
-                            {/* Content Section */}
+             
                             <div className="p-6 flex-1 flex flex-col">
                                 <div className="flex items-center justify-between mb-3">
                                     <div className="flex items-center gap-2">

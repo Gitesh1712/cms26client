@@ -1,6 +1,7 @@
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from'react';
 import { BookOpen, Users, Target, Heart, Lightbulb, Award, Globe, TrendingUp, MessageSquare, ArrowRight, Play, Star } from 'lucide-react';
-import { Link } from 'react-router-dom';
+import { Link } from'react-router-dom';
+import SEO from '../components/SEO';
 
 const About = () => {
     useEffect(() => {
@@ -24,8 +25,14 @@ const About = () => {
     ];
 
     return (
-        <div className="min-h-screen overflow-x-hidden" style={{ fontFamily: "'Georgia', serif" }}>
-            <style>{`
+      <div className="min-h-screen overflow-x-hidden" style={{ fontFamily: "'Georgia', serif" }}>
+          <SEO 
+          title="About Us - Our Story & Mission"
+            description="Learn about Kaivailayam's mission to preserve culture through digital storytelling. We bring you authentic, quality content that inspires and connects."
+            image="/logo.png"
+            type="website"
+          />
+         <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
 
                 .about-display { font-family: 'Playfair Display', serif; }
@@ -346,7 +353,7 @@ const About = () => {
                             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                                 style={{ background: 'radial-gradient(circle at 20% 20%, rgba(255,122,24,0.06), transparent 60%)' }} />
 
-                            {/* Index number */}
+                 
                             <div className="about-display text-slate-800 font-black mb-6 select-none"
                                 style={{ fontSize: '3.5rem', lineHeight: 1, letterSpacing: '-0.04em' }}>
                                 {String(index + 1).padStart(2, '0')}

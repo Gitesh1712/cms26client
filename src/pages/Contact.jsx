@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect } from'react';
 import { Send, MapPin, MessageSquare, Loader2, CheckCircle, AlertCircle, ArrowRight, Mail } from 'lucide-react';
 import { api } from '../services/api';
+import SEO from '../components/SEO';
 
 const Contact = () => {
     useEffect(() => {
@@ -42,8 +43,14 @@ const Contact = () => {
     };
 
     return (
-        <div className="min-h-screen overflow-x-hidden">
-            <style>{`
+      <div className="min-h-screen overflow-x-hidden">
+          <SEO 
+         title="Contact Us - Get in Touch"
+            description="Have a question or want to collaborate? Get in touch with NoNoiseStories. We'd love to hear from you."
+            image="/logo.png"
+            type="website"
+          />
+         <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400;1,700&family=DM+Sans:wght@300;400;500&display=swap');
 
                 .ct-display { font-family: 'Playfair Display', serif; }
@@ -125,16 +132,16 @@ const Contact = () => {
                 }
             `}</style>
 
-            {/* ── HERO HEADER ── */}
+     
             <section className="relative pt-20 pb-16 px-6 md:px-12 lg:px-20 overflow-hidden grain-ct">
 
-                {/* Background orbs */}
+    
                 <div className="absolute top-10 right-0 w-[480px] h-[480px] rounded-full pointer-events-none pulse-soft"
                     style={{ background: 'radial-gradient(circle, rgba(255,122,24,0.1) 0%, transparent 70%)' }} />
                 <div className="absolute -bottom-10 left-10 w-[320px] h-[320px] rounded-full pointer-events-none pulse-soft"
                     style={{ background: 'radial-gradient(circle, rgba(255,204,102,0.07) 0%, transparent 70%)', animationDelay: '2s' }} />
 
-                {/* Floating decorative number */}
+          
                 <div className="absolute right-6 md:right-16 top-16 select-none pointer-events-none ct-fade-in">
                     <span className="ct-display font-black text-stroke-ct float-slow inline-block"
                         style={{ fontSize: 'clamp(6rem, 18vw, 14rem)', lineHeight: 0.85, letterSpacing: '-0.04em' }}>
@@ -142,7 +149,7 @@ const Contact = () => {
                     </span>
                 </div>
 
-                {/* Label */}
+        
                 <div className="ct-fade-up mb-6">
                     <span className="ct-body inline-flex items-center gap-2 text-xs font-medium tracking-[0.2em] uppercase text-orange-400 border border-orange-500/20 bg-orange-500/8 px-4 py-2 rounded-full">
                         <span className="w-1.5 h-1.5 rounded-full bg-orange-400 inline-block" style={{ animation: 'pulseSoft 2s infinite' }} />
@@ -150,7 +157,7 @@ const Contact = () => {
                     </span>
                 </div>
 
-                {/* Headline */}
+         
                 <div className="ct-fade-up-1 max-w-3xl mb-4">
                     <h1 className="ct-display font-black text-white leading-none"
                         style={{ fontSize: 'clamp(3.2rem, 9vw, 8rem)', letterSpacing: '-0.03em' }}>
@@ -162,7 +169,7 @@ const Contact = () => {
                     </h1>
                 </div>
 
-                {/* Divider */}
+            
                 <div className="ct-fade-up-2 flex items-center gap-6 mt-8 mb-6">
                     <div className="h-px max-w-xs flex-1"
                         style={{ background: 'linear-gradient(to right, rgba(255,122,24,0.6), transparent)' }} />
@@ -175,14 +182,13 @@ const Contact = () => {
                 </p>
             </section>
 
-            {/* ── MAIN CONTENT ── */}
             <section className="px-6 md:px-12 lg:px-20 pb-24">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
 
-                    {/* LEFT — contact info */}
+                 
                     <div className="lg:col-span-4 space-y-8">
 
-                        {/* Info cards */}
+                     
                         {[
                             {
                                 icon: <Mail size={22} />,
@@ -221,7 +227,7 @@ const Contact = () => {
                             </div>
                         ))}
 
-                        {/* Inquiry types */}
+                     
                         <div className="pt-4">
                             <p className="ct-body text-xs tracking-[0.2em] uppercase text-slate-500 mb-4">We handle</p>
                             <div className="flex flex-wrap gap-2">
@@ -235,16 +241,16 @@ const Contact = () => {
                         </div>
                     </div>
 
-                    {/* RIGHT — form */}
+                  
                     <div className="lg:col-span-8">
                         <div className="relative rounded-3xl p-8 md:p-10 border border-white/8 card-shine"
                             style={{ background: 'linear-gradient(135deg, rgba(20,12,4,0.9), rgba(15,15,20,0.95))' }}>
 
-                            {/* Top accent line */}
+                    
                             <div className="absolute top-0 left-0 right-0 h-px rounded-t-3xl"
                                 style={{ background: 'linear-gradient(to right, transparent, rgba(255,204,102,0.3), transparent)' }} />
 
-                            {/* Form header */}
+                        
                             <div className="flex items-center gap-4 mb-8">
                                 <div className="w-8 h-px bg-orange-500" />
                                 <span className="ct-body text-xs tracking-[0.2em] uppercase text-orange-400">Send a message</span>
@@ -252,7 +258,7 @@ const Contact = () => {
 
                             <form onSubmit={handleSubmit} className="space-y-6">
 
-                                {/* Status message */}
+                       
                                 {status && (
                                     <div className={`p-4 rounded-2xl flex items-center gap-3 ct-body text-sm font-medium border
                                         ${status === 'success'
@@ -263,7 +269,7 @@ const Contact = () => {
                                     </div>
                                 )}
 
-                                {/* Name */}
+                         
                                 <div className="space-y-2">
                                     <label className="ct-body text-xs tracking-[0.15em] uppercase text-slate-500 font-medium">Full Name</label>
                                     <input
@@ -277,7 +283,7 @@ const Contact = () => {
                                     />
                                 </div>
 
-                                {/* Email + Mobile */}
+                          
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="ct-body text-xs tracking-[0.15em] uppercase text-slate-500 font-medium">Email</label>
@@ -305,7 +311,7 @@ const Contact = () => {
                                     </div>
                                 </div>
 
-                                {/* Inquiry Type — custom styled select */}
+                         
                                 <div className="space-y-2">
                                     <label className="ct-body text-xs tracking-[0.15em] uppercase text-slate-500 font-medium">Inquiry Type</label>
                                     <div className="relative">
@@ -319,7 +325,7 @@ const Contact = () => {
                                             <option value="Partnership">Partnership</option>
                                             <option value="Support">Support</option>
                                         </select>
-                                        {/* Custom chevron */}
+                            
                                         <div className="absolute right-4 top-1/2 -translate-y-1/2 pointer-events-none">
                                             <svg className="w-4 h-4 text-slate-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                                                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 9l-7 7-7-7" />
@@ -328,7 +334,7 @@ const Contact = () => {
                                     </div>
                                 </div>
 
-                                {/* Message */}
+                     
                                 <div className="space-y-2">
                                     <label className="ct-body text-xs tracking-[0.15em] uppercase text-slate-500 font-medium">Message</label>
                                     <textarea
@@ -342,7 +348,7 @@ const Contact = () => {
                                     />
                                 </div>
 
-                                {/* Submit */}
+                       
                                 <button
                                     type="submit"
                                     disabled={loading}

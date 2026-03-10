@@ -153,7 +153,7 @@ const Newsletter = () => {
 
   const handleExport = async () => {
     try {
-      // Create CSV from current data
+   
       const dataToExport = filteredSubscribers;
       const NEWLINE = "\r\n";
 
@@ -164,7 +164,7 @@ const Newsletter = () => {
         ).toISOString()}"${NEWLINE}`;
       });
 
-      // Download CSV
+ 
       const blob = new Blob([csvContent], { type: "text/csv" });
       const url = window.URL.createObjectURL(blob);
       const a = document.createElement("a");
@@ -189,7 +189,7 @@ const Newsletter = () => {
 
   return (
     <div className="space-y-8">
-      {/* Header & Stats */}
+
       <div>
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4 mb-6">
           <div>

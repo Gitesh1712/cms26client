@@ -5,6 +5,7 @@ import {
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
+import SEO from '../components/SEO';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
@@ -54,7 +55,7 @@ const Home = () => {
     const [copied, setCopied] = useState(false);
     const [shortVideos, setShortVideos] = useState([]);
 
-    // ── NEW: track expanded state per section ──
+
     const [topStoriesExpanded, setTopStoriesExpanded] = useState(false);
     const [expandedCategories, setExpandedCategories] = useState({});
 
@@ -101,7 +102,7 @@ const Home = () => {
 
     const fetchData = async (filterCategory = null) => {
         setLoading(true);
-        // reset expanded states on new fetch
+  
         setTopStoriesExpanded(false);
         setExpandedCategories({});
         try {
@@ -138,7 +139,7 @@ const Home = () => {
                 )
                 .map(mapPost);
 
-            // ── store ALL top stories (not sliced to 6 anymore) ──
+         
             setTopStories(allTopStoryPosts);
 
             const isFilteringTopStories = filterCategory && topStoryCat && (
@@ -155,7 +156,7 @@ const Home = () => {
                     p => p.category?.toLowerCase() === filterCategory.toLowerCase()
                 );
                 const categoryName = categoriesData.find(c => c.id === filterCategory)?.name || filterCategory;
-                // ── store ALL posts for filtered category ──
+   
                 setGroupedPosts(filteredPosts.length > 0 ? { [categoryName]: filteredPosts.map(mapPost) } : {});
             } else {
                 setFilteredTopStories([]);
@@ -167,7 +168,7 @@ const Home = () => {
                              p.category?.toLowerCase() === cat.name?.toLowerCase()
                     );
                     if (catPosts.length) {
-                        // ── store ALL posts per category ──
+    
                         grouped[cat.name] = catPosts.map(mapPost);
                     }
                 });
@@ -253,9 +254,7 @@ const Home = () => {
         return found ? found.name : categoryId;
     };
 
-    // ── VIEW MORE / LESS — inline in heading row ──
 
-    // ── POST CARD ── news thumbnail style
     const PostCard = ({ post, index = 0 }) => {
         const youtubeId = getYoutubeId(post.mediaUrl);
 
@@ -269,7 +268,7 @@ const Home = () => {
                 className="hm-card group cursor-pointer flex flex-col rounded-2xl overflow-hidden border border-white/8 hover:border-orange-500/25 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/40"
                 style={{ background: 'rgba(12,10,8,0.9)', animationDelay: `${index * 0.08}s` }}
             >
-                {/* ── THUMBNAIL ── */}
+
                 <div className="relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
                     {thumbSrc ? (
                         <img
@@ -284,11 +283,11 @@ const Home = () => {
                         </div>
                     )}
 
-                    {/* Gradient overlay */}
+
                     <div className="absolute inset-0"
                         style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.6) 100%)' }} />
 
-                    {/* Play button bottom-left for videos */}
+
                     {post.isVideo && (
                         <div className="absolute bottom-2.5 left-3 z-10">
                             <div className="w-7 h-7 rounded-full flex items-center justify-center shadow-lg"
@@ -300,7 +299,6 @@ const Home = () => {
                         </div>
                     )}
 
-                    {/* Date bottom-right */}
                     <div className="absolute bottom-2.5 right-3 z-10">
                         <span className="text-[10px] text-white/75 font-medium"
                             style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -309,7 +307,7 @@ const Home = () => {
                     </div>
                 </div>
 
-                {/* ── CONTENT ── */}
+
                 <div className="flex flex-col flex-1 px-4 pt-3 pb-4">
                     <h3 className="text-white font-semibold mb-3 line-clamp-2 group-hover:text-orange-100 transition-colors"
                         style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.9rem', lineHeight: '1.45' }}>
@@ -337,7 +335,7 @@ const Home = () => {
         );
     };
 
-    // ── SECTION HEADING component
+
     const SectionHeading = ({ children, count, onClick, expanded, onToggle, total }) => (
         <div className="flex items-center justify-between mb-8 md:mb-10">
             <div className="flex items-center gap-4">
@@ -386,6 +384,12 @@ const Home = () => {
 
     return (
         <div className="flex flex-col ">
+            <SEO 
+           title="Home - Top Stories, Travel & Culture"
+            description="Discover trending top stories, travel guides, cultural insights, and NNS Shorts. Your gateway to authentic storytelling and quality content."
+            image="/logo.png"
+            type="website"
+          />
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap');
 
@@ -418,14 +422,14 @@ const Home = () => {
                 }
             `}</style>
 
-            {/* ══ SHARE MODAL ══ */}
+
             {shareModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4"
                     onClick={() => setShareModalOpen(false)}>
                     <div className="relative rounded-2xl p-6 max-w-md w-full border border-white/10 shadow-2xl"
                         style={{ background: 'linear-gradient(135deg, rgba(20,12,4,0.98), rgba(15,15,20,0.98))' }}
                         onClick={e => e.stopPropagation()}>
-                        {/* Top accent */}
+
                         <div className="absolute top-0 left-0 right-0 h-px rounded-t-2xl"
                             style={{ background: 'linear-gradient(to right, transparent, rgba(255,204,102,0.4), transparent)' }} />
 
@@ -483,7 +487,7 @@ const Home = () => {
                 </div>
             )}
 
-            {/* ══ HERO SLIDER ══ */}
+
             {heroSlides.length > 0 && (
                 <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] overflow-hidden mb-12 md:mb-20 hm-section">
                     {heroSlides.map((slide, index) => (
@@ -493,20 +497,20 @@ const Home = () => {
                                 style={{ background: 'linear-gradient(105deg, rgba(5,2,0,0.92) 0%, rgba(5,2,0,0.6) 40%, transparent 70%)' }} />
 
                             {(() => {
-                                const youtubeId = getYoutubeId(slide.image);
-                                if (youtubeId && index === currentSlide) {
+                               const youtubeId = getYoutubeId(slide.image);
+                               if (youtubeId && index === currentSlide) {
                                     return (
                                         <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
                                             <iframe
                                                 style={{
                                                     position: 'absolute',
-                                                    top: '93%',
+                                                    top: '50%',
                                                     left: '50%',
                                                     transform: 'translate(-50%, -50%)',
-                                                    width: '177.78vh',
-                                                    minWidth: '100%',
-                                                    height: '56.25vw',
-                                                    minHeight: '100%',
+                                                    width: '100%',
+                                                    height: '100%',
+                                                    minWidth: '177.78vh',
+                                                    minHeight: '56.25vw',
                                                     border: 'none'
                                                 }}
                                                 src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${youtubeId}&modestbranding=1&iv_load_policy=3&showinfo=0&rel=0`}
@@ -592,7 +596,7 @@ const Home = () => {
                 </div>
             )}
 
-            {/* ══ SHORT VIDEOS ══ */}
+     
             {shortVideos.length > 0 && (
                 <div className="mx-2 sm:mx-4 md:mx-6 lg:mx-8 mb-14 md:mb-20 hm-section">
                     <div className="flex items-center gap-4 mb-7 px-2 sm:px-4">
@@ -675,10 +679,10 @@ const Home = () => {
                 </div>
             )}
 
-            {/* ══ POSTS SECTIONS ══ */}
+
             <div className="mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 pb-16 md:pb-24 w-full">
 
-                {/* Top stories — filtered view (when category = top stories selected) */}
+          
                 {isTopStoriesSelected && (
                     <div className="mb-16 md:mb-24 hm-section">
                         <SectionHeading
@@ -700,10 +704,10 @@ const Home = () => {
                     </div>
                 )}
 
-                {/* Default view */}
+         
                 {!isTopStoriesSelected && (
                     <>
-                        {/* Top Stories preview (home page) */}
+                   
                         {!selectedCategory && topStories.length > 0 && (
                             <div className="mb-16 md:mb-24 hm-section">
                                 <SectionHeading
@@ -729,7 +733,7 @@ const Home = () => {
                             </div>
                         )}
 
-                        {/* Category sections */}
+                    
                         {displayPosts.map(([categoryName, posts]) => (
                             <div key={categoryName} className="mb-16 md:mb-24 hm-section">
                                 <SectionHeading

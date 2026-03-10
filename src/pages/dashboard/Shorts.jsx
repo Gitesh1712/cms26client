@@ -20,34 +20,28 @@ import Swal from 'sweetalert2';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
-/**
- * Extract YouTube video ID from various URL formats
- */
+
 const getYoutubeId = (url) => {
     if (!url) return null;
     
-    // Handle YouTube Shorts URLs
+
     const shortsMatch = url.match(/youtube\.com\/shorts\/([^?&\/\s]{11})/);
     if (shortsMatch) return shortsMatch[1];
     
-    // Handle regular YouTube URLs
+    
     const regExp = /(?:youtube\.com\/(?:[^\/]+\/.*\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
     const match = url.match(regExp);
     return match ? match[1] : null;
 };
 
-/**
- * Extract Instagram Reel ID from URL
- */
+
 const getInstagramReelId = (url) => {
     if (!url) return null;
     const reelMatch = url.match(/instagram\.com\/(?:reel|reels|p)\/([A-Za-z0-9_-]+)/);
     return reelMatch ? reelMatch[1] : null;
 };
 
-/**
- * Detect platform from URL
- */
+
 const detectPlatform = (url) => {
     if (!url) return null;
     if (url.includes('youtube.com') || url.includes('youtu.be')) return 'youtube';
@@ -55,17 +49,13 @@ const detectPlatform = (url) => {
     return null;
 };
 
-/**
- * Get YouTube thumbnail URL
- */
+
 const getYoutubeThumbnail = (videoUrl) => {
     const youtubeId = getYoutubeId(videoUrl);
     return youtubeId ? `https://img.youtube.com/vi/${youtubeId}/mqdefault.jpg` : null;
 };
 
-/**
- * Get thumbnail URL (handles both local and external URLs)
- */
+
 const getThumbnailUrl = (thumbnail) => {
     if (!thumbnail) return null;
     if (thumbnail.startsWith('http')) return thumbnail;
@@ -80,7 +70,7 @@ const Shorts = () => {
     const [searchTerm, setSearchTerm] = useState('');
     const [statusFilter, setStatusFilter] = useState('');
     
-    // Modal states
+
     const [isModalOpen, setIsModalOpen] = useState(false);
     const [submitLoading, setSubmitLoading] = useState(false);
     const [editingShort, setEditingShort] = useState(null);
@@ -93,7 +83,7 @@ const Shorts = () => {
     const [thumbnailPreview, setThumbnailPreview] = useState(null);
     const fileInputRef = useRef(null);
 
-    // Pagination
+
     const [pagination, setPagination] = useState({
         page: 1,
         limit: 20,
@@ -161,7 +151,7 @@ const Shorts = () => {
         const { name, value } = e.target;
         setFormData(prev => ({ ...prev, [name]: value }));
         
-        // Auto-update thumbnail preview for YouTube URLs
+
         if (name === 'videoUrl') {
             const platform = detectPlatform(value);
             if (platform === 'youtube' && !thumbnailFile) {
@@ -190,7 +180,7 @@ const Shorts = () => {
         if (fileInputRef.current) {
             fileInputRef.current.value = '';
         }
-        // Restore auto-generated thumbnail for YouTube
+
         const platform = detectPlatform(formData.videoUrl);
         if (platform === 'youtube') {
             setThumbnailPreview(getYoutubeThumbnail(formData.videoUrl));
@@ -202,7 +192,7 @@ const Shorts = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
         
-        // Validate URL (both YouTube and Instagram)
+   
         const platform = detectPlatform(formData.videoUrl);
         const youtubeId = getYoutubeId(formData.videoUrl);
         const instagramId = getInstagramReelId(formData.videoUrl);
@@ -217,7 +207,7 @@ const Shorts = () => {
             return;
         }
 
-        // Instagram requires thumbnail if none provided
+   
         if (platform === 'instagram' && !thumbnailFile && !thumbnailPreview) {
             Swal.fire({
                 icon: 'warning',
@@ -233,7 +223,7 @@ const Shorts = () => {
         try {
             const token = sessionStorage.getItem('token');
             
-            // Use FormData for file upload
+    
             const submitData = new FormData();
             submitData.append('title', formData.title);
             submitData.append('videoUrl', formData.videoUrl);
@@ -244,7 +234,7 @@ const Shorts = () => {
             }
             
             if (editingShort) {
-                // Update existing
+       
                 const response = await fetch(`${API_BASE_URL}/shorts/${editingShort._id}`, {
                     method: 'PUT',
                     headers: {
@@ -267,7 +257,7 @@ const Shorts = () => {
                     showConfirmButton: false
                 });
             } else {
-                // Create new
+      
                 const response = await fetch(`${API_BASE_URL}/shorts`, {
                     method: 'POST',
                     headers: {
@@ -402,14 +392,14 @@ const Shorts = () => {
         }
     };
 
-    // Filter shorts by search term
+ 
     const filteredShorts = shorts.filter(short => 
         short.title.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
     return (
         <div className="space-y-6">
-            {/* Header */}
+     
             <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl md:text-3xl font-bold text-white">Shorts</h2>
@@ -424,10 +414,10 @@ const Shorts = () => {
                 </button>
             </div>
 
-            {/* Filters */}
+       
             <div className="bg-slate-900 border border-white/10 rounded-2xl p-4">
                 <div className="flex flex-col sm:flex-row gap-4">
-                    {/* Search */}
+             
                     <div className="relative flex-1">
                         <Search size={18} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
                         <input
@@ -439,7 +429,7 @@ const Shorts = () => {
                         />
                     </div>
                     
-                    {/* Status Filter */}
+          
                     <select
                         value={statusFilter}
                         onChange={(e) => setStatusFilter(e.target.value)}
@@ -453,7 +443,7 @@ const Shorts = () => {
                 </div>
             </div>
 
-            {/* Stats */}
+        
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-slate-900 border border-white/10 rounded-xl p-4 text-center">
                     <div className="text-2xl font-bold text-white">{pagination.total}</div>
@@ -473,7 +463,7 @@ const Shorts = () => {
                 </div>
             </div>
 
-            {/* Shorts Grid */}
+   
             <div className="bg-slate-900 border border-white/10 rounded-2xl overflow-hidden">
                 {loading ? (
                     <div className="p-12 text-center text-slate-500">
@@ -495,7 +485,7 @@ const Shorts = () => {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4">
                         {filteredShorts.map((short, index) => {
-                            // Get thumbnail - use stored thumbnail or auto-generate for YouTube
+                         
                             const thumbUrl = short.thumbnail 
                                 ? getThumbnailUrl(short.thumbnail) 
                                 : (short.platform === 'youtube' ? getYoutubeThumbnail(short.videoUrl) : null);
@@ -505,7 +495,7 @@ const Shorts = () => {
                                     key={short._id} 
                                     className="bg-slate-950/50 border border-white/5 rounded-xl overflow-hidden group hover:border-orange-500/30 transition-all"
                                 >
-                                    {/* Thumbnail */}
+                             
                                     <div className="relative aspect-[9/16] bg-slate-800 overflow-hidden">
                                         {thumbUrl ? (
                                             <img
@@ -523,21 +513,21 @@ const Shorts = () => {
                                             </div>
                                         )}
                                         
-                                        {/* Overlay */}
+                                 
                                         <div className="absolute inset-0 bg-gradient-to-t from-black/80 via-transparent to-transparent" />
                                         
-                                        {/* Status Badge */}
+                                      
                                         <div className="absolute top-2 left-2 flex gap-1">
                                             {getStatusBadge(short.status)}
                                             {getPlatformBadge(short.platform)}
                                         </div>
                                         
-                                        {/* Position Badge */}
+                                  
                                         <div className="absolute top-2 right-2 px-2 py-1 text-xs font-medium bg-black/50 text-white rounded-full">
                                             #{index + 1}
                                         </div>
                                         
-                                        {/* Play Icon */}
+                                    
                                         <a
                                             href={short.videoUrl}
                                             target="_blank"
@@ -549,7 +539,7 @@ const Shorts = () => {
                                             </div>
                                         </a>
                                         
-                                        {/* Title */}
+                                    
                                         <div className="absolute bottom-0 left-0 right-0 p-3">
                                             <h3 className="text-white font-semibold text-sm line-clamp-2">
                                                 {short.title}
@@ -560,7 +550,7 @@ const Shorts = () => {
                                         </div>
                                     </div>
                                     
-                                    {/* Actions */}
+                             
                                     <div className="p-3 flex items-center justify-between border-t border-white/5">
                                         <button
                                             onClick={() => handleStatusToggle(short)}
@@ -607,7 +597,7 @@ const Shorts = () => {
                 )}
             </div>
 
-            {/* Pagination */}
+        
             {pagination.pages > 1 && (
                 <div className="flex items-center justify-center gap-2">
                     <button
@@ -630,11 +620,11 @@ const Shorts = () => {
                 </div>
             )}
 
-            {/* Add/Edit Modal */}
+      
             {isModalOpen && (
                 <div className="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4 overflow-y-auto">
                     <div className="bg-slate-900 border border-white/10 rounded-2xl w-full max-w-md overflow-hidden my-8">
-                        {/* Modal Header */}
+                    
                         <div className="flex items-center justify-between p-4 border-b border-white/5">
                             <h3 className="text-lg font-semibold text-white">
                                 {editingShort ? 'Edit Short' : 'Add New Short'}
@@ -647,9 +637,9 @@ const Shorts = () => {
                             </button>
                         </div>
                         
-                        {/* Modal Body */}
+                
                         <form onSubmit={handleSubmit} className="p-4 space-y-4">
-                            {/* Title */}
+                       
                             <div>
                                 <label className="block text-sm font-medium text-slate-300 mb-2">
                                     Title *
@@ -665,7 +655,7 @@ const Shorts = () => {
                                 />
                             </div>
                             
-                            {/* Video URL */}
+                  
                             <div>
                                 <label className="block text-sm font-medium text-slate-300 mb-2">
                                     Video URL *
@@ -702,13 +692,13 @@ const Shorts = () => {
                                 </p>
                             </div>
 
-                            {/* Thumbnail Upload */}
+                
                             <div>
                                 <label className="block text-sm font-medium text-slate-300 mb-2">
                                     Thumbnail {detectPlatform(formData.videoUrl) === 'instagram' && !thumbnailFile && !editingShort?.thumbnail && <span className="text-red-400">* (Required for Instagram)</span>}
                                 </label>
                                 
-                                {/* Thumbnail Preview */}
+                      
                                 {thumbnailPreview && (
                                     <div className="relative aspect-video bg-slate-800 rounded-xl overflow-hidden mb-3">
                                         <img
@@ -738,7 +728,7 @@ const Shorts = () => {
                                     </div>
                                 )}
                                 
-                                {/* Upload Button */}
+                           
                                 <div className="flex gap-2">
                                     <input
                                         ref={fileInputRef}
@@ -763,7 +753,7 @@ const Shorts = () => {
                                 </p>
                             </div>
                             
-                            {/* Status */}
+                       
                             <div>
                                 <label className="block text-sm font-medium text-slate-300 mb-2">
                                     Status
@@ -780,7 +770,7 @@ const Shorts = () => {
                                 </select>
                             </div>
                             
-                            {/* Submit Button */}
+                              
                             <div className="flex gap-3 pt-2">
                                 <button
                                     type="button"
