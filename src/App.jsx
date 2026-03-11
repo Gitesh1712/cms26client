@@ -63,7 +63,7 @@ function LenisWrapper({ children }) {
 
 function App() {
   return (
-    <BrowserRouter basename="/kaivailayam/">
+    <BrowserRouter>
       <Toaster 
         position="top-right"
         toastOptions={{
