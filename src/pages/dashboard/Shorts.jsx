@@ -442,8 +442,6 @@ const Shorts = () => {
                     </select>
                 </div>
             </div>
-
-        
             <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
                 <div className="bg-slate-900 border border-white/10 rounded-xl p-4 text-center">
                     <div className="text-2xl font-bold text-white">{pagination.total}</div>

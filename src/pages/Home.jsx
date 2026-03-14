@@ -6,6 +6,7 @@ import {
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
 import SEO from '../components/SEO';
+import { generateSlug } from '../utils/slugify';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
@@ -54,6 +55,8 @@ const Home = () => {
     const [selectedPost, setSelectedPost] = useState(null);
     const [copied, setCopied] = useState(false);
     const [shortVideos, setShortVideos] = useState([]);
+    const [videoModalOpen, setVideoModalOpen] = useState(false);
+    const [selectedVideoUrl, setSelectedVideoUrl] = useState(null);
 
 
     const [topStoriesExpanded, setTopStoriesExpanded] = useState(false);
@@ -112,20 +115,44 @@ const Home = () => {
 
             const postsData = await api.get('/allposts');
 
-            setHeroSlides(
-                postsData.filter(p => p.heroContent === true).slice(0, 5).map(p => ({
-                    id: p._id,
-                    title: p.title,
-                    excerpt: p.description,
-                    image: p.media?.[0]?.url ? getImageUrl(p.media[0].url) : 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200',
-                    mediaUrl: p.media?.[0]?.url ? getImageUrl(p.media[0].url) : null,
-                    isVideo: p.media?.[0]?.url ? isVideoUrl(p.media[0].url) : false,
-                    postType: p.postType,
-                    category: p.category,
-                    author: p.author,
-                    date: new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
-                }))
-            );
+           
+            const allHeroSlides = postsData.filter(p => p.heroContent === true).slice(0, 5);
+            
+            if (filterCategory) {
+               
+                setHeroSlides(
+                    allHeroSlides.filter(p => 
+                        p.category?.toLowerCase() === filterCategory.toLowerCase()
+                    ).map(p => ({
+                        id: p._id,
+                        title: p.title,
+                        excerpt: p.description,
+                        image: p.media?.[0]?.url ? getImageUrl(p.media[0].url) : 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200',
+                        mediaUrl: p.media?.[0]?.url ? getImageUrl(p.media[0].url) : null,
+                        isVideo: p.media?.[0]?.url ? isVideoUrl(p.media[0].url) : false,
+                        postType: p.postType,
+                        category: p.category,
+                        author: p.author,
+                        date: new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                    }))
+                );
+            } else {
+                
+                setHeroSlides(
+                    allHeroSlides.map(p => ({
+                        id: p._id,
+                        title: p.title,
+                        excerpt: p.description,
+                        image: p.media?.[0]?.url ? getImageUrl(p.media[0].url) : 'https://images.unsplash.com/photo-1518770660439-4636190af475?w=1200',
+                        mediaUrl: p.media?.[0]?.url ? getImageUrl(p.media[0].url) : null,
+                        isVideo: p.media?.[0]?.url ? isVideoUrl(p.media[0].url) : false,
+                        postType: p.postType,
+                        category: p.category,
+                        author: p.author,
+                        date: new Date(p.createdAt).toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' }),
+                    }))
+                );
+            }
 
             const topStoryCat = categoriesData.find(c => isTopStoriesCategory(c));
 
@@ -218,10 +245,15 @@ const Home = () => {
         setCopied(false);
     };
 
-    const getShareUrl = (postId) => `${window.location.origin}/kaivailayam/post/${postId}`;
+    const getShareUrl = (post) => {
+        if (!post) return '';
+        const categorySlug = generateSlug(post.category);
+        const postSlug = generateSlug(post.title);
+        return `${window.location.origin}/${categorySlug}/${postSlug}`;
+    };
 
     const shareVia = (platform) => {
-        const url = getShareUrl(selectedPost.id);
+        const url = getShareUrl(selectedPost);
         const text = selectedPost.title;
         switch (platform) {
             case 'whatsapp': window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank'); break;
@@ -237,7 +269,15 @@ const Home = () => {
         }
     };
 
-    const handleVideoClick = (videoUrl) => window.open(videoUrl, '_blank');
+    const handleVideoClick = (videoUrl) => {
+        setSelectedVideoUrl(videoUrl);
+        setVideoModalOpen(true);
+    };
+
+    const closeVideoModal = () => {
+        setVideoModalOpen(false);
+        setSelectedVideoUrl(null);
+    };
 
     const scrollVideos = (direction) => {
         const container = document.getElementById('short-videos-container');
@@ -262,9 +302,12 @@ const Home = () => {
             ? `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
             : post.image;
 
+        const categorySlug = generateSlug(post.category);
+        const postSlug = generateSlug(post.title);
+
         return (
             <div
-                onClick={() => navigate(`/post/${post.id}`)}
+                onClick={() => navigate(`/${categorySlug}/${postSlug}`)}
                 className="hm-card group cursor-pointer flex flex-col rounded-2xl overflow-hidden border border-white/8 hover:border-orange-500/25 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/40"
                 style={{ background: 'rgba(12,10,8,0.9)', animationDelay: `${index * 0.08}s` }}
             >
@@ -313,6 +356,7 @@ const Home = () => {
                         style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.9rem', lineHeight: '1.45' }}>
                         {post.title}
                     </h3>
+                   
                     <div className="flex items-center justify-between mt-auto">
                         <div className="flex items-center gap-2">
                             <div className="w-5 h-5 rounded-full flex items-center justify-center text-slate-900 text-[9px] font-black flex-shrink-0"
@@ -368,11 +412,11 @@ const Home = () => {
                 {onToggle && total > POSTS_PER_ROW && (
                     <button
                         onClick={onToggle}
-                        className="flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-orange-500/30 text-orange-400 text-xs font-semibold hover:bg-orange-500/10 transition-all flex-shrink-0"
+                        className="  flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-orange-500/30 text-orange-400 text-xs font-semibold hover:bg-orange-500/10 transition-all flex-shrink-0"
                         style={{ fontFamily: "'DM Sans', sans-serif" }}
                     >
                         {expanded ? (
-                            <>View Less <ChevronLeft size={13} className="rotate-90" /></>
+                            <>View Less <ChevronLeft size={13} className="rotate-90 " /></>
                         ) : (
                             <>View More <ChevronRight size={13} className="rotate-90" /></>
                         )}
@@ -487,6 +531,56 @@ const Home = () => {
                 </div>
             )}
 
+           
+            {videoModalOpen && selectedVideoUrl && (
+                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md"
+                    onClick={closeVideoModal}>
+                    <div className="relative w-full max-w-4xl h-[80vh] sm:h-[85vh] md:h-[90vh] flex flex-col"
+                        onClick={e => e.stopPropagation()}>
+                        
+                       
+                        <button 
+                            onClick={closeVideoModal}
+                            className="absolute -top-12 right-0 p-2 text-white hover:text-orange-400 transition-colors z-10">
+                            <X size={32} />
+                        </button>
+
+                      
+                        <div className="flex-1 w-full h-full rounded-2xl overflow-hidden bg-black">
+                            {(() => {
+                                const youtubeId = getYoutubeId(selectedVideoUrl);
+                                if (youtubeId) {
+                                    return (
+                                        <iframe
+                                            className="w-full h-full"
+                                            src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&modestbranding=1&rel=0`}
+                                            title="YouTube video player"
+                                            frameBorder="0"
+                                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                            allowFullScreen
+                                        />
+                                    );
+                                }
+                                
+                                return (
+                                    <div className="w-full h-full flex items-center justify-center bg-slate-900">
+                                        <p className="text-white text-lg">Opening video...</p>
+                                        <script>window.open('{selectedVideoUrl}', '_blank');</script>
+                                    </div>
+                                );
+                            })()}
+                        </div>
+
+                       
+                        <div className="mt-4 text-center">
+                            <p className="text-slate-400 text-sm" style={{ fontFamily: "'DM Sans', sans-serif" }}>
+                                Click anywhere outside or press X to close
+                            </p>
+                        </div>
+                    </div>
+                </div>
+            )}
+
 
             {heroSlides.length > 0 && (
                 <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] overflow-hidden mb-12 md:mb-20 hm-section">
@@ -559,7 +653,7 @@ const Home = () => {
                                     </div>
 
                                     <button
-                                        onClick={() => navigate(`/post/${slide.id}`)}
+                                        onClick={() => navigate(`/${generateSlug(slide.category)}/${generateSlug(slide.title)}`)}
                                         className="group flex items-center gap-2.5 px-6 py-3 rounded-full font-bold text-slate-900 text-sm transition-all hover:scale-105 active:scale-95"
                                         style={{ fontFamily: "'DM Sans', sans-serif", background: 'linear-gradient(135deg, #FFCC66, #FF7A18)', boxShadow: '0 0 30px rgba(255,122,24,0.35)' }}>
                                         Read Article
@@ -597,7 +691,8 @@ const Home = () => {
             )}
 
      
-            {shortVideos.length > 0 && (
+          
+            {!selectedCategory && shortVideos.length > 0 && (
                 <div className="mx-2 sm:mx-4 md:mx-6 lg:mx-8 mb-14 md:mb-20 hm-section">
                     <div className="flex items-center gap-4 mb-7 px-2 sm:px-4">
                         <div className="w-1 h-7 rounded-full" style={{ background: "linear-gradient(to bottom, #FFCC66, #FF7A18)" }} />
@@ -680,7 +775,7 @@ const Home = () => {
             )}
 
 
-            <div className="mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 pb-16 md:pb-24 w-full">
+            <div className="mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 pb-16 md:pb-24 w-full" style={{marginTop:"82px"}}>
 
           
                 {isTopStoriesSelected && (

@@ -8,6 +8,7 @@ import {
 import { api } from '../services/api';
 import Swal from'sweetalert2';
 import SEO from '../components/SEO';
+import { generateSlug } from '../utils/slugify';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
@@ -26,7 +27,7 @@ const getYoutubeId = (url) => {
 };
 
 const Post = () => {
-    const { id } = useParams();
+    const { category, slug } = useParams();
     const navigate = useNavigate();
 
     const [post, setPost] = useState(null);
@@ -47,8 +48,28 @@ const Post = () => {
         const fetchPost = async () => {
             try {
                 setLoading(true);
-                const data = await api.get(`/public/posts/${id}`);
-                setPost(data);
+                
+                
+                const postsData = await api.get('/allposts');
+                
+           
+                const foundPost = postsData.find(p => {
+                    const postSlug = generateSlug(p.title);
+                    return postSlug === slug;
+                });
+                
+               
+                const fallbackPost = !foundPost ? postsData.find(p => 
+                    p.title.toLowerCase().replace(/\s+/g, '-') === slug
+                ) : null;
+                
+                if (foundPost) {
+                    setPost(foundPost);
+                } else if (fallbackPost) {
+                    setPost(fallbackPost);
+                } else {
+                    setError('Post not found');
+                }
             } catch (err) {
                 console.error("Failed to fetch post:", err);
                 setError("Post not found or failed to load.");
@@ -58,13 +79,13 @@ const Post = () => {
         };
         fetchPost();
         window.scrollTo(0, 0);
-    }, [id]);
+    }, [slug]);
 
     const handleLike = async () => {
-        if (likeLoading) return;
+        if (likeLoading || !post) return;
         setLikeLoading(true);
         try {
-            const endpoint = isLiked ? `/public/posts/${id}/unlike` : `/public/posts/${id}/like`;
+            const endpoint = isLiked ? `/public/posts/${post._id}/unlike` : `/public/posts/${post._id}/like`;
             const data = await api.post(endpoint);
             setPost(prev => ({ ...prev, likes: data.likes }));
             setIsLiked(!isLiked);
@@ -77,10 +98,10 @@ const Post = () => {
 
     const handleCommentSubmit = async (e) => {
         e.preventDefault();
-        if (!commentUser.trim() || !commentText.trim() || commentLoading) return;
+        if (!commentUser.trim() || !commentText.trim() || commentLoading || !post) return;
         setCommentLoading(true);
         try {
-            const data = await api.post(`/public/posts/${id}/comment`, {
+            const data = await api.post(`/public/posts/${post._id}/comment`, {
                 user: commentUser,
                 text: commentText
             });
@@ -100,7 +121,12 @@ const Post = () => {
         }
     };
 
-    const getShareUrl = () => `${window.location.origin}/kaivailayam/post/${id}`;
+    const getShareUrl = () => {
+        if (!post) return '';
+        const categorySlug = generateSlug(post.category);
+        const postSlug = generateSlug(post.title);
+        return `${window.location.origin}/${categorySlug}/${postSlug}`;
+    };
 
     const handleShare = () => {
         setShareModalOpen(true);
@@ -165,6 +191,7 @@ const Post = () => {
         ? (mediaUrl.includes('youtube.com') || mediaUrl.includes('youtu.be') || mediaUrl.includes('vimeo.com') || mediaUrl.match(/\.(mp4|webm|ogg|mov|avi|wmv)$/i))
         : false;
     const youtubeId = getYoutubeId(mediaUrl);
+    
 
     return (
         <div className="min-h-screen text-slate-200">

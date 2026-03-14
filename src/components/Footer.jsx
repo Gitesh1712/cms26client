@@ -37,17 +37,23 @@ const Footer = () => {
             <div className="max-w-7xl mx-auto px-4 md:px-6 py-10 md:py-16">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
                     
-                    {/* Brand */}
+              
                     <div className="space-y-6">
+
+
+
                         <Link to="/" className="hover:opacity-80 transition-opacity block">
-                            <img src="logo.png" alt="No Noise Stories" className="h-20 w-auto" />
+                            <img src="/logo.png" alt="No Noise Stories" className="h-20 w-auto" onError={(e) => { console.error('Footer logo failed to load:', e); }} />
                         </Link>
+
+
+                        
                         <p className="text-slate-400 leading-relaxed max-w-xs">
                             Uncovering the signals in the noise. High-fidelity storytelling for the modern era.
                         </p>
                     </div>
 
-                    {/* Quick Links */}
+                  
                     <div className="space-y-6">
                         <h4 className="text-lg font-bold text-white uppercase tracking-wider">Quick Links</h4>
                         <ul className="space-y-4">
@@ -73,7 +79,7 @@ const Footer = () => {
                         </ul>
                     </div>
 
-                    {/* Follow Us */}
+                 
                     <div className="space-y-6">
                         <h4 className="text-lg font-bold text-white uppercase tracking-wider">Follow Us</h4>
                         <div className="flex flex-col gap-4">
@@ -106,10 +112,20 @@ const Footer = () => {
                                 </div>
                                 <span className="text-sm font-medium">LinkedIn</span>
                             </Link>
+
+                            <Link to="https://www.youtube.com/@NoNoiseStories" target="_blank" rel="noopener noreferrer"
+                                className="flex items-center gap-3 text-slate-400 hover:text-white transition-all group">
+                                <div className="w-9 h-9 rounded-full bg-slate-800 group-hover:bg-[#FF0000] border border-white/10 group-hover:border-transparent flex items-center justify-center transition-all duration-200">
+                                    <svg className="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                                        <path d="M23.498 6.186a3.016 3.016 0 00-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 00.502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 002.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 002.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                                    </svg>
+                                </div>
+                                <span className="text-sm font-medium">YouTube</span>
+                            </Link>
                         </div>
                     </div>
 
-                    {/* Newsletter */}
+                
                     <div className="space-y-6">
                         <h4 className="text-lg font-bold text-white uppercase tracking-wider">Newsletter</h4>
                         <p className="text-slate-400 text-sm">
@@ -141,7 +157,7 @@ const Footer = () => {
                     </div>
                 </div>
 
-                {/* Bottom Bar */}
+        
                 <div className="mt-10 md:mt-16 pt-6 md:pt-8 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-slate-500 text-sm">
                         © 2026 no noise stories all rights reserved

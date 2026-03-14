@@ -66,7 +66,9 @@ const Layout = () => {
                     <Link to="/" className="hover:opacity-80 transition-opacity flex-shrink-0" onClick={() => {
                         window.dispatchEvent(new CustomEvent('categoryFilterChange', { detail: { category: null } }));
                     }}>
-                        <img src="logo.png" alt="No Noise Stories" className="h-10 sm:h-12 md:h-16 w-auto" style={{width:"120px",height:"70px"}} />
+
+                        
+                        <img src="/logo.png" alt="No Noise Stories" className="h-10 sm:h-12 md:h-16 w-auto" style={{width:"120px",height:"70px"}} onError={(e) => { console.error('Logo failed to load:', e); e.target.style.display = 'none'; }} />
                     </Link>
 
                     <div className="hidden lg:flex space-x-6 items-center bg-slate-800/50 px-6 py-2 rounded-full border border-white/5 shadow-lg">
@@ -74,7 +76,7 @@ const Layout = () => {
                             window.dispatchEvent(new CustomEvent('categoryFilterChange', { detail: { category: null } }));
                         }} />
 
-                        {/* ✅ About link — Home ke baad */}
+                       
                         <NavLink to="/about" icon={<Info size={18} />} label="About" active={isActive('/about')} />
 
                         {isHomePage && categories.slice(0, 4).map((category) => (
@@ -192,7 +194,7 @@ const Layout = () => {
                         isHomePage ? 'top-[140px] sm:top-[148px]' : 'top-[80px] sm:top-[88px]'
                     }`}>
                         <NavLink to="/" icon={<Home size={18} />} label="Home" active={isActive('/')} onClick={closeMobileMenu} mobile />
-                        {/* ✅ About mobile menu mein bhi */}
+                     
                         <NavLink to="/about" icon={<Info size={18} />} label="About" active={isActive('/about')} onClick={closeMobileMenu} mobile />
                         <NavLink to="/contact" icon={<Mail size={18} />} label="Contact" active={isActive('/contact')} onClick={closeMobileMenu} mobile />
 
@@ -203,7 +205,7 @@ const Layout = () => {
                 </div>
             )}
 
-            <main className={`min-h-screen relative ${isHomePage ? 'pt-32 sm:pt-36 md:pt-40 lg:pt-24' : 'pt-20 sm:pt-24 md:pt-28'}`}>
+            <main className={`min-h-screen relative ${isHomePage ? 'pt-20 sm:pt-24 md:pt-28 lg:pt-20' : 'pt-20 sm:pt-24 md:pt-28'}`}>
                 <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
                     <div className="absolute top-[-10%] left-[-10%] w-64 sm:w-80 md:w-96 h-64 sm:h-80 md:h-96 bg-orange-600 rounded-full mix-blend-screen filter blur-[80px] md:blur-[100px] opacity-20 animate-blob will-change-transform"></div>
                     <div className="absolute top-[-10%] right-[-10%] w-64 sm:w-80 md:w-96 h-64 sm:h-80 md:h-96 bg-amber-600 rounded-full mix-blend-screen filter blur-[80px] md:blur-[100px] opacity-20 animate-blob animation-delay-2000 will-change-transform"></div>

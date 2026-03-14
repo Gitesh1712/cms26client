@@ -24,6 +24,10 @@ import RejectedPosts from './pages/dashboard/RejectedPosts';
 import HiddenPosts from './pages/dashboard/HiddenPosts';
 import Newsletter from './pages/dashboard/Newsletter';
 import Shorts from './pages/dashboard/Shorts';
+import Leads from './pages/dashboard/Leads';
+
+import ProtectedRoute from './components/ProtectedRoute';
+import PublicRoute from './components/PublicRoute';
 
 
 function LenisWrapper({ children }) {
@@ -89,23 +93,42 @@ function App() {
       />
       <LenisWrapper>
         <Routes>
-        
+         
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
-            <Route path="login" element={<Login />} />
             <Route path="contact" element={<Contact />} />
             <Route path="about" element={<About />} />
-            <Route path="post/:id" element={<Post />} />
+            <Route path=":category/:slug" element={<Post />} />
           </Route>
 
          
-          <Route path="/dashboard" element={<DashboardLayout />}>
+          <Route 
+            path="/login" 
+            element={
+              <PublicRoute>
+                <Layout />
+              </PublicRoute>
+            }
+          >
+            <Route index element={<Login />} />
+          </Route>
+
+         
+          <Route 
+            path="/dashboard" 
+            element={
+              <ProtectedRoute>
+                <DashboardLayout />
+              </ProtectedRoute>
+            }
+          >
             <Route index element={<DashboardHome />} />
             <Route path="stories" element={<AllStories />} />
             <Route path="stories/add" element={<AddStory />} />
             <Route path="stories/edit/:id" element={<EditStory />} />
             <Route path="categories" element={<Categories />} />
             <Route path="team" element={<Team />} />
+            <Route path="leads" element={<Leads />} />
             <Route path="pending-approval" element={<PendingApproval />} />
             <Route path="approved-posts" element={<ApprovedPosts />} />
             <Route path="rejected-posts" element={<RejectedPosts />} />

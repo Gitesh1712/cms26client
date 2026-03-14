@@ -217,7 +217,7 @@ const ApprovedPosts = () => {
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     {posts.map((post) => (
                         <div key={post._id} className="bg-slate-900 border border-white/10 rounded-2xl overflow-hidden group hover:border-orange-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-orange-500/10 flex flex-col h-full">
-                            {/* Image/Video Section */}
+                        
                             <div className="aspect-video relative overflow-hidden bg-slate-800">
                                 {post.media?.[0]?.url ? (
                                     post.postType === 'video' ? (

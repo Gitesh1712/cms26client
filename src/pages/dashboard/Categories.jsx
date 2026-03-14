@@ -81,7 +81,7 @@ const Categories = () => {
             background: '#0f172a',
             color: '#e2e8f0',
             inputAttributes: { autocomplete: 'off' },
-            customClass: { input: 'swal-input-custom', popup: 'swal-popup-custom' },
+            customClass: { input: '', popup: 'swal-popup-custom' },
             inputValidator: (value) => {
                 if (!value || !value.trim()) return 'Category name cannot be empty!';
                 if (value.trim() === category.name) return 'Please enter a different name!';

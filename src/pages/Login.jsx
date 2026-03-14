@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react';
 import { Mail, Lock, Loader2, AlertCircle } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { api } from '../services/api';
 
 const Login = () => {
     const navigate = useNavigate();
+    const location = useLocation();
+    
     useEffect(() => {
         window.scrollTo(0, 0);
     }, []);
@@ -22,14 +24,12 @@ const Login = () => {
         try {
             const response = await api.post('/login', { email, password });
 
-           
-            sessionStorage.clear
+            sessionStorage.clear();
             console.log("Login successful:", response);
             if (response.token) {
                 sessionStorage.setItem('token', response.token);
             }
 
-          
             if (response.user) {
                 sessionStorage.setItem('userInfo', JSON.stringify({
                     name: response.user.name,
@@ -37,8 +37,8 @@ const Login = () => {
                     role: response.user.role
                 }));
             }
-
-            navigate('/dashboard');
+            const from = location.state?.from || '/dashboard';
+            navigate(from, { replace: true });
         } catch (err) {
             console.error("Login failed:", err);
             setError(err.message || "Invalid credentials. Please try again.");
@@ -46,8 +46,7 @@ const Login = () => {
             setLoading(false);
         }
     };
-
-    return (
+     return (
         <div className="flex items-center justify-center min-h-[80vh] px-4">
             <div className="w-full max-w-md relative group">
               
@@ -99,8 +98,6 @@ const Login = () => {
                                 />
                             </div>
                         </div>
-
-                        
                         <button
                             type="submit"
                             disabled={loading}

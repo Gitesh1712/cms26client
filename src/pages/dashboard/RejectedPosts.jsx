@@ -297,6 +297,7 @@ const RejectedPosts = () => {
                                     </div>
                                 )}
                             </div>
+                            
 
                            
                             <div className="p-6 flex-1 flex flex-col">
