@@ -1,10 +1,6 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { 
-    Mail, Phone, User, Calendar, MessageSquare, Search, 
-    Filter, Download, Trash2, Eye, Loader2, AlertCircle,
-    ChevronLeft, ChevronRight, X
-} from "lucide-react";
+import {Mail, Phone, User, Calendar, MessageSquare, Search, Filter, Download, Trash2, Eye, Loader2, AlertCircle,ChevronLeft, ChevronRight, X} from "lucide-react";
 import { api } from "../../services/api";
 import Swal from "sweetalert2";
 
@@ -18,27 +14,62 @@ const Leads = () => {
     const [selectedLead, setSelectedLead] = useState(null);
     const [modalOpen, setModalOpen] = useState(false);
     
-    
+   
     const [currentPage, setCurrentPage] = useState(1);
     const [leadsPerPage] = useState(10);
+    const [pagination, setPagination] = useState({
+        page: 1,
+        limit: 10,
+        total: 0,
+        totalPages: 0
+    });
 
     useEffect(() => {
         fetchLeads();
     }, []);
 
-    const fetchLeads = async () => {
+
+    useEffect(() => {
+        const timer = setTimeout(() => {
+            fetchLeads(1); 
+        }, 300); 
+        
+        return () => clearTimeout(timer);
+    }, [searchTerm, filterType]);
+
+    const fetchLeads = async (page = 1) => {
         try {
             setLoading(true);
             const token = sessionStorage.getItem("token");
             
-         
-            const response = await api.get("/leads", { 
+           
+            const queryParams = new URLSearchParams();
+            queryParams.append('page', page);
+            queryParams.append('limit', leadsPerPage);
+            
+            if (searchTerm) {
+                queryParams.append('search', searchTerm);
+            }
+            if (filterType !== 'all') {
+                queryParams.append('inquiryType', filterType);
+            }
+            
+            const response = await api.get(`/public/leads/leads?${queryParams.toString()}`, { 
                 Authorization: `Bearer ${token}` 
             });
             
-           s
             let leadsData = [];
-            if (Array.isArray(response)) {
+            let paginationData = { page: 1, limit: 10, total: 0, totalPages: 0 };
+            
+            if (response?.success) {
+                leadsData = Array.isArray(response.data) ? response.data : [];
+                paginationData = {
+                    page: response.page || 1,
+                    limit: response.limit || 10,
+                    total: response.total || 0,
+                    totalPages: response.totalPages || 0
+                };
+            } else if (Array.isArray(response)) {
                 leadsData = response;
             } else if (response?.data) {
                 leadsData = Array.isArray(response.data) ? response.data : [];
@@ -47,7 +78,11 @@ const Leads = () => {
             }
             
             console.log('Fetched leads:', leadsData);
-            setLeads(leadsData.sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt)));
+            console.log('Pagination data:', paginationData);
+            
+            setLeads(leadsData);
+            setPagination(paginationData);
+            setCurrentPage(page);
             setError(null);
         } catch (err) {
             console.error("Failed to fetch leads:", err);
@@ -60,11 +95,10 @@ const Leads = () => {
                 if (err.response.status === 404) {
                     setError(
                         <div>
-                            <p className="mb-2">Backend API endpoint '/leads' not found.</p>
+                            <p className="mb-2">Backend API endpoint '/public/leads/leads' not found.</p>
                             <p className="text-sm text-slate-400">
-                                The count endpoint works (showing {leadsStats.totalLeads} total leads), 
-                                but the list endpoint is missing. Please ask the backend developer to add: 
-                                <code className="block mt-2 p-2 bg-slate-800 rounded">GET /api/leads</code>
+                                Please verify the API endpoint is correct and accessible.
+                                <code className="block mt-2 p-2 bg-slate-800 rounded">GET /api/public/leads/leads</code>
                             </p>
                         </div>
                     );
@@ -102,7 +136,7 @@ const Leads = () => {
         if (result.isConfirmed) {
             try {
                 const token = sessionStorage.getItem("token");
-                await api.delete(`/leads/${leadId}`, { 
+                await api.delete(`/leads/delete/${leadId}`, { 
                     Authorization: `Bearer ${token}` 
                 });
                 
@@ -114,7 +148,8 @@ const Leads = () => {
                     color: "#fff"
                 });
                 
-                fetchLeads();
+               
+                fetchLeads(currentPage);
             } catch (err) {
                 console.error("Failed to delete lead:", err);
                 await Swal.fire({
@@ -133,26 +168,12 @@ const Leads = () => {
         setModalOpen(true);
     };
 
-    const filteredLeads = leads.filter(lead => {
-        const matchesSearch = 
-            lead.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            lead.email?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-            lead.message?.toLowerCase().includes(searchTerm.toLowerCase());
-        
-        const matchesFilter = filterType === "all" || lead.inquiryType === filterType;
-        
-        return matchesSearch && matchesFilter;
-    });
-
-   
-    const indexOfLastLead = currentPage * leadsPerPage;
-    const indexOfFirstLead = indexOfLastLead - leadsPerPage;
-    const currentLeads = filteredLeads.slice(indexOfFirstLead, indexOfLastLead);
-    const totalPages = Math.ceil(filteredLeads.length / leadsPerPage);
+    
+    const currentLeads = leads;
 
     const exportToCSV = () => {
         const headers = ["Name", "Email", "Mobile", "Inquiry Type", "Message", "Date"];
-        const csvData = filteredLeads.map(lead => [
+        const csvData = currentLeads.map(lead => [
             lead.name,
             lead.email,
             lead.mobile,
@@ -233,7 +254,7 @@ const Leads = () => {
                     <AlertCircle size={48} className="mx-auto mb-4 text-red-500" />
                     <p className="text-red-400">{error}</p>
                 </div>
-            ) : filteredLeads.length === 0 ? (
+            ) : currentLeads.length === 0 ? (
                 <div className="bg-slate-900 border border-white/10 rounded-2xl p-12 text-center">
                     <Mail size={64} className="mx-auto mb-4 text-slate-600" />
                     <p className="text-slate-400 text-lg mb-2">No leads found</p>
@@ -267,7 +288,7 @@ const Leads = () => {
                                             className="hover:bg-white/5 transition-colors cursor-pointer"
                                             onClick={() => handleViewDetails(lead)}
                                         >
-                                            <td className="p-4 text-slate-500 text-sm">{indexOfFirstLead + index + 1}</td>
+                                            <td className="p-4 text-slate-500 text-sm">{(currentPage - 1) * leadsPerPage + index + 1}</td>
                                             <td className="p-4">
                                                 <div className="flex items-center gap-3">
                                                     <div className="w-8 h-8 rounded-full bg-gradient-to-r from-orange-500 to-amber-500 flex items-center justify-center text-white text-xs font-bold flex-shrink-0">
@@ -322,25 +343,31 @@ const Leads = () => {
                     </div>
 
                  
-                    {totalPages > 1 && (
+                    {pagination.totalPages > 1 && (
                         <div className="flex items-center justify-between mt-6">
                             <p className="text-slate-400 text-sm">
-                                Showing {indexOfFirstLead + 1} to {Math.min(indexOfLastLead, filteredLeads.length)} of {filteredLeads.length} leads
+                                Showing {(currentPage - 1) * leadsPerPage + 1} to {Math.min(currentPage * leadsPerPage, pagination.total)} of {pagination.total} leads
                             </p>
                             <div className="flex items-center gap-2">
                                 <button
-                                    onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+                                    onClick={() => {
+                                        const newPage = Math.max(1, currentPage - 1);
+                                        fetchLeads(newPage);
+                                    }}
                                     disabled={currentPage === 1}
                                     className="p-2 rounded-lg border border-white/10 hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed text-white"
                                 >
                                     <ChevronLeft size={20} />
                                 </button>
                                 <span className="text-white text-sm px-4">
-                                    Page {currentPage} of {totalPages}
+                                    Page {currentPage} of {pagination.totalPages}
                                 </span>
                                 <button
-                                    onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
-                                    disabled={currentPage === totalPages}
+                                    onClick={() => {
+                                        const newPage = Math.min(pagination.totalPages, currentPage + 1);
+                                        fetchLeads(newPage);
+                                    }}
+                                    disabled={currentPage === pagination.totalPages}
                                     className="p-2 rounded-lg border border-white/10 hover:bg-white/5 disabled:opacity-50 disabled:cursor-not-allowed text-white"
                                 >
                                     <ChevronRight size={20} />
@@ -440,13 +467,13 @@ const Leads = () => {
                             >
                                 Close
                             </button>
-                            <a
+                            {/* <a
                                 href={`mailto:${selectedLead.email}`}
                                 className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:opacity-90 text-slate-900 rounded-xl transition-all font-bold"
                             >
                                 <Mail size={18} />
                                 Reply via Email
-                            </a>
+                            </a> */}
                         </div>
                     </div>
                 </div>

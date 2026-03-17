@@ -126,7 +126,6 @@ const Categories = () => {
             setActionLoading(false);
         }
     };
-
     const handleDeleteCategory = async (category) => {
         setActionLoading(true);
         try {
@@ -156,8 +155,6 @@ const Categories = () => {
                 });
                 return;
             }
-
-           
             const result = await Swal.fire({
                 title: 'Are you sure?',
                 text: "You won't be able to revert this!",
