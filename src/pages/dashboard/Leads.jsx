@@ -467,13 +467,15 @@ const Leads = () => {
                             >
                                 Close
                             </button>
-                            {/* <a
-                                href={`mailto:${selectedLead.email}`}
-                                className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:opacity-90 text-slate-900 rounded-xl transition-all font-bold"
+                            <a
+                                href={`https://mail.google.com/mail/?view=cm&to=${selectedLead.email}&su=Re: Your Inquiry - ${selectedLead.inquiryType || 'General'}&body=Hi ${selectedLead.name},%0A%0A`}
+  target="_blank"
+  rel="noopener noreferrer"
+  className="flex items-center gap-2 px-6 py-2.5 bg-gradient-to-r from-orange-500 to-amber-500 hover:opacity-90 text-slate-900 rounded-xl transition-all font-bold"
                             >
                                 <Mail size={18} />
                                 Reply via Email
-                            </a> */}
+                            </a>
                         </div>
                     </div>
                 </div>

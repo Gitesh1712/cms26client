@@ -1,23 +1,8 @@
 import { useState, useEffect } from "react";
-import {
-  Users,
-  Plus,
-  Edit2,
-  Trash2,
-  X,
-  Loader2,
-  AlertCircle,
-  Search,
-  Shield,
-  User as UserIcon,
-  Phone,
-  Power,
-} from "lucide-react";
+import { Users, Plus,Edit2, Trash2,X,Loader2,AlertCircle, Search,Shield,User as UserIcon, Phone,Power,} from "lucide-react";
 import { api } from "../../services/api";
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
-
-
 
 
 const Team = () => {

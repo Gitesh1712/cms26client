@@ -28,7 +28,6 @@ const Layout = () => {
                 console.error('Failed to fetch categories:', err);
             }
         };
-
         fetchCategories();
     }, []);
 
@@ -59,41 +58,75 @@ const Layout = () => {
         }));
     };
 
+    // Ordered categories: Top Stories always first
+    const topStoriesCat = categories.find(c =>
+        c.name?.toLowerCase().replace(/[\s\-_]/g, '').includes('topstori')
+    );
+    const otherCategories = categories.filter(c => c !== topStoriesCat);
+    const orderedCategories = topStoriesCat ? [topStoriesCat, ...otherCategories] : otherCategories;
+    const overflowCats = orderedCategories.slice(4);
+
     return (
         <div className="min-h-screen bg-slate-900 text-white selection:bg-orange-500 selection:text-white font-['Inter',_'Poppins',_'SF_Pro_Display',_system-ui,_-apple-system,_sans-serif] overflow-x-hidden">
             <nav className="fixed top-0 left-0 right-0 p-3 sm:p-4 md:p-6 z-50 backdrop-blur-md bg-slate-900/50 border-b border-white/5">
                 <div className="flex justify-between items-center">
-                    <Link to="/" className="hover:opacity-80 transition-opacity flex-shrink-0" onClick={() => {
-                        window.dispatchEvent(new CustomEvent('categoryFilterChange', { detail: { category: null } }));
-                    }}>
-
-                        
-                        <img src="/logo.png" alt="No Noise Stories" className="h-10 sm:h-12 md:h-16 w-auto" style={{width:"120px",height:"70px"}} onError={(e) => { console.error('Logo failed to load:', e); e.target.style.display = 'none'; }} />
+                    {/* Logo */}
+                    <Link
+                        to="/"
+                        className="hover:opacity-80 transition-opacity flex-shrink-0"
+                        onClick={() => {
+                            window.dispatchEvent(new CustomEvent('categoryFilterChange', { detail: { category: null } }));
+                        }}
+                    >
+                        <img
+                            src="/logo.png"
+                            alt="No Noise Stories"
+                            style={{ width: '120px', height: '70px' }}
+                            onError={(e) => { console.error('Logo failed to load:', e); e.target.style.display = 'none'; }}
+                        />
                     </Link>
 
+                    {/* Desktop Nav */}
                     <div className="hidden lg:flex space-x-6 items-center bg-slate-800/50 px-6 py-2 rounded-full border border-white/5 shadow-lg">
-                        <NavLink to="/" icon={<Home size={18} />} label="Home" active={isActive('/')} onClick={() => {
-                            window.dispatchEvent(new CustomEvent('categoryFilterChange', { detail: { category: null } }));
-                        }} />
 
-                       
+                        {/* Home */}
+                        <NavLink
+                            to="/"
+                            icon={<Home size={18} />}
+                            label="Home"
+                            active={isActive('/')}
+                            onClick={() => {
+                                window.dispatchEvent(new CustomEvent('categoryFilterChange', { detail: { category: null } }));
+                            }}
+                        />
+
+                        {/* About */}
                         <NavLink to="/about" icon={<Info size={18} />} label="About" active={isActive('/about')} />
 
-                        {isHomePage && categories.slice(0, 4).map((category) => (
-                            <button
-                                key={category.id}
-                                onClick={() => handleCategorySelect(category)}
-                                className={`flex items-center gap-2 text-base font-bold transition-colors px-4 py-2 rounded-full uppercase tracking-wide ${
-                                    selectedCategory === category.name
-                                        ? 'text-orange-400 bg-orange-400/10'
-                                        : 'text-slate-400 hover:text-orange-300 hover:bg-white/5'
-                                }`}
-                            >
-                                <span>{category.name}</span>
-                            </button>
-                        ))}
+                        {/* Categories: Top Stories pinned first, then others */}
+                        {isHomePage && (() => {
+                            const topStory = categories.find(c =>
+                                c.name?.toLowerCase().replace(/[\s\-_]/g, '').includes('topstori')
+                            );
+                            const others = categories.filter(c => c !== topStory);
+                            const ordered = topStory ? [topStory, ...others] : others;
+                            return ordered.slice(0, 4).map((category) => (
+                                <button
+                                    key={category.id}
+                                    onClick={() => handleCategorySelect(category)}
+                                    className={`flex items-center gap-2 text-base font-bold transition-colors px-4 py-2 rounded-full uppercase tracking-wide ${
+                                        selectedCategory === category.name
+                                            ? 'text-orange-400 bg-orange-400/10'
+                                            : 'text-slate-400 hover:text-orange-300 hover:bg-white/5'
+                                    }`}
+                                >
+                                    <span>{category.name}</span>
+                                </button>
+                            ));
+                        })()}
 
-                        {isHomePage && categories.length > 4 && (
+                        {/* More dropdown (overflow categories) */}
+                        {isHomePage && overflowCats.length > 0 && (
                             <div className="relative" ref={dropdownRef}>
                                 <button
                                     onClick={() => setDropdownOpen(!dropdownOpen)}
@@ -114,7 +147,7 @@ const Layout = () => {
                                                 All Categories
                                             </button>
                                             <div className="h-px bg-white/10 my-1 mx-2"></div>
-                                            {categories.slice(4).map((category) => (
+                                            {overflowCats.map((category) => (
                                                 <button
                                                     key={category.id}
                                                     onClick={() => handleCategorySelect(category)}
@@ -130,12 +163,16 @@ const Layout = () => {
                             </div>
                         )}
 
+                        {/* Contact */}
                         <NavLink to="/contact" icon={<Mail size={18} />} label="Contact" active={isActive('/contact')} />
 
                         <div className="w-px h-4 bg-white/10 mx-2"></div>
+
+                        {/* Login */}
                         <NavLink to="/login" icon={<LogIn size={18} />} label="Login" active={isActive('/login')} variant="primary" />
                     </div>
 
+                    {/* Mobile hamburger */}
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         className="lg:hidden text-slate-300 hover:text-orange-400 p-2 transition-colors"
@@ -145,6 +182,7 @@ const Layout = () => {
                     </button>
                 </div>
 
+                {/* Mobile category filter */}
                 {isHomePage && (
                     <div className="lg:hidden mt-3">
                         <div className="relative" ref={mobileDropdownRef}>
@@ -167,7 +205,18 @@ const Layout = () => {
                                             All Categories
                                         </button>
                                         <div className="h-px bg-white/10 my-1 mx-2"></div>
-                                        {categories.map((category) => (
+
+                                        {/* Top Stories first in mobile dropdown too */}
+                                        {topStoriesCat && (
+                                            <button
+                                                onClick={() => handleCategorySelect(topStoriesCat)}
+                                                className="w-full text-left px-4 py-2.5 text-sm font-bold text-orange-300 hover:bg-orange-400/10 transition-colors capitalize"
+                                            >
+                                                {topStoriesCat.name}
+                                            </button>
+                                        )}
+
+                                        {otherCategories.map((category) => (
                                             <button
                                                 key={category.id}
                                                 onClick={() => handleCategorySelect(category)}
@@ -184,6 +233,7 @@ const Layout = () => {
                 )}
             </nav>
 
+            {/* Mobile menu overlay */}
             {mobileMenuOpen && (
                 <div className="fixed inset-0 z-40 lg:hidden">
                     <div
@@ -194,12 +244,9 @@ const Layout = () => {
                         isHomePage ? 'top-[140px] sm:top-[148px]' : 'top-[80px] sm:top-[88px]'
                     }`}>
                         <NavLink to="/" icon={<Home size={18} />} label="Home" active={isActive('/')} onClick={closeMobileMenu} mobile />
-                     
                         <NavLink to="/about" icon={<Info size={18} />} label="About" active={isActive('/about')} onClick={closeMobileMenu} mobile />
                         <NavLink to="/contact" icon={<Mail size={18} />} label="Contact" active={isActive('/contact')} onClick={closeMobileMenu} mobile />
-
                         <div className="h-px bg-white/10 my-3"></div>
-
                         <NavLink to="/login" icon={<LogIn size={18} />} label="Login" active={isActive('/login')} variant="primary" onClick={closeMobileMenu} mobile />
                     </div>
                 </div>

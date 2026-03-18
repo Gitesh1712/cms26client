@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import {
     ArrowRight, ChevronLeft, ChevronRight, Calendar,
-    User, Share2, X, Mail, Copy, Check, Play, TrendingUp
+    Play, TrendingUp, X, Check, Copy
 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { api } from '../services/api';
@@ -51,13 +51,10 @@ const Home = () => {
     const [groupedPosts, setGroupedPosts] = useState({});
     const [selectedCategory, setSelectedCategory] = useState(null);
     const [loading, setLoading] = useState(true);
-    const [shareModalOpen, setShareModalOpen] = useState(false);
-    const [selectedPost, setSelectedPost] = useState(null);
-    const [copied, setCopied] = useState(false);
     const [shortVideos, setShortVideos] = useState([]);
     const [videoModalOpen, setVideoModalOpen] = useState(false);
     const [selectedVideoUrl, setSelectedVideoUrl] = useState(null);
-
+    const [copiedPostId, setCopiedPostId] = useState(null);
 
     const [topStoriesExpanded, setTopStoriesExpanded] = useState(false);
     const [expandedCategories, setExpandedCategories] = useState({});
@@ -105,7 +102,6 @@ const Home = () => {
 
     const fetchData = async (filterCategory = null) => {
         setLoading(true);
-  
         setTopStoriesExpanded(false);
         setExpandedCategories({});
         try {
@@ -114,14 +110,11 @@ const Home = () => {
             setCategories(categoriesData);
 
             const postsData = await api.get('/allposts');
-
-           
             const allHeroSlides = postsData.filter(p => p.heroContent === true).slice(0, 5);
-            
+
             if (filterCategory) {
-               
                 setHeroSlides(
-                    allHeroSlides.filter(p => 
+                    allHeroSlides.filter(p =>
                         p.category?.toLowerCase() === filterCategory.toLowerCase()
                     ).map(p => ({
                         id: p._id,
@@ -137,7 +130,6 @@ const Home = () => {
                     }))
                 );
             } else {
-                
                 setHeroSlides(
                     allHeroSlides.map(p => ({
                         id: p._id,
@@ -155,7 +147,6 @@ const Home = () => {
             }
 
             const topStoryCat = categoriesData.find(c => isTopStoriesCategory(c));
-
             const allTopStoryPosts = postsData
                 .filter(p =>
                     p.topStory === true ||
@@ -166,7 +157,6 @@ const Home = () => {
                 )
                 .map(mapPost);
 
-         
             setTopStories(allTopStoryPosts);
 
             const isFilteringTopStories = filterCategory && topStoryCat && (
@@ -183,7 +173,6 @@ const Home = () => {
                     p => p.category?.toLowerCase() === filterCategory.toLowerCase()
                 );
                 const categoryName = categoriesData.find(c => c.id === filterCategory)?.name || filterCategory;
-   
                 setGroupedPosts(filteredPosts.length > 0 ? { [categoryName]: filteredPosts.map(mapPost) } : {});
             } else {
                 setFilteredTopStories([]);
@@ -195,7 +184,6 @@ const Home = () => {
                              p.category?.toLowerCase() === cat.name?.toLowerCase()
                     );
                     if (catPosts.length) {
-    
                         grouped[cat.name] = catPosts.map(mapPost);
                     }
                 });
@@ -238,33 +226,32 @@ const Home = () => {
     const isTopStoriesSelected = filteredTopStories.length > 0;
     const topStoryCat = categories.find(c => isTopStoriesCategory(c));
 
-    const handleShare = (post, e) => {
-        e.stopPropagation();
-        setSelectedPost(post);
-        setShareModalOpen(true);
-        setCopied(false);
-    };
-
+    // Share URL generator
     const getShareUrl = (post) => {
-        if (!post) return '';
         const categorySlug = generateSlug(post.category);
         const postSlug = generateSlug(post.title);
         return `${window.location.origin}/${categorySlug}/${postSlug}`;
     };
 
-    const shareVia = (platform) => {
-        const url = getShareUrl(selectedPost);
-        const text = selectedPost.title;
+    // Share on platform directly
+    const shareOnPlatform = (platform, post, e) => {
+        e.stopPropagation();
+        const url = getShareUrl(post);
+        const text = post.title;
         switch (platform) {
-            case 'whatsapp': window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank'); break;
-            case 'email': window.location.href = `mailto:?subject=${encodeURIComponent(text)}&body=${encodeURIComponent(url)}`; break;
-            case 'twitter': window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank'); break;
-            case 'facebook': window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank'); break;
-            case 'linkedin': window.open(`https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(url)}`, '_blank'); break;
+            case 'whatsapp':
+                window.open(`https://wa.me/?text=${encodeURIComponent(text + ' ' + url)}`, '_blank');
+                break;
+            case 'twitter':
+                window.open(`https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}`, '_blank');
+                break;
+            case 'facebook':
+                window.open(`https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(url)}`, '_blank');
+                break;
             case 'copy':
                 navigator.clipboard.writeText(url);
-                setCopied(true);
-                setTimeout(() => setCopied(false), 2000);
+                setCopiedPostId(post.id);
+                setTimeout(() => setCopiedPostId(null), 2000);
                 break;
         }
     };
@@ -294,16 +281,61 @@ const Home = () => {
         return found ? found.name : categoryId;
     };
 
-
+    // =============================================
+    // POST CARD — NDTV style hover share icons
+    // =============================================
     const PostCard = ({ post, index = 0 }) => {
+        const [shareHovered, setShareHovered] = useState(false);
         const youtubeId = getYoutubeId(post.mediaUrl);
-
         const thumbSrc = post.isVideo && youtubeId
             ? `https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`
             : post.image;
 
         const categorySlug = generateSlug(post.category);
         const postSlug = generateSlug(post.title);
+        const isCopied = copiedPostId === post.id;
+
+        // Social icons config
+        const socialIcons = [
+            {
+                key: 'whatsapp',
+                title: 'WhatsApp',
+                bg: '#25D366',
+                icon: (
+                    <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/>
+                    </svg>
+                )
+            },
+            {
+                key: 'twitter',
+                title: 'Twitter / X',
+                bg: '#000000',
+                icon: (
+                    <svg className="w-3 h-3 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                )
+            },
+            {
+                key: 'facebook',
+                title: 'Facebook',
+                bg: '#1877F2',
+                icon: (
+                    <svg className="w-3.5 h-3.5 text-white" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
+                    </svg>
+                )
+            },
+            {
+                key: 'copy',
+                title: isCopied ? 'Copied!' : 'Copy Link',
+                bg: isCopied ? '#22c55e' : '#475569',
+                icon: isCopied
+                    ? <Check className="w-3.5 h-3.5 text-white" />
+                    : <Copy className="w-3.5 h-3.5 text-white" />
+            },
+        ];
 
         return (
             <div
@@ -311,7 +343,7 @@ const Home = () => {
                 className="hm-card group cursor-pointer flex flex-col rounded-2xl overflow-hidden border border-white/8 hover:border-orange-500/25 transition-all duration-300 hover:-translate-y-1 hover:shadow-xl hover:shadow-black/40"
                 style={{ background: 'rgba(12,10,8,0.9)', animationDelay: `${index * 0.08}s` }}
             >
-
+                {/* Thumbnail */}
                 <div className="relative overflow-hidden" style={{ aspectRatio: '16/9' }}>
                     {thumbSrc ? (
                         <img
@@ -326,10 +358,8 @@ const Home = () => {
                         </div>
                     )}
 
-
                     <div className="absolute inset-0"
                         style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.1) 0%, rgba(0,0,0,0) 40%, rgba(0,0,0,0.6) 100%)' }} />
-
 
                     {post.isVideo && (
                         <div className="absolute bottom-2.5 left-3 z-10">
@@ -350,14 +380,17 @@ const Home = () => {
                     </div>
                 </div>
 
-
+                {/* Card Body */}
                 <div className="flex flex-col flex-1 px-4 pt-3 pb-4">
                     <h3 className="text-white font-semibold mb-3 line-clamp-2 group-hover:text-orange-100 transition-colors"
                         style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.9rem', lineHeight: '1.45' }}>
                         {post.title}
                     </h3>
-                   
+
+                    {/* Bottom row: author + share */}
                     <div className="flex items-center justify-between mt-auto">
+
+                        {/* Author */}
                         <div className="flex items-center gap-2">
                             <div className="w-5 h-5 rounded-full flex items-center justify-center text-slate-900 text-[9px] font-black flex-shrink-0"
                                 style={{ background: 'linear-gradient(135deg, #FFCC66, #FF7A18)' }}>
@@ -368,18 +401,61 @@ const Home = () => {
                                 {post.author}
                             </span>
                         </div>
-                        <button onClick={e => handleShare(post, e)}
-                            className="p-1.5 rounded-lg hover:bg-orange-500/10 transition-all group/share"
-                            title="Share post">
-                            <Share2 size={13} className="text-slate-600 group-hover/share:text-orange-400 transition-colors" />
-                        </button>
+
+                        {/* ===== NDTV-style Share ===== */}
+                        <div
+                            className="relative flex items-center"
+                            onMouseEnter={() => setShareHovered(true)}
+                            onMouseLeave={() => setShareHovered(false)}
+                            onClick={e => e.stopPropagation()}
+                        >
+                            {/* Social icons — slide in from right on hover */}
+                            <div
+                                className="flex items-center gap-1.5 overflow-hidden transition-all duration-300 ease-in-out"
+                                style={{
+                                    maxWidth: shareHovered ? '160px' : '0px',
+                                    opacity: shareHovered ? 1 : 0,
+                                    marginRight: shareHovered ? '6px' : '0px',
+                                }}
+                            >
+                                {socialIcons.map(({ key, title, bg, icon }) => (
+                                    <button
+                                        key={key}
+                                        onClick={(e) => shareOnPlatform(key, post, e)}
+                                        title={title}
+                                        className="w-6 h-6 rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shadow-md"
+                                        style={{ background: bg }}
+                                    >
+                                        {icon}
+                                    </button>
+                                ))}
+                            </div>
+
+                            {/* Share trigger button — orange circle, black icon */}
+                            <button
+                                className="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shadow-md"
+                                style={{ background: '#fb923c' }}
+                                title="Share"
+                            >
+                                <svg
+                                    width="12" height="12" viewBox="0 0 24 24" fill="none"
+                                    stroke="#000000" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"
+                                >
+                                    <circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/>
+                                    <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/>
+                                    <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/>
+                                </svg>
+                            </button>
+                        </div>
+                        {/* ===== End Share ===== */}
+
                     </div>
                 </div>
             </div>
         );
     };
 
-
+    // Section Heading
     const SectionHeading = ({ children, count, onClick, expanded, onToggle, total }) => (
         <div className="flex items-center justify-between mb-8 md:mb-10">
             <div className="flex items-center gap-4">
@@ -412,11 +488,11 @@ const Home = () => {
                 {onToggle && total > POSTS_PER_ROW && (
                     <button
                         onClick={onToggle}
-                        className="  flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-orange-500/30 text-orange-400 text-xs font-semibold hover:bg-orange-500/10 transition-all flex-shrink-0"
+                        className="flex items-center gap-1.5 px-4 py-1.5 rounded-full border border-orange-500/30 text-orange-400 text-xs font-semibold hover:bg-orange-500/10 transition-all flex-shrink-0"
                         style={{ fontFamily: "'DM Sans', sans-serif" }}
                     >
                         {expanded ? (
-                            <>View Less <ChevronLeft size={13} className="rotate-90 " /></>
+                            <>View Less <ChevronLeft size={13} className="rotate-90" /></>
                         ) : (
                             <>View More <ChevronRight size={13} className="rotate-90" /></>
                         )}
@@ -427,13 +503,13 @@ const Home = () => {
     );
 
     return (
-        <div className="flex flex-col ">
-            <SEO 
-           title="Home - Top Stories, Travel & Culture"
-            description="Discover trending top stories, travel guides, cultural insights, and NNS Shorts. Your gateway to authentic storytelling and quality content."
-            image="/logo.png"
-            type="website"
-          />
+        <div className="flex flex-col">
+            <SEO
+                title="Home - Top Stories, Travel & Culture"
+                description="Discover trending top stories, travel guides, cultural insights, and NNS Shorts. Your gateway to authentic storytelling and quality content."
+                image="/logo.png"
+                type="website"
+            />
             <style>{`
                 @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,700;0,900;1,700&family=DM+Sans:wght@300;400;500&display=swap');
 
@@ -450,12 +526,8 @@ const Home = () => {
                     50%      { opacity:0.7; transform:scale(1.04); }
                 }
 
-                .hm-card {
-                    animation: hmFadeUp 0.7s cubic-bezier(.22,1,.36,1) both;
-                }
-                .hm-section {
-                    animation: hmFadeIn 0.6s ease both;
-                }
+                .hm-card { animation: hmFadeUp 0.7s cubic-bezier(.22,1,.36,1) both; }
+                .hm-section { animation: hmFadeIn 0.6s ease both; }
 
                 .scrollbar-hide::-webkit-scrollbar { display: none; }
                 .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
@@ -466,86 +538,17 @@ const Home = () => {
                 }
             `}</style>
 
-
-            {shareModalOpen && (
-                <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-sm px-4"
-                    onClick={() => setShareModalOpen(false)}>
-                    <div className="relative rounded-2xl p-6 max-w-md w-full border border-white/10 shadow-2xl"
-                        style={{ background: 'linear-gradient(135deg, rgba(20,12,4,0.98), rgba(15,15,20,0.98))' }}
-                        onClick={e => e.stopPropagation()}>
-
-                        <div className="absolute top-0 left-0 right-0 h-px rounded-t-2xl"
-                            style={{ background: 'linear-gradient(to right, transparent, rgba(255,204,102,0.4), transparent)' }} />
-
-                        <div className="flex items-center justify-between mb-6">
-                            <div>
-                                <h3 className="text-lg font-black text-white"
-                                    style={{ fontFamily: "'Playfair Display', serif" }}>Share Post</h3>
-                                <p className="text-slate-600 text-xs mt-0.5"
-                                    style={{ fontFamily: "'DM Sans', sans-serif" }}>Choose a platform</p>
-                            </div>
-                            <button onClick={() => setShareModalOpen(false)}
-                                className="p-2 hover:bg-white/5 rounded-xl transition border border-white/5">
-                                <X size={18} className="text-slate-400" />
-                            </button>
-                        </div>
-
-                        <div className="grid grid-cols-2 gap-2.5 mb-3">
-                            {[
-                                { key: 'whatsapp', label: 'WhatsApp', bg: '#25D366', icon: <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413Z"/></svg> },
-                                { key: 'email',    label: 'Email',    bg: '#475569', icon: <Mail size={18} className="text-white" /> },
-                                { key: 'twitter',  label: 'Twitter',  bg: '#000000', icon: <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg> },
-                                { key: 'facebook', label: 'Facebook', bg: '#1877F2', icon: <svg className="w-5 h-5 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg> },
-                                { key: 'linkedin', label: 'LinkedIn', bg: '#0A66C2', icon: <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 24 24"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433c-1.144 0-2.063-.926-2.063-2.065 0-1.138.92-2.063 2.063-2.063 1.14 0 2.064.925 2.064 2.063 0 1.139-.925 2.065-2.064 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg> },
-                            ].map(({ key, label, bg, icon }) => (
-                                <button key={key} onClick={() => shareVia(key)}
-                                    className="flex items-center gap-3 p-3.5 rounded-xl border border-white/5 hover:border-white/10 transition-all group"
-                                    style={{ background: 'rgba(255,255,255,0.03)' }}>
-                                    <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                                        style={{ background: bg }}>
-                                        {icon}
-                                    </div>
-                                    <span className="text-slate-300 text-sm font-medium group-hover:text-white transition-colors"
-                                        style={{ fontFamily: "'DM Sans', sans-serif" }}>
-                                        {label}
-                                    </span>
-                                </button>
-                            ))}
-                            <button onClick={() => shareVia('copy')}
-                                className="col-span-2 flex items-center gap-3 p-3.5 rounded-xl border border-white/5 hover:border-orange-500/20 transition-all group"
-                                style={{ background: 'rgba(255,255,255,0.03)' }}>
-                                <div className="w-9 h-9 rounded-full flex items-center justify-center flex-shrink-0"
-                                    style={{ background: copied ? 'rgba(34,197,94,0.2)' : 'rgba(255,255,255,0.08)' }}>
-                                    {copied
-                                        ? <Check size={16} className="text-green-400" />
-                                        : <Copy size={16} className="text-slate-400" />
-                                    }
-                                </div>
-                                <span className="text-sm font-medium transition-colors"
-                                    style={{ fontFamily: "'DM Sans', sans-serif", color: copied ? '#4ade80' : '#cbd5e1' }}>
-                                    {copied ? 'Link Copied!' : 'Copy Link'}
-                                </span>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
-           
+            {/* Video Modal */}
             {videoModalOpen && selectedVideoUrl && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/95 backdrop-blur-md"
                     onClick={closeVideoModal}>
                     <div className="relative w-full max-w-4xl h-[80vh] sm:h-[85vh] md:h-[90vh] flex flex-col"
                         onClick={e => e.stopPropagation()}>
-                        
-                       
-                        <button 
+                        <button
                             onClick={closeVideoModal}
                             className="absolute -top-12 right-0 p-2 text-white hover:text-orange-400 transition-colors z-10">
                             <X size={32} />
                         </button>
-
-                      
                         <div className="flex-1 w-full h-full rounded-2xl overflow-hidden bg-black">
                             {(() => {
                                 const youtubeId = getYoutubeId(selectedVideoUrl);
@@ -561,17 +564,13 @@ const Home = () => {
                                         />
                                     );
                                 }
-                                
                                 return (
                                     <div className="w-full h-full flex items-center justify-center bg-slate-900">
                                         <p className="text-white text-lg">Opening video...</p>
-                                        <script>window.open('{selectedVideoUrl}', '_blank');</script>
                                     </div>
                                 );
                             })()}
                         </div>
-
-                       
                         <div className="mt-4 text-center">
                             <p className="text-slate-400 text-sm" style={{ fontFamily: "'DM Sans', sans-serif" }}>
                                 Click anywhere outside or press X to close
@@ -581,7 +580,7 @@ const Home = () => {
                 </div>
             )}
 
-
+            {/* Hero Slider */}
             {heroSlides.length > 0 && (
                 <div className="relative w-full h-[400px] sm:h-[500px] md:h-[600px] overflow-hidden mb-12 md:mb-20 hm-section">
                     {heroSlides.map((slide, index) => (
@@ -591,21 +590,16 @@ const Home = () => {
                                 style={{ background: 'linear-gradient(105deg, rgba(5,2,0,0.92) 0%, rgba(5,2,0,0.6) 40%, transparent 70%)' }} />
 
                             {(() => {
-                               const youtubeId = getYoutubeId(slide.image);
-                               if (youtubeId && index === currentSlide) {
+                                const youtubeId = getYoutubeId(slide.image);
+                                if (youtubeId && index === currentSlide) {
                                     return (
                                         <div className="absolute inset-0 w-full h-full z-0 pointer-events-none overflow-hidden">
                                             <iframe
                                                 style={{
-                                                    position: 'absolute',
-                                                    top: '50%',
-                                                    left: '50%',
+                                                    position: 'absolute', top: '50%', left: '50%',
                                                     transform: 'translate(-50%, -50%)',
-                                                    width: '100%',
-                                                    height: '100%',
-                                                    minWidth: '177.78vh',
-                                                    minHeight: '56.25vw',
-                                                    border: 'none'
+                                                    width: '100%', height: '100%',
+                                                    minWidth: '177.78vh', minHeight: '56.25vw', border: 'none'
                                                 }}
                                                 src={`https://www.youtube.com/embed/${youtubeId}?autoplay=1&mute=1&controls=0&loop=1&playlist=${youtubeId}&modestbranding=1&iv_load_policy=3&showinfo=0&rel=0`}
                                                 allow="autoplay" frameBorder="0" />
@@ -627,17 +621,14 @@ const Home = () => {
                                     style={{ fontFamily: "'DM Sans', sans-serif", background: 'linear-gradient(135deg, #FFCC66, #FF7A18)' }}>
                                     {getCategoryName(slide.category)}
                                 </span>
-
                                 <h2 className="text-white font-black mb-3 md:mb-4 max-w-3xl leading-tight line-clamp-3 md:line-clamp-none"
                                     style={{ fontFamily: "'Playfair Display', serif", fontSize: 'clamp(1.6rem, 4.5vw, 3.8rem)', letterSpacing: '-0.02em' }}>
                                     {slide.title}
                                 </h2>
-
                                 <p className="text-slate-300 mb-5 md:mb-7 max-w-2xl line-clamp-2"
                                     style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 'clamp(0.85rem, 1.5vw, 1.05rem)', fontWeight: 300 }}>
                                     {slide.excerpt}
                                 </p>
-
                                 <div className="flex flex-wrap items-center gap-4 md:gap-6">
                                     <div className="hidden sm:flex items-center gap-4 text-slate-400"
                                         style={{ fontFamily: "'DM Sans', sans-serif", fontSize: '0.8rem' }}>
@@ -651,7 +642,6 @@ const Home = () => {
                                         <span className="text-slate-600">·</span>
                                         <span className="flex items-center gap-1"><Calendar size={13} /> {slide.date}</span>
                                     </div>
-
                                     <button
                                         onClick={() => navigate(`/${generateSlug(slide.category)}/${generateSlug(slide.title)}`)}
                                         className="group flex items-center gap-2.5 px-6 py-3 rounded-full font-bold text-slate-900 text-sm transition-all hover:scale-105 active:scale-95"
@@ -690,8 +680,7 @@ const Home = () => {
                 </div>
             )}
 
-     
-          
+            {/* NNS Shorts */}
             {!selectedCategory && shortVideos.length > 0 && (
                 <div className="mx-2 sm:mx-4 md:mx-6 lg:mx-8 mb-14 md:mb-20 hm-section">
                     <div className="flex items-center gap-4 mb-7 px-2 sm:px-4">
@@ -774,10 +763,9 @@ const Home = () => {
                 </div>
             )}
 
+            {/* Posts Grid */}
+            <div className="mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 pb-16 md:pb-24 w-full" style={{ marginTop: "82px" }}>
 
-            <div className="mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 pb-16 md:pb-24 w-full" style={{marginTop:"82px"}}>
-
-          
                 {isTopStoriesSelected && (
                     <div className="mb-16 md:mb-24 hm-section">
                         <SectionHeading
@@ -799,10 +787,8 @@ const Home = () => {
                     </div>
                 )}
 
-         
                 {!isTopStoriesSelected && (
                     <>
-                   
                         {!selectedCategory && topStories.length > 0 && (
                             <div className="mb-16 md:mb-24 hm-section">
                                 <SectionHeading
@@ -828,7 +814,6 @@ const Home = () => {
                             </div>
                         )}
 
-                    
                         {displayPosts.map(([categoryName, posts]) => (
                             <div key={categoryName} className="mb-16 md:mb-24 hm-section">
                                 <SectionHeading
