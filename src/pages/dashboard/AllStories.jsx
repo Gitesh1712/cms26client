@@ -4,6 +4,22 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../services/api';
 import Swal from 'sweetalert2';
 
+
+import {
+    DndContext,
+    closestCenter,
+    PointerSensor,
+    useSensor,
+    useSensors,
+} from '@dnd-kit/core';
+import {
+    SortableContext,
+    rectSortingStrategy,
+    arrayMove,
+    useSortable,
+} from '@dnd-kit/sortable';
+import { CSS } from '@dnd-kit/utilities';
+
 const isVideoUrl = (url) => {
     if (!url) return false;
     const videoExtensions = ['mp4', 'webm', 'ogg', 'mov', 'avi', 'wmv'];
@@ -31,6 +47,166 @@ const getEmbedUrl = (url) => {
     return url;
 };
 
+
+const SortableCard = ({ post, getCategoryName, handleEditStory, handleDeleteStory, isAdmin }) => {
+    const {
+        attributes,
+        listeners,
+        setNodeRef,
+        transform,
+        transition,
+        isDragging,
+    } = useSortable({ id: post._id });
+
+    const style = {
+        transform: CSS.Transform.toString(transform),
+        transition,
+        opacity: isDragging ? 0.4 : 1,
+        zIndex: isDragging ? 999 : 'auto',
+    };
+
+    return (
+        <div ref={setNodeRef} style={style}>
+          
+            <div
+                className="bg-slate-900 border border-white/10 rounded-2xl overflow-hidden group hover:border-orange-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-orange-500/10 flex flex-col h-full"
+                style={{ cursor: isDragging ? 'grabbing' : 'default' }}
+            >
+           
+                <div
+                    {...attributes}
+                    {...listeners}
+                    className="flex items-center justify-center py-1.5 bg-slate-800/50 border-b border-white/5 cursor-grab active:cursor-grabbing hover:bg-slate-700/50 transition-colors"
+                    title="Drag to reorder"
+                >
+                    <div className="flex gap-0.5">
+                        {[...Array(6)].map((_, i) => (
+                            <div key={i} className="w-1 h-1 rounded-full bg-slate-500" />
+                        ))}
+                    </div>
+                </div>
+
+             
+                <div className="aspect-video relative overflow-hidden bg-slate-800">
+                    {post.media?.[0]?.url ? (
+                        isVideoUrl(post.media[0].url) ? (
+                            isEmbedVideo(post.media[0].url) ? (
+                                <iframe
+                                    src={getEmbedUrl(post.media[0].url)}
+                                    className="w-full h-full"
+                                    frameBorder="0"
+                                    allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                                    allowFullScreen
+                                    loading="lazy"
+                                />
+                            ) : (
+                                <>
+                                    <video
+                                        src={post.media[0].url.startsWith('http')
+                                            ? post.media[0].url
+                                            : `${import.meta.env.VITE_API_URL}${post.media[0].url}`}
+                                        className="w-full h-full object-cover bg-black"
+                                        muted preload="metadata"
+                                    />
+                                    <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
+                                        <div className="w-14 h-14 rounded-full bg-orange-500/90 flex items-center justify-center text-white text-xl">▶</div>
+                                    </div>
+                                </>
+                            )
+                        ) : (
+                            (() => {
+                                const imageUrl = post.media[0].url.startsWith('http')
+                                    ? post.media[0].url
+                                    : `${import.meta.env.VITE_API_URL}${post.media[0].url}`;
+                                const youtubeId = getYoutubeId(imageUrl);
+                                if (youtubeId) {
+                                    return (
+                                        <img
+                                            src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`}
+                                            alt={post.title}
+                                            className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        />
+                                    );
+                                }
+                                return (
+                                    <img
+                                        src={imageUrl}
+                                        alt={post.title}
+                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                        onError={(e) => {
+                                            e.target.onerror = null;
+                                            e.target.src = 'https://placehold.co/600x400/1e293b/475569?text=No+Image';
+                                        }}
+                                    />
+                                );
+                            })()
+                        )
+                    ) : (
+                        <div className="w-full h-full flex items-center justify-center text-slate-600">
+                            <ImageIcon size={32} />
+                        </div>
+                    )}
+                </div>
+
+                <div className="p-6 flex-1 flex flex-col">
+                    <div className="flex items-center justify-between mb-3">
+                        <div className="flex items-center gap-2">
+                            <span className="text-xs font-medium text-orange-400 bg-orange-500/10 px-2 py-1 rounded-md border border-orange-500/20 uppercase tracking-wider">
+                                {getCategoryName(post.category)}
+                            </span>
+                            <span className={`text-xs font-medium px-2 py-1 rounded-md border ${
+                                post.status === 1
+                                    ? 'text-green-400 bg-green-500/10 border-green-500/20'
+                                    : post.status === 2
+                                        ? 'text-red-400 bg-red-500/10 border-red-500/20'
+                                        : 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20'
+                            }`}>
+                                {post.status === 1 ? 'Approved' : post.status === 2 ? 'Rejected' : 'Pending'}
+                            </span>
+                        </div>
+                        <div className="flex items-center gap-1 text-slate-500 text-xs">
+                            <Eye size={14} />
+                            <span>{post.views || 0}</span>
+                        </div>
+                    </div>
+
+                    <h3 className="text-xl font-bold text-white mb-2 line-clamp-2 leading-tight group-hover:text-orange-400 transition-colors">
+                        {post.title}
+                    </h3>
+
+                    <p className="text-slate-400 text-sm line-clamp-3 mb-6 flex-1">
+                        {post.description || "No description available."}
+                    </p>
+
+                    <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-auto">
+                        <div className="text-xs text-slate-500 font-medium">
+                            By <span className="text-slate-300">{post.author}</span>
+                        </div>
+                        <div className="flex gap-2">
+                            <button
+                                onClick={() => handleEditStory(post._id)}
+                                className="p-2 text-slate-400 hover:text-white hover:bg-blue-500 rounded-lg transition-all"
+                                title="Edit"
+                            >
+                                <Edit2 size={16} />
+                            </button>
+                            {isAdmin && (
+                                <button
+                                    onClick={() => handleDeleteStory(post._id)}
+                                    className="p-2 text-slate-400 hover:text-white hover:bg-red-500 rounded-lg transition-all"
+                                    title="Delete"
+                                >
+                                    <Trash2 size={16} />
+                                </button>
+                            )}
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const AllStories = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -41,8 +217,14 @@ const AllStories = () => {
     const [error, setError] = useState(null);
     const [isAdmin, setIsAdmin] = useState(false);
 
-  
     const activeCategoryId = searchParams.get('category') || '';
+
+   
+    const sensors = useSensors(
+        useSensor(PointerSensor, {
+            activationConstraint: { distance: 8 }, 
+        })
+    );
 
     useEffect(() => {
         const userInfo = sessionStorage.getItem('userInfo');
@@ -79,7 +261,6 @@ const AllStories = () => {
         fetchPosts();
     }, []);
 
-
     const getCategoryName = (categoryId) => {
         if (!categoryId) return categoryId;
         const found = categories.find(
@@ -88,14 +269,12 @@ const AllStories = () => {
         return found ? found.name : categoryId;
     };
 
-  
     const filteredPosts = activeCategoryId
         ? posts.filter(p =>
             String(p.category).toLowerCase() === String(activeCategoryId).toLowerCase()
           )
         : posts;
 
-  
     const activeCategoryName = activeCategoryId ? getCategoryName(activeCategoryId) : '';
 
     const clearFilter = () => {
@@ -138,12 +317,52 @@ const AllStories = () => {
         }
     };
 
+
+  const handleDragEnd = async (event) => {
+    const { active, over } = event;
+    if (!over || active.id === over.id) return;
+
+    const oldIndex = filteredPosts.findIndex(p => p._id === active.id);
+    const newIndex = filteredPosts.findIndex(p => p._id === over.id);
+    if (oldIndex === -1 || newIndex === -1) return;
+
+    const reordered = arrayMove(filteredPosts, oldIndex, newIndex);
+
+   
+    if (activeCategoryId) {
+        setPosts(prev => {
+            const reorderedIds = reordered.map(p => p._id);
+            return [
+                ...prev.filter(p => !reorderedIds.includes(p._id)),
+                ...reordered
+            ];
+        });
+    } else {
+        setPosts(arrayMove(posts, 
+            posts.findIndex(p => p._id === active.id),
+            posts.findIndex(p => p._id === over.id)
+        ));
+    }
+
+   
+    try {
+        const token = sessionStorage.getItem('token');
+        await api.put(
+            '/posts/reorder',
+            { orderedIds: reordered.map(p => p._id) },
+            { Authorization: `Bearer ${token}` }
+        );
+    } catch (err) {
+        console.error('Reorder failed:', err);
+        fetchPosts();
+    }
+};
+
     return (
         <div className="space-y-8">
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
                     <h2 className="text-2xl md:text-3xl font-bold text-white">
-                    
                         {activeCategoryName ? `${activeCategoryName} Stories` : 'All Stories'}
                     </h2>
                     <p className="text-slate-400 mt-1 text-sm md:text-base">
@@ -153,7 +372,6 @@ const AllStories = () => {
                     </p>
                 </div>
                 <div className="flex items-center gap-3">
-               
                     {activeCategoryId && (
                         <button
                             onClick={clearFilter}
@@ -173,7 +391,6 @@ const AllStories = () => {
                 </div>
             </div>
 
-         
             {!loading && categories.length > 0 && (
                 <div className="flex flex-wrap gap-2">
                     <button
@@ -239,129 +456,30 @@ const AllStories = () => {
                     </button>
                 </div>
             ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
-                    {filteredPosts.map((post) => (
-                        <div key={post._id} className="bg-slate-900 border border-white/10 rounded-2xl overflow-hidden group hover:border-orange-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-orange-500/10 flex flex-col h-full">
-
-                            <div className="aspect-video relative overflow-hidden bg-slate-800">
-                                {post.media?.[0]?.url ? (
-                                    isVideoUrl(post.media[0].url) ? (
-                                        isEmbedVideo(post.media[0].url) ? (
-                                            <iframe
-                                                src={getEmbedUrl(post.media[0].url)}
-                                                className="w-full h-full"
-                                                frameBorder="0"
-                                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                                                allowFullScreen
-                                                loading="lazy"
-                                            />
-                                        ) : (
-                                            <>
-                                                <video
-                                                    src={post.media[0].url.startsWith('http')
-                                                        ? post.media[0].url
-                                                        : `${import.meta.env.VITE_API_URL}${post.media[0].url}`}
-                                                    className="w-full h-full object-cover bg-black"
-                                                    muted preload="metadata"
-                                                />
-                                                <div className="absolute inset-0 flex items-center justify-center bg-black/30 pointer-events-none">
-                                                    <div className="w-14 h-14 rounded-full bg-orange-500/90 flex items-center justify-center text-white text-xl">▶</div>
-                                                </div>
-                                            </>
-                                        )
-                                    ) : (
-                                        (() => {
-                                            const imageUrl = post.media[0].url.startsWith('http')
-                                                ? post.media[0].url
-                                                : `${import.meta.env.VITE_API_URL}${post.media[0].url}`;
-                                            const youtubeId = getYoutubeId(imageUrl);
-                                            if (youtubeId) {
-                                                return (
-                                                    <img
-                                                        src={`https://img.youtube.com/vi/${youtubeId}/hqdefault.jpg`}
-                                                        alt={post.title}
-                                                        className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                                    />
-                                                );
-                                            }
-                                            return (
-                                                <img
-                                                    src={imageUrl}
-                                                    alt={post.title}
-                                                    className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
-                                                    onError={(e) => {
-                                                        e.target.onerror = null;
-                                                        e.target.src = 'https://placehold.co/600x400/1e293b/475569?text=No+Image';
-                                                    }}
-                                                />
-                                            );
-                                        })()
-                                    )
-                                ) : (
-                                    <div className="w-full h-full flex items-center justify-center text-slate-600">
-                                        <ImageIcon size={32} />
-                                    </div>
-                                )}
-                            </div>
-
-                            <div className="p-6 flex-1 flex flex-col">
-                                <div className="flex items-center justify-between mb-3">
-                                    <div className="flex items-center gap-2">
-                                       
-                                        <span className="text-xs font-medium text-orange-400 bg-orange-500/10 px-2 py-1 rounded-md border border-orange-500/20 uppercase tracking-wider">
-                                            {getCategoryName(post.category)}
-                                        </span>
-                                        <span className={`text-xs font-medium px-2 py-1 rounded-md border ${
-                                            post.status === 1
-                                                ? 'text-green-400 bg-green-500/10 border-green-500/20'
-                                                : post.status === 2
-                                                    ? 'text-red-400 bg-red-500/10 border-red-500/20'
-                                                    : 'text-yellow-400 bg-yellow-500/10 border-yellow-500/20'
-                                        }`}>
-                                            {post.status === 1 ? 'Approved' : post.status === 2 ? 'Rejected' : 'Pending'}
-                                        </span>
-                                    </div>
-                                    <div className="flex items-center gap-1 text-slate-500 text-xs">
-                                        <Eye size={14} />
-                                        <span>{post.views || 0}</span>
-                                    </div>
-                                </div>
-
-                                <h3 className="text-xl font-bold text-white mb-2 line-clamp-2 leading-tight group-hover:text-orange-400 transition-colors">
-                                    {post.title}
-                                </h3>
-
-                                <p className="text-slate-400 text-sm line-clamp-3 mb-6 flex-1">
-                                    {post.description || "No description available."}
-                                </p>
-
-                                <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-auto">
-                                    <div className="text-xs text-slate-500 font-medium">
-                                        By <span className="text-slate-300">{post.author}</span>
-                                    </div>
-                                    <div className="flex gap-2">
-                                        <button
-                                            onClick={() => handleEditStory(post._id)}
-                                            className="p-2 text-slate-400 hover:text-white hover:bg-blue-500 rounded-lg transition-all"
-                                            title="Edit"
-                                        >
-                                            <Edit2 size={16} />
-                                        </button>
-                                        {isAdmin && (
-                                            <button
-                                                onClick={() => handleDeleteStory(post._id)}
-                                                className="p-2 text-slate-400 hover:text-white hover:bg-red-500 rounded-lg transition-all"
-                                                title="Delete"
-                                            >
-                                                <Trash2 size={16} />
-                                            </button>
-                                        )}
-                                    </div>
-                                </div>
-                            </div>
+             
+                <DndContext
+                    sensors={sensors}
+                    collisionDetection={closestCenter}
+                    onDragEnd={handleDragEnd}
+                >
+                    <SortableContext
+                        items={filteredPosts.map(p => p._id)}
+                        strategy={rectSortingStrategy}
+                    >
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                            {filteredPosts.map((post) => (
+                                <SortableCard
+                                    key={post._id}
+                                    post={post}
+                                    getCategoryName={getCategoryName}
+                                    handleEditStory={handleEditStory}
+                                    handleDeleteStory={handleDeleteStory}
+                                    isAdmin={isAdmin}
+                                />
+                            ))}
                         </div>
-                    ))}
-                </div>
+                    </SortableContext>
+                </DndContext>
             )}
         </div>
     );

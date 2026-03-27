@@ -36,7 +36,7 @@ const Footer = () => {
             <div className="max-w-7xl mx-auto px-4 md:px-6 py-10 md:py-16">
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-8 md:gap-12">
 
-                    {/* ---- Brand ---- */}
+                   
                     <div className="space-y-6">
                         <Link to="/" className="hover:opacity-80 transition-opacity block">
                             <img
@@ -51,7 +51,7 @@ const Footer = () => {
                         </p>
                     </div>
 
-                    {/* ---- Quick Links ---- */}
+               
                     <div className="space-y-6">
                         <h4 className="text-base font-bold uppercase tracking-widest"
                             style={{ color: '#fbbf24' }}>
@@ -85,7 +85,7 @@ const Footer = () => {
                         </ul>
                     </div>
 
-                    {/* ---- Follow Us ---- */}
+                 
                     <div className="space-y-6">
                         <h4 className="text-base font-bold uppercase tracking-widest"
                             style={{ color: '#fbbf24' }}>
@@ -93,7 +93,7 @@ const Footer = () => {
                         </h4>
                         <div className="flex flex-col gap-4">
 
-                            {/* Twitter / X */}
+                        
                             <Link to="https://x.com/NoNoiseStories" target="_blank" rel="noopener noreferrer"
                                 className="flex items-center gap-3 text-slate-300 hover:text-white transition-all group">
                                 <div className="w-9 h-9 rounded-full bg-slate-800 group-hover:bg-black border border-white/20 group-hover:border-white/40 flex items-center justify-center transition-all duration-200">
@@ -104,7 +104,7 @@ const Footer = () => {
                                 <span className="text-sm font-medium">Twitter / X</span>
                             </Link>
 
-                            {/* Instagram */}
+                            
                             <Link to="https://www.instagram.com/nonoisestories/" target="_blank" rel="noopener noreferrer"
                                 className="flex items-center gap-3 text-slate-300 hover:text-white transition-all group">
                                 <div className="w-9 h-9 rounded-full bg-slate-800 group-hover:bg-gradient-to-br group-hover:from-purple-600 group-hover:via-pink-500 group-hover:to-orange-400 border border-white/20 group-hover:border-transparent flex items-center justify-center transition-all duration-200">
@@ -115,7 +115,7 @@ const Footer = () => {
                                 <span className="text-sm font-medium">Instagram</span>
                             </Link>
 
-                            {/* LinkedIn */}
+                         
                             <Link to="https://www.linkedin.com/company/no-noise-stories/" target="_blank" rel="noopener noreferrer"
                                 className="flex items-center gap-3 text-slate-300 hover:text-white transition-all group">
                                 <div className="w-9 h-9 rounded-full bg-slate-800 group-hover:bg-[#0A66C2] border border-white/20 group-hover:border-transparent flex items-center justify-center transition-all duration-200">
@@ -126,7 +126,7 @@ const Footer = () => {
                                 <span className="text-sm font-medium">LinkedIn</span>
                             </Link>
 
-                            {/* YouTube */}
+                      
                             <Link to="https://www.youtube.com/@NoNoiseStories" target="_blank" rel="noopener noreferrer"
                                 className="flex items-center gap-3 text-slate-300 hover:text-white transition-all group">
                                 <div className="w-9 h-9 rounded-full bg-slate-800 group-hover:bg-[#FF0000] border border-white/20 group-hover:border-transparent flex items-center justify-center transition-all duration-200">
@@ -139,7 +139,7 @@ const Footer = () => {
                         </div>
                     </div>
 
-                    {/* ---- Newsletter ---- */}
+                  
                     <div className="space-y-6">
                         <h4 className="text-base font-bold uppercase tracking-widest"
                             style={{ color: '#fbbf24' }}>
@@ -177,7 +177,7 @@ const Footer = () => {
                     </div>
                 </div>
 
-                {/* ---- Bottom Bar ---- */}
+             
                 <div className="mt-10 md:mt-16 pt-6 md:pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-slate-400 text-sm">
                         © 2026 no noise stories all rights reserved
@@ -189,7 +189,7 @@ const Footer = () => {
                 </div>
             </div>
 
-            {/* Background glow */}
+           
             <div className="absolute -z-10 bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-orange-500/5 to-transparent pointer-events-none" />
         </footer>
     );

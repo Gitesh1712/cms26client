@@ -58,7 +58,7 @@ const Layout = () => {
         }));
     };
 
-    // Ordered categories: Top Stories always first
+   
     const topStoriesCat = categories.find(c =>
         c.name?.toLowerCase().replace(/[\s\-_]/g, '').includes('topstori')
     );
@@ -70,7 +70,7 @@ const Layout = () => {
         <div className="min-h-screen bg-slate-900 text-white selection:bg-orange-500 selection:text-white font-['Inter',_'Poppins',_'SF_Pro_Display',_system-ui,_-apple-system,_sans-serif] overflow-x-hidden">
             <nav className="fixed top-0 left-0 right-0 p-3 sm:p-4 md:p-6 z-50 backdrop-blur-md bg-slate-900/50 border-b border-white/5">
                 <div className="flex justify-between items-center">
-                    {/* Logo */}
+                  
                     <Link
                         to="/"
                         className="hover:opacity-80 transition-opacity flex-shrink-0"
@@ -86,10 +86,10 @@ const Layout = () => {
                         />
                     </Link>
 
-                    {/* Desktop Nav */}
+           
                     <div className="hidden lg:flex space-x-6 items-center bg-slate-800/50 px-6 py-2 rounded-full border border-white/5 shadow-lg">
 
-                        {/* Home */}
+                      
                         <NavLink
                             to="/"
                             icon={<Home size={18} />}
@@ -100,10 +100,10 @@ const Layout = () => {
                             }}
                         />
 
-                        {/* About */}
+                      
                         <NavLink to="/about" icon={<Info size={18} />} label="About" active={isActive('/about')} />
 
-                        {/* Categories: Top Stories pinned first, then others */}
+                       
                         {isHomePage && (() => {
                             const topStory = categories.find(c =>
                                 c.name?.toLowerCase().replace(/[\s\-_]/g, '').includes('topstori')
@@ -125,7 +125,7 @@ const Layout = () => {
                             ));
                         })()}
 
-                        {/* More dropdown (overflow categories) */}
+                       
                         {isHomePage && overflowCats.length > 0 && (
                             <div className="relative" ref={dropdownRef}>
                                 <button
@@ -163,16 +163,16 @@ const Layout = () => {
                             </div>
                         )}
 
-                        {/* Contact */}
+                        
                         <NavLink to="/contact" icon={<Mail size={18} />} label="Contact" active={isActive('/contact')} />
 
                         <div className="w-px h-4 bg-white/10 mx-2"></div>
 
-                        {/* Login */}
+                        
                         <NavLink to="/login" icon={<LogIn size={18} />} label="Login" active={isActive('/login')} variant="primary" />
                     </div>
 
-                    {/* Mobile hamburger */}
+                   
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         className="lg:hidden text-slate-300 hover:text-orange-400 p-2 transition-colors"
@@ -182,7 +182,7 @@ const Layout = () => {
                     </button>
                 </div>
 
-                {/* Mobile category filter */}
+               
                 {isHomePage && (
                     <div className="lg:hidden mt-3">
                         <div className="relative" ref={mobileDropdownRef}>
@@ -206,7 +206,7 @@ const Layout = () => {
                                         </button>
                                         <div className="h-px bg-white/10 my-1 mx-2"></div>
 
-                                        {/* Top Stories first in mobile dropdown too */}
+                                       
                                         {topStoriesCat && (
                                             <button
                                                 onClick={() => handleCategorySelect(topStoriesCat)}

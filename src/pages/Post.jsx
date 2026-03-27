@@ -25,7 +25,7 @@ const getYoutubeId = (url) => {
     return match ? match[1] : null;
 };
 
-// ── Inline Share Bar (NDTV style) ─────────────────────────────
+
 const ShareBar = ({ url, title }) => {
     const [hovered, setHovered] = useState(false);
     const [copied, setCopied] = useState(false);
@@ -110,7 +110,7 @@ const ShareBar = ({ url, title }) => {
             onMouseEnter={() => setHovered(true)}
             onMouseLeave={() => setHovered(false)}
         >
-            {/* Social icons — slide in on hover */}
+          
             <div
                 className="flex items-center gap-1.5 overflow-hidden transition-all duration-300 ease-in-out"
                 style={{
@@ -132,7 +132,7 @@ const ShareBar = ({ url, title }) => {
                 ))}
             </div>
 
-            {/* Share trigger button — orange circle, black icon */}
+          
             <button
                 className="w-8 h-8 rounded-full flex items-center justify-center flex-shrink-0 hover:scale-110 transition-transform shadow-md"
                 style={{ background: '#fb923c' }}
@@ -152,7 +152,7 @@ const ShareBar = ({ url, title }) => {
     );
 };
 
-// ── Main Post Component ────────────────────────────────────────
+
 const Post = () => {
     const { category, slug } = useParams();
     const navigate = useNavigate();
@@ -239,7 +239,7 @@ const Post = () => {
         return `${window.location.origin}/${generateSlug(post.category)}/${generateSlug(post.title)}`;
     };
 
-    // Loading
+   
     if (loading) return (
         <div className="min-h-screen flex flex-col items-center justify-center p-4">
             <div className="w-10 h-10 rounded-full border-2 border-orange-500/30 border-t-orange-500 animate-spin mb-5" />
@@ -250,7 +250,7 @@ const Post = () => {
         </div>
     );
 
-    // Error
+   
     if (error || !post) return (
         <div className="min-h-screen flex flex-col items-center justify-center p-4 text-center">
             <AlertCircle className="w-12 h-12 mb-5" style={{ color: 'rgba(239,68,68,0.6)' }} />
@@ -328,7 +328,7 @@ const Post = () => {
             <div className="max-w-3xl mx-auto px-4 sm:px-6 md:px-8 py-8 md:py-12">
                 <main className="w-full">
 
-                    {/* Back button */}
+                  
                     <button onClick={() => navigate(-1)}
                         className="p-fu mb-10 flex items-center gap-2.5 group"
                         style={{ fontFamily: "'DM Sans', sans-serif" }}>
@@ -338,7 +338,7 @@ const Post = () => {
                         <span className="text-xs tracking-widest uppercase group-hover:text-slate-200 transition-colors" style={{ color: '#94a3b8' }}>Back</span>
                     </button>
 
-                    {/* Category badge */}
+                  
                     <div className="p-fu mb-5">
                         <span className="inline-block text-[11px] font-bold tracking-widest uppercase px-3 py-1.5 rounded-full text-slate-900"
                             style={{ fontFamily: "'DM Sans', sans-serif", background: 'linear-gradient(135deg, #FFCC66, #FF7A18)' }}>
@@ -346,7 +346,7 @@ const Post = () => {
                         </span>
                     </div>
 
-                    {/* Title */}
+                 
                     <h1 className="p-fu-1 text-white font-black mb-7 leading-none"
                         style={{
                             fontFamily: "'Playfair Display', serif",
@@ -357,10 +357,10 @@ const Post = () => {
                         {post.title}
                     </h1>
 
-                    {/* Meta row — author, date, views, share */}
+                
                     <div className="p-fu-2 flex flex-wrap items-center gap-4 md:gap-5 mb-10 pb-8 border-b border-white/5">
 
-                        {/* Author */}
+                     
                         <div className="flex items-center gap-2.5">
                             <div className="w-8 h-8 rounded-full flex items-center justify-center text-slate-900 text-xs font-black flex-shrink-0"
                                 style={{ background: 'linear-gradient(135deg, #FFCC66, #FF7A18)', fontFamily: "'Playfair Display', serif" }}>
@@ -374,27 +374,27 @@ const Post = () => {
 
                         <div className="w-px h-5 bg-white/8 hidden sm:block" />
 
-                        {/* Date */}
+                        
                         <div className="flex items-center gap-1.5 text-xs"
                             style={{ fontFamily: "'DM Sans', sans-serif", color: '#94a3b8' }}>
                             <Calendar size={12} style={{ color: '#fb923c' }} />
                             <span>{new Date(post.createdAt).toLocaleDateString('en-US', { month: 'long', day: 'numeric', year: 'numeric' })}</span>
                         </div>
 
-                        {/* Views */}
+                     
                         <div className="flex items-center gap-1.5 text-xs"
                             style={{ fontFamily: "'DM Sans', sans-serif", color: '#94a3b8' }}>
                             <Eye size={12} style={{ color: '#fb923c' }} />
                             <span>{post.views || 0} views</span>
                         </div>
 
-                        {/* ===== NDTV-style Share Bar ===== */}
+                        
                         <div className="ml-auto">
                             <ShareBar url={getShareUrl()} title={post.title} />
                         </div>
                     </div>
 
-                    {/* Media */}
+                  
                     <div className="p-fi relative rounded-2xl md:rounded-3xl overflow-hidden mb-12 md:mb-16 border border-white/5 shadow-2xl"
                         style={{ background: 'rgba(15,15,20,0.8)' }}>
                         <div className="absolute top-0 left-0 right-0 h-px z-10"
@@ -435,7 +435,7 @@ const Post = () => {
                         )}
                     </div>
 
-                    {/* Post content */}
+                 
                     <div className="p-fu-3 mb-14 md:mb-20">
                         {post.description?.split('\n').map((para, i) => (
                             para.trim()
@@ -447,7 +447,7 @@ const Post = () => {
                         ))}
                     </div>
 
-                    {/* Like + comment count */}
+                  
                     <div className="flex items-center justify-between py-5 mb-14 border-y border-white/5">
                         <div className="flex items-center gap-2.5">
                             <button onClick={handleLike} disabled={likeLoading}
@@ -472,11 +472,11 @@ const Post = () => {
                             </div>
                         </div>
 
-                        {/* Share bar in bottom row too */}
+                      
                         <ShareBar url={getShareUrl()} title={post.title} />
                     </div>
 
-                    {/* Comments section */}
+               
                     <div className="space-y-7 md:space-y-9">
 
                         <div className="flex items-center gap-4">
@@ -492,7 +492,7 @@ const Post = () => {
                             </span>
                         </div>
 
-                        {/* Comment form */}
+                
                         <div className="relative rounded-2xl p-5 md:p-6 border border-white/5"
                             style={{ background: 'linear-gradient(135deg, rgba(20,12,4,0.6), rgba(15,15,20,0.8))' }}>
                             <div className="absolute top-0 left-0 right-0 h-px rounded-t-2xl"
@@ -519,7 +519,7 @@ const Post = () => {
                             </form>
                         </div>
 
-                        {/* Comment list */}
+                    
                         <div className="space-y-3">
                             {post.comments && post.comments.length > 0 ? (
                                 [...post.comments].reverse().map((comment, index) => (

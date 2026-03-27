@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from'react';
-import { BookOpen, Users, Target, Heart, Lightbulb, Award, Globe, TrendingUp, MessageSquare, ArrowRight, Play, Star } from 'lucide-react';
+import { BookOpen, Users, Target, Heart, Lightbulb, Award, Globe, TrendingUp, MessageSquare, ArrowRight, Play, Star, Filter, CheckCircle, Eye } from 'lucide-react';
 import { Link } from'react-router-dom';
 import SEO from '../components/SEO';
 
@@ -9,26 +9,26 @@ const About = () => {
     }, []);
 
     const features = [
-        { icon: <BookOpen size={28} />, title: "Authentic Stories", description: "We bring you genuine, well-researched stories that matter and inspire." },
-        { icon: <Users size={28} />, title: "Community Driven", description: "Built by storytellers for storytellers, fostering a vibrant community." },
-        { icon: <Target size={28} />, title: "Quality Content", description: "Every story goes through rigorous review to ensure excellence." },
-        { icon: <Heart size={28} />, title: "Passion First", description: "Driven by love for storytelling and cultural preservation." },
-        { icon: <Lightbulb size={28} />, title: "Innovation", description: "Using modern technology to bring traditional stories to life." },
-        { icon: <Award size={28} />, title: "Excellence", description: "Committed to delivering the highest quality content experience." }
+        { icon: <BookOpen size={28} />, title: "Explainers That Make Sense", description: "Complex topics, simplified in minutes. No jargon, no fluff — just clarity." },
+        { icon: <Users size={28} />, title: "On-Ground Storytelling", description: "Real voices, real impact. We go where the stories actually are." },
+        { icon: <Target size={28} />, title: "High-Retention Video Content", description: "Built for today's attention spans. Every second earns the next." },
+        { icon: <CheckCircle size={28} />, title: "Fact-First Narratives", description: "Accuracy over assumptions. We verify before we publish, always." },
+        { icon: <Filter size={28} />, title: "Cut Through the Noise", description: "We filter out misinformation and deliver only what actually matters." },
+        { icon: <Eye size={28} />, title: "Credibility is Non-Negotiable", description: "Trust is earned story by story. We don't cut corners on accuracy." }
     ];
 
     const stats = [
         { number: "500+", label: "Stories Published" },
         { number: "50K+", label: "Monthly Readers" },
         { number: "25+", label: "Categories" },
-        { number: "100%", label: "Dedication" }
+        { number: "100%", label: "Fact-First" }
     ];
 
     return (
       <div className="min-h-screen overflow-x-hidden" style={{ fontFamily: "'Georgia', serif" }}>
           <SEO 
           title="About Us - Our Story & Mission"
-            description="Learn about Kaivailayam's mission to preserve culture through digital storytelling. We bring you authentic, quality content that inspires and connects."
+            description="No Noise Stories is a digital storytelling platform built to simplify complex news, cut through misinformation, and deliver clear, impactful narratives that people can trust."
             image="/logo.png"
             type="website"
           />
@@ -129,87 +129,91 @@ const About = () => {
                     pointer-events: none;
                     opacity: 0.5;
                 }
+
+                /* Gradient text utility */
+                .grad-text {
+                    background: linear-gradient(135deg, rgb(255, 204, 102), rgb(255, 122, 24));
+                    -webkit-background-clip: text;
+                    -webkit-text-fill-color: transparent;
+                    background-clip: text;
+                }
             `}</style>
 
+           
             <section className="relative min-h-screen flex flex-col justify-center px-6 md:px-12 lg:px-20 pt-16 pb-0 overflow-hidden grain-overlay">
 
-            
                 <div className="absolute top-20 right-10 w-[500px] h-[500px] rounded-full pulse-soft pointer-events-none"
                     style={{ background: 'radial-gradient(circle, rgba(255,154,24,0.12) 0%, transparent 70%)' }} />
                 <div className="absolute -bottom-20 -left-20 w-[400px] h-[400px] rounded-full pulse-soft pointer-events-none"
                     style={{ background: 'radial-gradient(circle, rgba(255,204,102,0.08) 0%, transparent 70%)', animationDelay: '2s' }} />
 
-             
                 <div className="absolute right-6 md:right-16 top-24 md:top-32 select-none pointer-events-none anim-fade-in">
                     <span className="number-big about-display text-stroke float-slow inline-block">01</span>
                 </div>
 
-          
                 <div className="anim-fade-up mb-6 about-body">
                     <span className="inline-flex items-center gap-2 text-xs font-medium tracking-[0.2em] uppercase text-orange-400 border border-orange-500/20 bg-orange-500/8 px-4 py-2 rounded-full">
                         <span className="w-1.5 h-1.5 rounded-full bg-orange-400 inline-block" style={{ animation: 'pulseSoft 2s infinite' }}></span>
-                        No Noise Stories
+                        About No Noise Stories
                     </span>
                 </div>
 
-               
                 <div className="max-w-5xl anim-fade-up-1">
                     <h1 className="hero-title about-display font-black text-white mb-0 leading-none">
-                        Where
+                        In a World
                         <br />
                         <em className="italic" style={{ background: 'linear-gradient(135deg, #FFCC66, #FF7A18)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                            Stories
+                            Full of Noise
                         </em>
                         <br />
-                        Come Alive
+                        We Focus.
                     </h1>
                 </div>
 
-               
                 <div className="mt-10 mb-8 flex items-center gap-6 anim-fade-up-2">
                     <div className="h-px flex-1 max-w-xs" style={{ background: 'linear-gradient(to right, rgba(255,122,24,0.6), transparent)' }} />
-                    <span className="about-body text-xs tracking-widest text-slate-500 uppercase">Est. 2024</span>
+                   
+                    <span className="about-body text-xs tracking-widest uppercase grad-text">Est. 2024</span>
                 </div>
 
-              
-                <p className="about-body max-w-2xl text-slate-300 text-base md:text-lg leading-relaxed anim-fade-up-3" style={{ fontWeight: 300 }}>
-                    An infotainment platform built on storytelling. The street vendor with a secret recipe,
-                    the traveller chasing unknown paths, the cultural moments that shape us — we don't do hype.
-                    <span className="text-orange-300 font-medium"> We do heart.</span>
+                <p className="about-body max-w-2xl text-white text-base md:text-lg leading-relaxed anim-fade-up-3" style={{ fontWeight: 300 }}>
+                    No Noise Stories is a digital storytelling platform built to simplify complex news,
+                    cut through misinformation, and deliver clear, impactful narratives that people can trust.
+                    <span className="text-orange-300 font-medium"> We don't chase virality. We chase clarity.</span>
                 </p>
 
-             
                 <div className="flex flex-wrap items-center gap-4 mt-10 anim-fade-up-4">
                     <Link to="/" className="group inline-flex items-center gap-3 px-7 py-3.5 rounded-full font-semibold text-slate-900 about-body text-sm transition-all hover:scale-105 active:scale-95"
                         style={{ background: 'linear-gradient(135deg, #FFCC66, #FF7A18)', boxShadow: '0 0 40px rgba(255,122,24,0.3)' }}>
                         Start Reading
                         <ArrowRight size={16} className="group-hover:translate-x-1 transition-transform" />
                     </Link>
-                    <Link to="/contact" className="inline-flex items-center gap-3 px-7 py-3.5 rounded-full font-semibold text-slate-300 about-body text-sm border border-white/10 hover:border-orange-500/40 hover:text-white transition-all">
+                    <Link to="/contact" className="inline-flex items-center gap-3 px-7 py-3.5 rounded-full font-semibold text-white about-body text-sm border border-white/10 hover:border-orange-500/40 hover:text-white transition-all">
                         <MessageSquare size={15} />
                         Get in Touch
                     </Link>
                 </div>
 
-              
                 <div className="mt-20 mb-8 flex items-center gap-3 about-body anim-fade-in">
                     <div className="flex flex-col gap-1">
                         <div className="w-px h-8 mx-auto" style={{ background: 'linear-gradient(to bottom, transparent, rgba(255,122,24,0.6))' }} />
                         <div className="w-1.5 h-1.5 rounded-full bg-orange-500 mx-auto" />
                     </div>
-                    <span className="text-xs tracking-[0.2em] uppercase text-slate-600">Scroll to explore</span>
+                   
+                    <span className="about-body text-xs tracking-[0.2em] uppercase grad-text">Scroll to explore</span>
                 </div>
             </section>
 
-         
+          
             <div className="overflow-hidden border-y border-white/5 py-4" style={{ background: 'rgba(255,122,24,0.04)' }}>
                 <div className="flex marquee-inner whitespace-nowrap">
                     {[...Array(2)].map((_, i) => (
                         <div key={i} className="flex items-center gap-0 shrink-0">
-                            {['Food', 'Travel', 'Culture', 'Lifestyle', 'Tech', 'Entertainment', 'Human Stories', 'Documentaries', 'Real Voices', 'No Hype'].map((word, j) => (
-                                <span key={j} className="marquee-text about-display font-bold inline-flex items-center gap-6 px-8 text-slate-700">
+                            {['Clarity', 'Truth', 'Simplicity', 'No Hype', 'Fact-First', 'Real Stories', 'Cut the Noise', 'Credibility', 'Impact', 'Awareness'].map((word, j) => (
+                                <span key={j} className="marquee-text about-display font-bold inline-flex items-center gap-6 px-8"
+                                    style={{ background: 'linear-gradient(135deg, rgb(255,204,102), rgb(255,122,24))', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent', backgroundClip: 'text' }}>
                                     {word}
-                                    <span className="text-orange-500" style={{ fontSize: '0.5em' }}>◆</span>
+                                    <span className="text-orange-500" style={{ fontSize: '0.5em', WebkitTextFillColor: 'initial' }}>◆</span>
                                 </span>
                             ))}
                         </div>
@@ -217,66 +221,37 @@ const About = () => {
                 </div>
             </div>
 
-         
-            <section className="relative py-24 px-6 md:px-12 lg:px-20 overflow-hidden">
-                <div className="absolute inset-0 pointer-events-none">
-                    <div className="absolute top-0 left-0 right-0 h-px" style={{ background: 'linear-gradient(to right, transparent, rgba(255,122,24,0.2), transparent)' }} />
-                </div>
-
-             
-                <div className="flex items-center gap-4 mb-16">
-                    <span className="about-body text-xs tracking-[0.2em] uppercase text-orange-400">By the numbers</span>
-                    <div className="h-px flex-1 max-w-xs" style={{ background: 'linear-gradient(to right, rgba(255,122,24,0.4), transparent)' }} />
-                </div>
-
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-0">
-                    {stats.map((stat, i) => (
-                        <div key={i} className="stat-anim group relative p-8 md:p-10 border-r border-white/5 last:border-r-0"
-                            style={{ animationDelay: `${i * 0.1}s`, borderBottom: i < 2 ? '1px solid rgba(255,255,255,0.05)' : 'none' }}>
-                            <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
-                                style={{ background: 'radial-gradient(circle at 30% 50%, rgba(255,122,24,0.06), transparent 70%)' }} />
-                            <div className="about-display font-black text-white mb-2"
-                                style={{ fontSize: 'clamp(2.5rem, 6vw, 4.5rem)', lineHeight: 1, letterSpacing: '-0.03em' }}>
-                                <span style={{ background: 'linear-gradient(135deg, #FFCC66, #FF7A18)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                                    {stat.number}
-                                </span>
-                            </div>
-                            <div className="about-body text-slate-500 text-sm tracking-wider uppercase">{stat.label}</div>
-                        </div>
-                    ))}
-                </div>
-            </section>
-
-           
+            
             <section className="relative py-24 overflow-hidden" style={{ background: 'rgba(15,15,20,0.8)' }}>
                 <div className="px-6 md:px-12 lg:px-20">
                     <div className="grid grid-cols-1 lg:grid-cols-12 gap-12 lg:gap-0 items-center">
 
-                       
                         <div className="lg:col-span-7 lg:pr-20">
                             <div className="flex items-center gap-4 mb-10">
                                 <div className="w-8 h-px bg-orange-500" />
-                                <span className="about-body text-xs tracking-[0.25em] uppercase text-orange-400">Our Mission</span>
+                                <span className="about-body text-xs tracking-[0.25em] uppercase text-orange-400">Why We Exist</span>
                             </div>
 
                             <h2 className="about-display font-black text-white mb-8 leading-none"
                                 style={{ fontSize: 'clamp(2.5rem, 6vw, 5rem)', letterSpacing: '-0.03em' }}>
-                                Preserving Culture <br />
-                                <em className="italic text-slate-400">Through Digital</em><br />
-                                Storytelling
+                                Information Today<br />
+                               
+                                <em className="italic grad-text">Is Broken.</em><br />
+                                We're Fixing It.
                             </h2>
 
-                            <p className="about-body text-slate-400 text-base md:text-lg leading-relaxed mb-10 max-w-xl" style={{ fontWeight: 300 }}>
-                                We bridge the gap between traditional wisdom and modern digital experiences —
-                                making meaningful content accessible to everyone, everywhere.
+                            
+                            <p className="about-body text-white text-base md:text-lg leading-relaxed mb-8 max-w-xl" style={{ fontWeight: 300 }}>
+                                Because information today is either too complicated, too biased, or too shallow.
+                                We exist to fix that — delivering news and stories that are clear, credible, and meaningful.
                             </p>
 
                             <div className="space-y-5">
                                 {[
-                                    "Curated content from diverse voices",
-                                    "Commitment to authenticity and accuracy",
-                                    "User-friendly reading experience",
-                                    "Regular updates with fresh perspectives"
+                                    "Too complicated — we simplify without dumbing down",
+                                    "Too biased — we let facts lead, not agendas",
+                                    "Too shallow — we go deeper on what actually matters",
+                                    "Too noisy — we cut through and give you the signal"
                                 ].map((item, i) => (
                                     <div key={i} className="flex items-center gap-4 group">
                                         <div className="w-5 h-5 rounded-full flex-shrink-0 flex items-center justify-center"
@@ -285,19 +260,17 @@ const About = () => {
                                                 <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
                                             </svg>
                                         </div>
-                                        <span className="about-body text-slate-300 group-hover:text-white transition-colors">{item}</span>
+                                    
+                                        <span className="about-body text-white group-hover:grad-text transition-colors">{item}</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
 
-                   
                         <div className="lg:col-span-5 relative">
                             <div className="relative mx-auto max-w-sm">
-                     
                                 <div className="absolute -top-4 -right-4 w-full h-full rounded-3xl border border-orange-500/10"
                                     style={{ background: 'rgba(255,122,24,0.04)' }} />
-                              
                                 <div className="relative rounded-3xl p-8 border border-white/8 card-shine"
                                     style={{ background: 'linear-gradient(135deg, rgba(30,30,40,0.9), rgba(20,20,30,0.9))' }}>
                                     <div className="absolute top-0 left-0 right-0 h-px rounded-t-3xl"
@@ -307,19 +280,20 @@ const About = () => {
                                         style={{ background: 'linear-gradient(135deg, rgba(255,204,102,0.1), rgba(255,122,24,0.1))' }}>
                                         <div className="absolute inset-0 opacity-20"
                                             style={{ backgroundImage: 'repeating-linear-gradient(45deg, rgba(255,122,24,0.1) 0px, rgba(255,122,24,0.1) 1px, transparent 1px, transparent 20px)' }} />
-                                        <BookOpen size={72} className="text-orange-400 relative z-10 float-slow" />
+                                        <Filter size={72} className="text-orange-400 relative z-10 float-slow" />
                                     </div>
 
-                                    <p className="about-display text-xl font-bold text-white mb-2">Digital Library</p>
-                                    <p className="about-body text-slate-500 text-sm" style={{ fontWeight: 300 }}>
-                                        A treasure trove of stories waiting to be discovered
+                                    <p className="about-display text-xl font-bold text-white mb-2">Signal Over Noise</p>
+                                   
+                                    <p className="about-body grad-text text-sm" style={{ fontWeight: 300 }}>
+                                        We filter the flood so you only get what actually matters
                                     </p>
 
                                     <div className="mt-6 flex items-center gap-2">
                                         {[...Array(5)].map((_, i) => (
                                             <Star key={i} size={14} className="text-orange-400 fill-orange-400" />
                                         ))}
-                                        <span className="about-body text-slate-500 text-xs ml-2">50K+ readers</span>
+                                        <span className="about-body grad-text text-xs ml-2">50K+ readers</span>
                                     </div>
                                 </div>
                             </div>
@@ -327,23 +301,21 @@ const About = () => {
                     </div>
                 </div>
             </section>
-
-        
             <section className="py-24 px-6 md:px-12 lg:px-20">
                 <div className="flex items-end justify-between mb-16 flex-wrap gap-6">
                     <div>
                         <div className="flex items-center gap-4 mb-6">
                             <div className="w-8 h-px bg-orange-500" />
-                            <span className="about-body text-xs tracking-[0.25em] uppercase text-orange-400">Why Choose Us</span>
+                            <span className="about-body text-xs tracking-[0.25em] uppercase text-orange-400">What We Do</span>
                         </div>
                         <h2 className="about-display font-black text-white leading-none"
                             style={{ fontSize: 'clamp(2rem, 5vw, 4rem)', letterSpacing: '-0.03em' }}>
-                            What Makes<br />
-                            <em className="italic text-orange-400">Us Special</em>
+                            How We Cut<br />
+                            <em className="italic text-orange-400">Through the Noise</em>
                         </h2>
                     </div>
-                    <p className="about-body text-slate-500 max-w-xs text-sm leading-relaxed" style={{ fontWeight: 300 }}>
-                        We're not just another content platform — here's what sets us apart from the noise.
+                    <p className="about-body text-white max-w-xs text-sm leading-relaxed" style={{ fontWeight: 300 }}>
+                        We're not just another content platform — here's how we actually deliver on our promise.
                     </p>
                 </div>
 
@@ -352,10 +324,8 @@ const About = () => {
                         <div key={index} className="group p-8 md:p-10 bg-slate-950 hover:bg-slate-900/80 transition-all duration-500 card-shine relative">
                             <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 pointer-events-none"
                                 style={{ background: 'radial-gradient(circle at 20% 20%, rgba(255,122,24,0.06), transparent 60%)' }} />
-
-                 
-                            <div className="about-display text-slate-800 font-black mb-6 select-none"
-                                style={{ fontSize: '3.5rem', lineHeight: 1, letterSpacing: '-0.04em' }}>
+                            <div className="about-display font-black mb-6 select-none grad-text"
+                                style={{ fontSize: '3.5rem', lineHeight: 1, letterSpacing: '-0.04em', opacity: 0.35 }}>
                                 {String(index + 1).padStart(2, '0')}
                             </div>
 
@@ -365,7 +335,7 @@ const About = () => {
                             </div>
 
                             <h3 className="about-display text-xl font-bold text-white mb-3">{feature.title}</h3>
-                            <p className="about-body text-slate-500 leading-relaxed text-sm" style={{ fontWeight: 300 }}>{feature.description}</p>
+                            <p className="about-body text-white leading-relaxed text-sm" style={{ fontWeight: 300 }}>{feature.description}</p>
 
                             <div className="mt-6 w-0 group-hover:w-8 h-px transition-all duration-300"
                                 style={{ background: 'linear-gradient(to right, #FF7A18, #FFCC66)' }} />
@@ -373,8 +343,6 @@ const About = () => {
                     ))}
                 </div>
             </section>
-
-          
             <section className="relative py-32 px-6 md:px-12 lg:px-20 overflow-hidden" style={{ background: 'rgba(10,10,15,0.9)' }}>
                 <div className="absolute inset-0 pointer-events-none">
                     <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] rounded-full"
@@ -390,22 +358,21 @@ const About = () => {
 
                     <h2 className="about-display font-black text-white mb-8 leading-none"
                         style={{ fontSize: 'clamp(2.5rem, 7vw, 6rem)', letterSpacing: '-0.03em' }}>
-                        Building a World<br />
+                        A Platform Where<br />
                         <em className="italic" style={{ background: 'linear-gradient(135deg, #FFCC66, #FF7A18)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                            Connected by Stories
+                            Noise Doesn't Win
                         </em>
                     </h2>
-
-                    <p className="about-body text-slate-400 text-lg md:text-xl leading-relaxed mb-16 max-w-3xl mx-auto" style={{ fontWeight: 300 }}>
-                        A future where everyone has access to meaningful, diverse, and inspiring content —
-                        where traditional wisdom meets modern innovation.
+                    <p className="about-body text-white text-lg md:text-xl leading-relaxed mb-16 max-w-3xl mx-auto" style={{ fontWeight: 300 }}>
+                        We believe simplicity is powerful, credibility is non-negotiable,
+                        and storytelling drives real awareness. That's what we're building toward — every single day.
                     </p>
 
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-px bg-white/5 rounded-3xl overflow-hidden text-left">
                         {[
-                            { icon: <Globe size={24} />, title: "Global Reach", description: "Connecting readers worldwide through universal stories" },
-                            { icon: <Users size={24} />, title: "Inclusive Community", description: "Welcoming voices from all backgrounds and cultures" },
-                            { icon: <TrendingUp size={24} />, title: "Continuous Growth", description: "Evolving with our readers' needs and preferences" }
+                            { icon: <BookOpen size={24} />, title: "News Is Clear", description: "Complex stories, simplified without losing the truth. You'll always understand what's happening and why it matters." },
+                            { icon: <Users size={24} />, title: "Stories Are Meaningful", description: "Every piece we publish earns its place. No filler, no fluff — just content that informs, challenges, and connects." },
+                            { icon: <Filter size={24} />, title: "Noise Doesn't Win", description: "Misinformation loses when clarity wins. We're building a platform where facts and good storytelling always come first." }
                         ].map((item, i) => (
                             <div key={i} className="group p-8 bg-slate-950 hover:bg-slate-900/70 transition-all duration-400 relative overflow-hidden">
                                 <div className="absolute top-0 left-0 right-0 h-px opacity-0 group-hover:opacity-100 transition-opacity"
@@ -415,23 +382,19 @@ const About = () => {
                                     {item.icon}
                                 </div>
                                 <h3 className="about-display font-bold text-white text-lg mb-2">{item.title}</h3>
-                                <p className="about-body text-slate-500 text-sm leading-relaxed" style={{ fontWeight: 300 }}>{item.description}</p>
+                                <p className="about-body text-white text-sm leading-relaxed" style={{ fontWeight: 300 }}>{item.description}</p>
                             </div>
                         ))}
                     </div>
                 </div>
             </section>
-
-           
             <section className="py-24 px-6 md:px-12 lg:px-20">
                 <div className="relative rounded-3xl overflow-hidden"
                     style={{ background: 'linear-gradient(135deg, #1a0a00, #2d1200, #1a0a00)' }}>
 
-                 
                     <div className="absolute inset-0 pointer-events-none"
                         style={{ backgroundImage: 'repeating-linear-gradient(90deg, rgba(255,122,24,0.04) 0px, rgba(255,122,24,0.04) 1px, transparent 1px, transparent 80px), repeating-linear-gradient(0deg, rgba(255,122,24,0.04) 0px, rgba(255,122,24,0.04) 1px, transparent 1px, transparent 80px)' }} />
 
-                 
                     <div className="absolute top-0 right-0 w-96 h-96 rounded-full -translate-y-1/2 translate-x-1/4 pointer-events-none"
                         style={{ background: 'radial-gradient(circle, rgba(255,122,24,0.2), transparent 70%)' }} />
                     <div className="absolute bottom-0 left-0 w-64 h-64 rounded-full translate-y-1/2 -translate-x-1/4 pointer-events-none"
@@ -441,18 +404,18 @@ const About = () => {
                         <div className="grid grid-cols-1 lg:grid-cols-2 gap-12 items-center">
                             <div>
                                 <span className="about-body text-xs tracking-[0.25em] uppercase text-orange-400 mb-6 block">
-                                    Ready to Explore?
+                                    Ready to Read Differently?
                                 </span>
                                 <h2 className="about-display font-black text-white leading-none mb-6"
                                     style={{ fontSize: 'clamp(2.5rem, 6vw, 5rem)', letterSpacing: '-0.03em' }}>
                                     Join the<br />
                                     <em className="italic" style={{ background: 'linear-gradient(135deg, #FFCC66, #FF7A18)', WebkitBackgroundClip: 'text', WebkitTextFillColor: 'transparent' }}>
-                                        Story
+                                        Clarity
                                     </em>
                                 </h2>
-                                <p className="about-body text-slate-400 text-base leading-relaxed max-w-md" style={{ fontWeight: 300 }}>
-                                    Join thousands of readers discovering amazing stories every day.
-                                    Start your journey into narratives that inform, entertain, and connect.
+                                <p className="about-body text-white text-base leading-relaxed max-w-md" style={{ fontWeight: 300 }}>
+                                    Join thousands of readers who've chosen clarity over noise.
+                                    Start your journey into narratives that inform, challenge, and actually make sense.
                                 </p>
                             </div>
 
@@ -465,7 +428,7 @@ const About = () => {
                                     </span>
                                     <ArrowRight size={18} className="group-hover:translate-x-1 transition-transform" />
                                 </Link>
-                                <Link to="/contact" className="group flex-1 flex items-center justify-between px-8 py-5 rounded-2xl font-semibold text-slate-300 about-body border border-white/10 hover:border-orange-500/30 hover:text-white transition-all hover:scale-105">
+                                <Link to="/contact" className="group flex-1 flex items-center justify-between px-8 py-5 rounded-2xl font-semibold text-white about-body border border-white/10 hover:border-orange-500/30 hover:text-white transition-all hover:scale-105">
                                     <span className="flex items-center gap-3">
                                         <MessageSquare size={20} />
                                         Get in Touch

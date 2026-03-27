@@ -223,16 +223,16 @@ const Contact = () => {
                 }
             `}</style>
 
-            {/* ===== HERO SECTION ===== */}
+           
             <section className="relative pt-20 pb-16 px-6 md:px-12 lg:px-20 overflow-hidden grain-ct">
 
-                {/* Glow blobs */}
+               
                 <div className="absolute top-10 right-0 w-[480px] h-[480px] rounded-full pointer-events-none pulse-soft"
                     style={{ background: 'radial-gradient(circle, rgba(255,122,24,0.12) 0%, transparent 70%)' }} />
                 <div className="absolute -bottom-10 left-10 w-[320px] h-[320px] rounded-full pointer-events-none pulse-soft"
                     style={{ background: 'radial-gradient(circle, rgba(255,204,102,0.09) 0%, transparent 70%)', animationDelay: '2s' }} />
 
-                {/* Big "04" watermark */}
+            
                 <div className="absolute right-6 md:right-16 top-16 select-none pointer-events-none ct-fade-in">
                     <span className="ct-display font-black text-stroke-ct float-slow inline-block"
                         style={{ fontSize: 'clamp(6rem, 18vw, 14rem)', lineHeight: 0.85, letterSpacing: '-0.04em' }}>
@@ -240,7 +240,7 @@ const Contact = () => {
                     </span>
                 </div>
 
-                {/* Badge */}
+             
                 <div className="ct-fade-up mb-6">
                     <span className="ct-body inline-flex items-center gap-2 text-xs font-medium tracking-[0.2em] uppercase text-orange-400 border border-orange-500/30 bg-orange-500/10 px-4 py-2 rounded-full">
                         <span className="w-1.5 h-1.5 rounded-full bg-orange-400 inline-block" style={{ animation: 'pulseSoft 2s infinite' }} />
@@ -248,7 +248,7 @@ const Contact = () => {
                     </span>
                 </div>
 
-                {/* Heading */}
+              
                 <div className="ct-fade-up-1 max-w-3xl mb-4">
                     <h1 className="ct-display font-black text-white leading-none"
                         style={{ fontSize: 'clamp(3.2rem, 9vw, 8rem)', letterSpacing: '-0.03em' }}>
@@ -260,25 +260,25 @@ const Contact = () => {
                     </h1>
                 </div>
 
-                {/* Divider */}
+               
                 <div className="ct-fade-up-2 flex items-center gap-6 mt-8 mb-6">
                     <div className="h-px max-w-xs flex-1"
                         style={{ background: 'linear-gradient(to right, rgba(255,122,24,0.7), transparent)' }} />
                     <span className="divider-text">We'd love to hear from you</span>
                 </div>
 
-                {/* Subtext */}
+              
                 <p className="ct-fade-up-3 ct-body text-slate-300 text-base md:text-lg max-w-xl leading-relaxed" style={{ fontWeight: 300 }}>
                     Whether you have a question, want to collaborate, or just say hi —
                     <span className="text-orange-300 font-medium"> we're always listening.</span>
                 </p>
             </section>
 
-            {/* ===== FORM + INFO SECTION ===== */}
+          
             <section className="px-6 md:px-12 lg:px-20 pb-24">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-10 lg:gap-16 items-start">
 
-                    {/* ---- Left Info Cards ---- */}
+                   
                     <div className="lg:col-span-4 space-y-8">
 
                         {[
@@ -311,30 +311,30 @@ const Contact = () => {
                                 onMouseEnter={e => e.currentTarget.style.borderColor = 'rgba(255,122,24,0.35)'}
                                 onMouseLeave={e => e.currentTarget.style.borderColor = 'rgba(255,180,50,0.12)'}
                             >
-                                {/* Hover glow */}
+                           
                                 <div className="absolute inset-0 opacity-0 group-hover:opacity-100 transition-opacity duration-500 rounded-2xl pointer-events-none"
                                     style={{ background: 'radial-gradient(circle at 20% 50%, rgba(255,122,24,0.07), transparent 70%)' }} />
 
-                                {/* Icon */}
+                               
                                 <div className="w-11 h-11 rounded-xl flex-shrink-0 flex items-center justify-center text-slate-900 mt-0.5 group-hover:scale-110 transition-transform duration-300"
                                     style={{ background: 'linear-gradient(135deg, #FFCC66, #FF7A18)' }}>
                                     {item.icon}
                                 </div>
 
-                                {/* Text */}
+                               
                                 <div>
                                     <p className="info-label">{item.label}</p>
                                     <p className="info-value">{item.value}</p>
                                     <p className="info-desc">{item.desc}</p>
                                 </div>
 
-                                {/* Bottom line */}
+                              
                                 <div className="absolute bottom-4 right-5 w-0 group-hover:w-6 h-px transition-all duration-300"
                                     style={{ background: 'linear-gradient(to right, #FF7A18, #FFCC66)' }} />
                             </div>
                         ))}
 
-                        {/* Tags */}
+                       
                         <div className="pt-4">
                             <p className="handle-label">We handle</p>
                             <div className="flex flex-wrap gap-2">
@@ -345,7 +345,7 @@ const Contact = () => {
                         </div>
                     </div>
 
-                    {/* ---- Right Form ---- */}
+                    
                     <div className="lg:col-span-8">
                         <div className="relative rounded-3xl p-8 md:p-10 border card-shine"
                             style={{
@@ -353,11 +353,11 @@ const Contact = () => {
                                 borderColor: 'rgba(255,180,50,0.15)'
                             }}>
 
-                            {/* Top border line */}
+                          
                             <div className="absolute top-0 left-0 right-0 h-px rounded-t-3xl"
                                 style={{ background: 'linear-gradient(to right, transparent, rgba(255,204,102,0.4), transparent)' }} />
 
-                            {/* Section label */}
+                           
                             <div className="flex items-center gap-4 mb-8">
                                 <div className="w-8 h-px bg-orange-500" />
                                 <span className="section-label">Send a message</span>
@@ -365,7 +365,7 @@ const Contact = () => {
 
                             <form onSubmit={handleSubmit} className="space-y-6">
 
-                                {/* Status */}
+                              
                                 {status && (
                                     <div className={`p-4 rounded-2xl flex items-center gap-3 text-sm font-medium border ct-body
                                         ${status === 'success'
@@ -376,7 +376,7 @@ const Contact = () => {
                                     </div>
                                 )}
 
-                                {/* Full Name */}
+                               
                                 <div className="space-y-2">
                                     <label className="form-label">Full Name</label>
                                     <input
@@ -390,7 +390,7 @@ const Contact = () => {
                                     />
                                 </div>
 
-                                {/* Email + Mobile */}
+                              
                                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
                                     <div className="space-y-2">
                                         <label className="form-label">Email</label>
@@ -418,7 +418,7 @@ const Contact = () => {
                                     </div>
                                 </div>
 
-                                {/* Inquiry Type */}
+                           
                                 <div className="space-y-2">
                                     <label className="form-label">Inquiry Type</label>
                                     <div className="relative">
@@ -440,7 +440,7 @@ const Contact = () => {
                                     </div>
                                 </div>
 
-                                {/* Message */}
+                               
                                 <div className="space-y-2">
                                     <label className="form-label">Message</label>
                                     <textarea
@@ -454,7 +454,7 @@ const Contact = () => {
                                     />
                                 </div>
 
-                                {/* Submit Button */}
+                              
                                 <button
                                     type="submit"
                                     disabled={loading}

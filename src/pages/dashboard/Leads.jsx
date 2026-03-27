@@ -214,7 +214,6 @@ const Leads = () => {
                     </button>
                 </div>
             </div>
-
       
             <div className="bg-slate-900 border border-white/10 rounded-2xl p-4 mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -243,6 +242,9 @@ const Leads = () => {
                     </div>
                 </div>
             </div>
+
+
+
 
            
             {loading ? (

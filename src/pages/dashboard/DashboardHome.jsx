@@ -35,7 +35,10 @@ const DashboardHome = () => {
         api.get("/posts", { Authorization: `Bearer ${token}` })
       ]);
       const categories = categoriesRes?.data || [];
-      const posts = Array.isArray(postsRes) ? postsRes : (postsRes?.data || []);
+      const rawPosts = Array.isArray(postsRes) ? postsRes : (postsRes?.data || []);
+      const posts = [...rawPosts].sort((a, b) =>
+        new Date(b.createdAt) - new Date(a.createdAt)
+      );
 
   
       const countMap = {};
