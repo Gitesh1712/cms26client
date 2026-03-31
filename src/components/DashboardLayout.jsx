@@ -2,15 +2,20 @@ import { Outlet, NavLink, useNavigate } from 'react-router-dom';
 import { LayoutDashboard, FileText, FolderOpen, Users, LogOut, Menu, X, Clock, CheckCircle, XCircle, EyeOff, Mail, Play, MessageSquare } from 'lucide-react';
 import { useState, useEffect } from 'react';
 
+
+import useAutoLogout from '../hooks/useAutoLogout';
+import SessionWarning from './SessionWarning';
+
 const DashboardLayout = () => {
     const navigate = useNavigate();
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-   
+    
+    const { showWarning, countdown, resetTimer } = useAutoLogout(15, 2);
+
     const userInfo = JSON.parse(sessionStorage.getItem('userInfo') || '{}');
 
-   
     useEffect(() => {
         const handleResize = () => {
             if (window.innerWidth >= 768) {
@@ -22,7 +27,6 @@ const DashboardLayout = () => {
     }, []);
 
     const handleLogout = () => {
-       
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('userInfo');
         navigate('/login');
@@ -52,15 +56,20 @@ const DashboardLayout = () => {
 
     return (
         <div className="flex h-screen bg-slate-900 text-slate-200 font-sans overflow-hidden">
-           
+
+         
+            {showWarning && (
+                <SessionWarning countdown={countdown} onStayLoggedIn={resetTimer} />
+            )}
+
+          
             {isMobileMenuOpen && (
-                <div 
+                <div
                     className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"
                     onClick={() => setIsMobileMenuOpen(false)}
                 />
             )}
 
-          
             <aside className={`
                 bg-slate-950 border-r border-white/5 transition-all duration-300 flex flex-col z-40
                 fixed inset-y-0 left-0 w-64
@@ -78,7 +87,7 @@ const DashboardLayout = () => {
                         </div>
                     </div>
                     <div className="flex items-center gap-2">
-                        <button 
+                        <button
                             onClick={() => setIsMobileMenuOpen(false)}
                             className="md:hidden p-2 hover:bg-white/5 rounded-lg text-slate-400 hover:text-white transition-colors"
                         >
@@ -116,12 +125,10 @@ const DashboardLayout = () => {
                 </div>
             </aside>
 
-          
             <main className="flex-1 overflow-y-auto relative w-full min-w-0">
-                
                 <div className="sticky top-0 z-10 bg-slate-900/80 backdrop-blur-xl border-b border-white/5 px-4 md:px-8 py-4 flex items-center justify-between">
                     <div className="flex items-center gap-3">
-                        <button 
+                        <button
                             onClick={() => setIsMobileMenuOpen(true)}
                             className="md:hidden p-2 hover:bg-white/5 rounded-lg text-slate-400 hover:text-white transition-colors"
                         >

@@ -15,17 +15,13 @@ const SEO = ({
   const canonicalUrl= url || window.location.href;
 
  return (
+
     <Helmet>
-  
       <title>{title || defaultTitle}</title>
       <meta name="description" content={description || defaultDescription} />
       <meta name="keywords" content="stories, news, travel, culture, blog, articles, trending, top stories" />
       <meta name="author" content="NoNoiseStories" />
-      
-    
       <link rel="canonical" href={canonicalUrl} />
-      
-  
       <meta property="og:type" content={type} />
       <meta property="og:url" content={canonicalUrl} />
       <meta property="og:title" content={title ? `${title} | ${siteName}` : defaultTitle} />

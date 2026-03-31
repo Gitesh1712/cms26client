@@ -9,6 +9,7 @@ import Login from './pages/Login';
 import Contact from './pages/Contact';
 import Post from './pages/Post';
 import About from './pages/About';
+import ShortsPage from './pages/Shorts';
 
 
 import DashboardLayout from './components/DashboardLayout';
@@ -96,6 +97,7 @@ function App() {
          
           <Route path="/" element={<Layout />}>
             <Route index element={<Home />} />
+            <Route path="shorts" element={<ShortsPage />} />
             <Route path="contact" element={<Contact />} />
             <Route path="about" element={<About />} />
             <Route path=":category/:slug" element={<Post />} />

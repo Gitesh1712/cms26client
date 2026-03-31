@@ -173,7 +173,7 @@ const About = () => {
                 <div className="mt-10 mb-8 flex items-center gap-6 anim-fade-up-2">
                     <div className="h-px flex-1 max-w-xs" style={{ background: 'linear-gradient(to right, rgba(255,122,24,0.6), transparent)' }} />
                    
-                    <span className="about-body text-xs tracking-widest uppercase grad-text">Est. 2024</span>
+                    <span className="about-body text-xs tracking-widest uppercase grad-text">Est. 2026</span>
                 </div>
 
                 <p className="about-body max-w-2xl text-white text-base md:text-lg leading-relaxed anim-fade-up-3" style={{ fontWeight: 300 }}>

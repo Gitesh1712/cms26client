@@ -76,6 +76,7 @@ const clearLiked = (shortId) => {
 };
 
 
+
 const Home = () => {
     const navigate = useNavigate();
 
@@ -259,7 +260,7 @@ const Home = () => {
                     : allHeroSlides.map(heroMapper)
             );
 
-            const topStoryCat      = categoriesData.find(c => isTopStoriesCategory(c));
+            const topStoryCat= categoriesData.find(c => isTopStoriesCategory(c));
             const allTopStoryPosts = postsData
                 .filter(p =>
                     p.topStory === true ||
@@ -724,11 +725,11 @@ const Home = () => {
                 </div>
             )}
 
-            {/* ── NNS Shorts ───────────────────────────────────────────────── */}
+           
             {!selectedCategory && shortVideos.length > 0 && (
                 <div className="mx-2 sm:mx-4 md:mx-6 lg:mx-8 mb-14 md:mb-20 hm-section">
 
-                    {/* Heading */}
+                 
                     <div className="flex items-center gap-4 mb-7 px-2 sm:px-4">
                         <div className="w-1 h-7 rounded-full" style={{ background: "linear-gradient(to bottom, #FFCC66, #FF7A18)" }} />
                         <h2 className="font-black text-white" style={{ fontFamily: "'Playfair Display', serif", fontSize: "clamp(1.4rem, 3vw, 1.9rem)" }}>
@@ -737,7 +738,7 @@ const Home = () => {
                         <div className="h-px flex-1 max-w-xs" style={{ background: "linear-gradient(to right, rgba(255,122,24,0.35), transparent)" }} />
                     </div>
 
-                    {/* Scrollable row */}
+                
                     <div className="relative group/scroll">
                         <button onClick={() => scrollVideos("left")}
                             className="hidden md:flex absolute left-0 top-1/2 -translate-y-1/2 z-20 p-2.5 rounded-full border border-white/10 hover:border-orange-500/30 backdrop-blur-sm transition-all text-white opacity-0 group-hover/scroll:opacity-100 shadow-lg"
@@ -793,12 +794,12 @@ const Home = () => {
                                                         }}
                                                     />
 
-                                                    {/* Gradient */}
+                                      
                                                     <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent" />
 
-                                                    {/* Card bottom content */}
+                                                
                                                     <div className="absolute bottom-0 left-0 right-0 p-2.5 sm:p-3 z-10">
-                                                        {/* Title */}
+                                                      
                                                         <div className="flex items-start gap-2 mb-2">
                                                             <div className="w-7 h-7 rounded-full flex items-center justify-center shadow-lg flex-shrink-0"
                                                                 style={{ background: "linear-gradient(135deg, #FFCC66, #FF7A18)" }}>
@@ -812,9 +813,9 @@ const Home = () => {
                                                             </h3>
                                                         </div>
 
-                                                        {/* Views + Like */}
+                                                     
                                                         <div className="flex items-center justify-between">
-                                                            {/* Views */}
+                                                 
                                                             <div className="flex items-center gap-1 text-[10px] text-slate-400"
                                                                 style={{ fontFamily: "'DM Sans', sans-serif" }}>
                                                                 <svg className="w-3 h-3" fill="currentColor" viewBox="0 0 20 20">
@@ -824,7 +825,7 @@ const Home = () => {
                                                                 <span>{video.views}</span>
                                                             </div>
 
-                                                            {/* Like / Unlike button */}
+                                                        
                                                             <button
                                                                 onClick={(e) => handleLike(e, video)}
                                                                 className="flex items-center gap-1 text-[10px] transition-all hover:scale-110 active:scale-95"
@@ -856,11 +857,11 @@ const Home = () => {
                         </div>
                     </div>
 
-                    {/* Load More */}
+         
                     {shortsHasMore && (
                         <div className="flex justify-center mt-5">
                             <button
-                                onClick={() => fetchShorts(shortsPage + 1, true)}
+                                onClick={() => navigate('/shorts')}
                                 disabled={shortsLoading}
                                 className="flex items-center gap-2 px-6 py-2.5 rounded-full border border-orange-500/30 text-orange-400 text-sm font-semibold hover:bg-orange-500/10 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                                 style={{ fontFamily: "'DM Sans', sans-serif" }}
@@ -872,8 +873,8 @@ const Home = () => {
                                     </>
                                 ) : (
                                     <>
-                                        Load More Shorts
-                                        <ChevronRight size={16} />
+                                        View All Shorts
+                                        <ArrowRight size={16} />
                                     </>
                                 )}
                             </button>
@@ -882,7 +883,7 @@ const Home = () => {
                 </div>
             )}
 
-            {/* ── Posts ────────────────────────────────────────────────────── */}
+         
             <div className="mx-auto px-4 sm:px-6 md:px-8 lg:px-12 xl:px-16 pb-16 md:pb-24 w-full" style={{ marginTop: "82px" }}>
 
                 {isTopStoriesSelected && (

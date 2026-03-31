@@ -12,11 +12,11 @@ const Footer = () => {
     const handleSubscribe = async (e) => {
         e.preventDefault();
         if (!email || loading) return;
+        
 
         setLoading(true);
         setStatus(null);
         setMessage('');
-
         try {
             await api.post('/public/newsletter', { email, source: 'footer' });
             setStatus('success');
@@ -125,8 +125,6 @@ const Footer = () => {
                                 </div>
                                 <span className="text-sm font-medium">LinkedIn</span>
                             </Link>
-
-                      
                             <Link to="https://www.youtube.com/@NoNoiseStories" target="_blank" rel="noopener noreferrer"
                                 className="flex items-center gap-3 text-slate-300 hover:text-white transition-all group">
                                 <div className="w-9 h-9 rounded-full bg-slate-800 group-hover:bg-[#FF0000] border border-white/20 group-hover:border-transparent flex items-center justify-center transition-all duration-200">
@@ -138,8 +136,6 @@ const Footer = () => {
                             </Link>
                         </div>
                     </div>
-
-                  
                     <div className="space-y-6">
                         <h4 className="text-base font-bold uppercase tracking-widest"
                             style={{ color: '#fbbf24' }}>
@@ -176,8 +172,6 @@ const Footer = () => {
                         )}
                     </div>
                 </div>
-
-             
                 <div className="mt-10 md:mt-16 pt-6 md:pt-8 border-t border-white/10 flex flex-col md:flex-row justify-between items-center gap-4">
                     <p className="text-slate-400 text-sm">
                         © 2026 no noise stories all rights reserved
@@ -188,8 +182,6 @@ const Footer = () => {
                     </div>
                 </div>
             </div>
-
-           
             <div className="absolute -z-10 bottom-0 left-0 right-0 h-64 bg-gradient-to-t from-orange-500/5 to-transparent pointer-events-none" />
         </footer>
     );
