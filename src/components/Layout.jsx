@@ -39,6 +39,7 @@ const Layout = () => {
                 setDropdownOpen(false);
             }
         };
+        
 
         if (dropdownOpen) {
             setTimeout(() => {
@@ -233,7 +234,7 @@ const Layout = () => {
                 )}
             </nav>
 
-            {/* Mobile menu overlay */}
+           
             {mobileMenuOpen && (
                 <div className="fixed inset-0 z-40 lg:hidden">
                     <div

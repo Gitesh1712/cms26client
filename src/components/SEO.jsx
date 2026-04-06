@@ -28,8 +28,6 @@ const SEO = ({
       <meta property="og:description" content={description || defaultDescription} />
       <meta property="og:image" content={image?.startsWith('http') ? image : `${window.location.origin}${image || defaultImage}`} />
       <meta property="og:site_name" content={siteName} />
-      
-  
       <meta name="twitter:card" content="summary_large_image" />
       <meta name="twitter:url" content={canonicalUrl} />
       <meta name="twitter:title" content={title ? `${title} | ${siteName}` : defaultTitle} />

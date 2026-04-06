@@ -22,7 +22,7 @@ const useAutoLogout = (timeoutMinutes = 15, warningMinutes = 2) => {
     clearInterval(countdownInterval.current);
     setShowWarning(false);
     setCountdown(warningMinutes * 60);
-
+  
     warningTimer.current = setTimeout(() => {
       setShowWarning(true);
       let secs = warningMinutes * 60;
@@ -36,6 +36,7 @@ const useAutoLogout = (timeoutMinutes = 15, warningMinutes = 2) => {
     logoutTimer.current = setTimeout(logout, timeoutMinutes * 60 * 1000);
   }, [logout, timeoutMinutes, warningMinutes]);
 
+  
   useEffect(() => {
     const events = ['mousedown', 'mousemove', 'keypress', 'scroll', 'touchstart', 'click'];
     resetTimer();
