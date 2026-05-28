@@ -10,6 +10,8 @@ import Contact from './pages/Contact';
 import Post from './pages/Post';
 import About from './pages/About';
 import ShortsPage from './pages/Shorts';
+import PrivacyPolicy from './pages/PrivacyPolicy';
+import CitizenJournalist from './pages/CitizenJournalist';
 
 
 import DashboardLayout from './components/DashboardLayout';
@@ -99,7 +101,9 @@ function App() {
             <Route index element={<Home />} />
             <Route path="shorts" element={<ShortsPage />} />
             <Route path="contact" element={<Contact />} />
+             <Route path="CitizenJournalist" element={<CitizenJournalist />} />
             <Route path="about" element={<About />} />
+            <Route path="privacy-policy" element={<PrivacyPolicy />} />
             <Route path=":category/:slug" element={<Post />} />
           </Route>
 
@@ -130,7 +134,8 @@ function App() {
             <Route path="stories/edit/:id" element={<EditStory />} />
             <Route path="categories" element={<Categories />} />
             <Route path="team" element={<Team />} />
-            <Route path="leads" element={<Leads />} />
+            <Route path="leads" element={<Leads mode="contact" />} />
+            <Route path="citizen-journalist" element={<Leads mode="citizen" />} />
             <Route path="pending-approval" element={<PendingApproval />} />
             <Route path="approved-posts" element={<ApprovedPosts />} />
             <Route path="rejected-posts" element={<RejectedPosts />} />

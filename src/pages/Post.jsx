@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import PostDescriptionRenderer from '../components/PostDescriptionRenderer';
 import {
     Calendar, Heart, MessageCircle, Eye,
     ArrowLeft, Send, Loader2, AlertCircle, Check, Copy
@@ -177,7 +178,7 @@ const Post = () => {
                 const fallbackPost = !foundPost
                     ? postsData.find(p => p.title.toLowerCase().replace(/\s+/g, '-') === slug)
                     : null;
-
+                   
                 if (foundPost) setPost(foundPost);
                 else if (fallbackPost) setPost(fallbackPost);
                 else setError('Post not found');
@@ -270,6 +271,7 @@ const Post = () => {
             </button>
         </div>
     );
+
 
     const mediaUrl = post.media?.[0]?.url ? getImageUrl(post.media[0].url) : '';
     const isVideo = mediaUrl
@@ -436,16 +438,17 @@ const Post = () => {
                     </div>
 
                  
-                    <div className="p-fu-3 mb-14 md:mb-20">
-                        {post.description?.split('\n').map((para, i) => (
-                            para.trim()
-                                ? <p key={i} className="mb-5 md:mb-7 last:mb-0 text-slate-300 whitespace-pre-wrap"
-                                    style={{ fontFamily: "'DM Sans', sans-serif", fontSize: 'clamp(0.95rem, 1.5vw, 1.08rem)', fontWeight: 300, lineHeight: 1.85 }}>
-                                    {para}
-                                  </p>
-                                : <div key={i} className="h-3" />
-                        ))}
-                    </div>
+                    <div className="p-fu-3">
+    <PostDescriptionRenderer
+        description={post.description}
+        textStyle={{
+            fontFamily: "'DM Sans', sans-serif",
+            fontSize: 'clamp(0.95rem, 1.5vw, 1.08rem)',
+            fontWeight: 300,
+            lineHeight: 1.85
+        }}
+    />
+</div>
 
                   
                     <div className="flex items-center justify-between py-5 mb-14 border-y border-white/5">
@@ -518,6 +521,9 @@ const Post = () => {
                                 </div>
                             </form>
                         </div>
+
+
+                        
 
                     
                         <div className="space-y-3">

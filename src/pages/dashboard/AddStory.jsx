@@ -133,6 +133,8 @@ const AddStory = () => {
                                     <Loader2 size={16} className="animate-spin" /> Loading categories...
                                 </div>
                             ) : (
+
+
                                 <select name="category" value={formData.category} onChange={handleInputChange}
                                     className="w-full bg-slate-950/50 border border-slate-800 rounded-xl py-3 px-4 text-slate-200 focus:outline-none focus:border-orange-500/50 focus:ring-1 focus:ring-orange-500/50">
                                     {categories.length > 0 ? (
@@ -141,6 +143,11 @@ const AddStory = () => {
                                         ))
                                     ) : (
                                         <option value="">No categories available</option>
+
+
+
+
+                                        
                                     )}
                                 </select>
                             )}

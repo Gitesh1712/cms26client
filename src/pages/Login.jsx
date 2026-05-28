@@ -136,9 +136,10 @@ const Login = () => {
                             )}
 
                             
-                            <p className="text-slate-500 text-xs ml-1">
+                            {/* <p className="text-slate-500 text-xs ml-1">
                                 Password must contain at least one special character: ! @ # $ % ^ & *
-                            </p>
+                              
+                            </p> */}
                         </div>
 
                         <button

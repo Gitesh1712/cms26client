@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { Home, LogIn, Mail, Menu, X, Filter, ChevronDown, Info } from 'lucide-react';
+import { Home, LogIn, Mail, Menu, X, Filter, ChevronDown, Info, Newspaper } from 'lucide-react';
 import Footer from './Footer';
 import { useState, useEffect, useRef } from 'react';
 import { api } from '../services/api';
@@ -39,7 +39,6 @@ const Layout = () => {
                 setDropdownOpen(false);
             }
         };
-        
 
         if (dropdownOpen) {
             setTimeout(() => {
@@ -59,7 +58,6 @@ const Layout = () => {
         }));
     };
 
-   
     const topStoriesCat = categories.find(c =>
         c.name?.toLowerCase().replace(/[\s\-_]/g, '').includes('topstori')
     );
@@ -71,7 +69,8 @@ const Layout = () => {
         <div className="min-h-screen bg-slate-900 text-white selection:bg-orange-500 selection:text-white font-['Inter',_'Poppins',_'SF_Pro_Display',_system-ui,_-apple-system,_sans-serif] overflow-x-hidden">
             <nav className="fixed top-0 left-0 right-0 p-3 sm:p-4 md:p-6 z-50 backdrop-blur-md bg-slate-900/50 border-b border-white/5">
                 <div className="flex justify-between items-center">
-                  
+
+                    {/* Logo */}
                     <Link
                         to="/"
                         className="hover:opacity-80 transition-opacity flex-shrink-0"
@@ -87,13 +86,11 @@ const Layout = () => {
                         />
                     </Link>
 
-           
+                    {/* Desktop Nav */}
                     <div className="hidden lg:flex space-x-6 items-center bg-slate-800/50 px-6 py-2 rounded-full border border-white/5 shadow-lg">
 
-                      
                         <NavLink
                             to="/"
-                            icon={<Home size={18} />}
                             label="Home"
                             active={isActive('/')}
                             onClick={() => {
@@ -101,10 +98,9 @@ const Layout = () => {
                             }}
                         />
 
-                      
-                        <NavLink to="/about" icon={<Info size={18} />} label="About" active={isActive('/about')} />
+                        <NavLink to="/about" label="About" active={isActive('/about')} />
 
-                       
+                        {/* Category buttons — desktop only on home */}
                         {isHomePage && (() => {
                             const topStory = categories.find(c =>
                                 c.name?.toLowerCase().replace(/[\s\-_]/g, '').includes('topstori')
@@ -126,7 +122,7 @@ const Layout = () => {
                             ));
                         })()}
 
-                       
+                        {/* More dropdown — desktop */}
                         {isHomePage && overflowCats.length > 0 && (
                             <div className="relative" ref={dropdownRef}>
                                 <button
@@ -164,16 +160,15 @@ const Layout = () => {
                             </div>
                         )}
 
-                        
-                        <NavLink to="/contact" icon={<Mail size={18} />} label="Contact" active={isActive('/contact')} />
+                        <NavLink to="/CitizenJournalist" label="Citizen Journalist" active={isActive('/CitizenJournalist')} />
+                        <NavLink to="/contact" label="Contact" active={isActive('/contact')} />
 
                         <div className="w-px h-4 bg-white/10 mx-2"></div>
 
-                        
                         <NavLink to="/login" icon={<LogIn size={18} />} label="Login" active={isActive('/login')} variant="primary" />
                     </div>
 
-                   
+                    {/* Hamburger — mobile */}
                     <button
                         onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
                         className="lg:hidden text-slate-300 hover:text-orange-400 p-2 transition-colors"
@@ -183,7 +178,7 @@ const Layout = () => {
                     </button>
                 </div>
 
-               
+                {/* Category filter pill — mobile, home only */}
                 {isHomePage && (
                     <div className="lg:hidden mt-3">
                         <div className="relative" ref={mobileDropdownRef}>
@@ -207,7 +202,6 @@ const Layout = () => {
                                         </button>
                                         <div className="h-px bg-white/10 my-1 mx-2"></div>
 
-                                       
                                         {topStoriesCat && (
                                             <button
                                                 onClick={() => handleCategorySelect(topStoriesCat)}
@@ -234,7 +228,7 @@ const Layout = () => {
                 )}
             </nav>
 
-           
+            {/* ✅ FIXED: Mobile menu — CitizenJournalist added */}
             {mobileMenuOpen && (
                 <div className="fixed inset-0 z-40 lg:hidden">
                     <div
@@ -246,6 +240,8 @@ const Layout = () => {
                     }`}>
                         <NavLink to="/" icon={<Home size={18} />} label="Home" active={isActive('/')} onClick={closeMobileMenu} mobile />
                         <NavLink to="/about" icon={<Info size={18} />} label="About" active={isActive('/about')} onClick={closeMobileMenu} mobile />
+                        {/* ✅ THIS WAS MISSING */}
+                        <NavLink to="/CitizenJournalist" icon={<Newspaper size={18} />} label="Citizen Journalist" active={isActive('/CitizenJournalist')} onClick={closeMobileMenu} mobile />
                         <NavLink to="/contact" icon={<Mail size={18} />} label="Contact" active={isActive('/contact')} onClick={closeMobileMenu} mobile />
                         <div className="h-px bg-white/10 my-3"></div>
                         <NavLink to="/login" icon={<LogIn size={18} />} label="Login" active={isActive('/login')} variant="primary" onClick={closeMobileMenu} mobile />

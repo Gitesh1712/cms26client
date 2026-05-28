@@ -128,6 +128,7 @@ const SortableCard = ({ post, getCategoryName, handleEditStory, handleDeleteStor
                                         />
                                     );
                                 }
+
                                 return (
                                     <img
                                         src={imageUrl}
@@ -147,6 +148,9 @@ const SortableCard = ({ post, getCategoryName, handleEditStory, handleDeleteStor
                         </div>
                     )}
                 </div>
+
+
+
 
                 <div className="p-6 flex-1 flex flex-col">
                     <div className="flex items-center justify-between mb-3">

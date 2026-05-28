@@ -1,6 +1,7 @@
 import { Outlet, NavLink, useNavigate } from 'react-router-dom';
-import { LayoutDashboard, FileText, FolderOpen, Users, LogOut, Menu, X, Clock, CheckCircle, XCircle, EyeOff, Mail, Play, MessageSquare } from 'lucide-react';
+import { LayoutDashboard, FileText, FolderOpen, Users, LogOut, Menu, X, Clock, CheckCircle, XCircle, EyeOff, Mail, Play, MessageSquare, Newspaper } from 'lucide-react';
 import { useState, useEffect } from 'react';
+import { api } from '../services/api';
 
 
 import useAutoLogout from '../hooks/useAutoLogout';
@@ -26,11 +27,47 @@ const DashboardLayout = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    const handleLogout = () => {
+    // const handleLogout = () => {
+    //     sessionStorage.removeItem('token');
+    //     sessionStorage.removeItem('userInfo');
+    //     navigate('/login');
+    // };
+
+
+const handleLogout = async () => {
+    try {
+        const token = sessionStorage.getItem('token');
+
+        await api.post(
+            '/logout',
+            {},
+            {
+                Authorization: `Bearer ${token}`
+            }
+        );
+
+        console.log('Logout API Hit Successfully');
+
+    } catch (error) {
+        console.error('Logout API Error:', error);
+    } finally {
         sessionStorage.removeItem('token');
         sessionStorage.removeItem('userInfo');
+
         navigate('/login');
-    };
+    }
+};
+
+
+
+
+
+
+
+
+
+
+
 
     const navItems = [
         { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
@@ -40,6 +77,7 @@ const DashboardLayout = () => {
         navItems.push({ icon: FolderOpen, label: "Categories", path: "/dashboard/categories" });
         navItems.push({ icon: Play, label: "Shorts", path: "/dashboard/shorts" });
         navItems.push({ icon: MessageSquare, label: "Leads", path: "/dashboard/leads" });
+        navItems.push({ icon: Newspaper, label: "Citizen Journalist", path: "/dashboard/citizen-journalist" });
         navItems.push({ icon: Clock, label: "Pending Approval", path: "/dashboard/pending-approval" });
         navItems.push({ icon: CheckCircle, label: "Approved Posts", path: "/dashboard/approved-posts" });
         navItems.push({ icon: XCircle, label: "Rejected Posts", path: "/dashboard/rejected-posts" });

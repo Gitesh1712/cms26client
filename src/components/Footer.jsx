@@ -60,7 +60,7 @@ const Footer = () => {
                         <ul className="space-y-4">
                             <li>
                                 <Link
-                                    to="/About"
+                                    to="/about"
                                     className="text-slate-300 hover:text-orange-400 transition-colors text-sm font-medium flex items-center gap-2"
                                 >
                                     About
@@ -72,6 +72,14 @@ const Footer = () => {
                                     className="text-slate-300 hover:text-orange-400 transition-colors text-sm font-medium flex items-center gap-2"
                                 >
                                     Contact Us
+                                </Link>
+                            </li>
+                            <li>
+                                <Link
+                                    to="/privacy-policy"
+                                    className="text-slate-300 hover:text-orange-400 transition-colors text-sm font-medium flex items-center gap-2"
+                                >
+                                    Privacy Policy
                                 </Link>
                             </li>
                             <li>
@@ -177,7 +185,7 @@ const Footer = () => {
                         © 2026 no noise stories all rights reserved
                     </p>
                     <div className="flex gap-8 text-xs text-slate-400">
-                        <a href="#" className="hover:text-orange-400 transition-colors">Privacy Policy</a>
+                        <Link to="/privacy-policy" className="hover:text-orange-400 transition-colors">Privacy Policy</Link>
                         <a href="#" className="hover:text-orange-400 transition-colors">Terms of Service</a>
                     </div>
                 </div>

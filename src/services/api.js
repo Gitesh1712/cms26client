@@ -6,6 +6,9 @@ const API_BASE_URL = import.meta.env.VITE_API_URL;
  * @param {object} options - Fetch options
  * @returns {Promise<any>}
  */
+
+
+
 // async function request(endpoint, options = {}) {
 //     const { timeout = 10000, ...fetchOptions } = options; // Default 10s timeout
 
