@@ -388,6 +388,7 @@ const About = () => {
                     </div>
                 </div>
             </section>
+            
             <section className="py-24 px-6 md:px-12 lg:px-20">
                 <div className="relative rounded-3xl overflow-hidden"
                     style={{ background: 'linear-gradient(135deg, #1a0a00, #2d1200, #1a0a00)' }}>

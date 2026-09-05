@@ -1,8 +1,9 @@
 import { useState, useEffect } from 'react';
-import { Eye, Edit2, Loader2, AlertCircle, Image as ImageIcon, CheckCircle, XCircle, EyeOff } from 'lucide-react';
+import { Eye, Edit2, Loader2, AlertCircle, Image as ImageIcon, Trash2, FileText } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import toast from 'react-hot-toast';
 import { api } from '../../services/api';
+import Swal from 'sweetalert2';
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || '';
 
@@ -26,38 +27,6 @@ const getYoutubeId = (url) => {
     const regExp = /(?:youtube\.com\/(?:[^\/]+\/.*\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
     const match = url.match(regExp);
     return match ? match[1] : null;
-};
-
-
-const extractTextFromLexical = (content) => {
-    if (!content) return '';
-    if (typeof content === 'string') return content;
-
-    try {
-        const root = content.root || content;
-        let text = '';
-
-        const walk = (node) => {
-            if (!node) return;
-            if (node.type === 'text' && node.text) {
-                text += node.text;
-            }
-            if (node.type === 'linebreak') {
-                text += ' ';
-            }
-            if (Array.isArray(node.children)) {
-                node.children.forEach(walk);
-            }
-        };
-
-        if (Array.isArray(root.children)) {
-            root.children.forEach(walk);
-        }
-
-        return text.trim();
-    } catch {
-        return '';
-    }
 };
 
 
@@ -143,13 +112,11 @@ const resolvePostThumbnail = (p) => {
     return { thumbnail, hasImage };
 };
 
-const PendingApproval = () => {
+const DraftPosts = () => {
     const navigate = useNavigate();
     const [posts, setPosts] = useState([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState(null);
-    const [statusModal, setStatusModal] = useState({ open: false, postId: null, postTitle: '' });
-    const [updating, setUpdating] = useState(false);
     const [isAdmin, setIsAdmin] = useState(false);
 
     useEffect(() => {
@@ -164,15 +131,15 @@ const PendingApproval = () => {
         }
     }, []);
 
-    const fetchPendingPosts = async () => {
+    const fetchDraftPosts = async () => {
         try {
             setLoading(true);
             const token = sessionStorage.getItem('token');
-            const response = await api.get('/posts/posts-by-status?status=0', { Authorization: `Bearer ${token}` });
+            const response = await api.get('/posts/posts-by-status?status=3', { Authorization: `Bearer ${token}` });
             setPosts(Array.isArray(response) ? response : (response.data || []));
         } catch (err) {
-            console.error("Failed to fetch pending posts:", err);
-            setError("Failed to load pending stories.");
+            console.error("Failed to fetch draft posts:", err);
+            setError("Failed to load draft stories.");
         } finally {
             setLoading(false);
         }
@@ -180,16 +147,8 @@ const PendingApproval = () => {
 
     useEffect(() => {
         window.scrollTo(0, 0);
-        fetchPendingPosts();
+        fetchDraftPosts();
     }, []);
-
-    const openStatusModal = (postId, postTitle) => {
-        setStatusModal({ open: true, postId, postTitle });
-    };
-
-    const closeStatusModal = () => {
-        setStatusModal({ open: false, postId: null, postTitle: '' });
-    };
 
     const handleEditStory = (id) => {
         navigate(`/dashboard/stories/edit/${id}`);
@@ -199,37 +158,131 @@ const PendingApproval = () => {
         navigate(`/dashboard/stories/preview/${id}`);
     };
 
-    const handleUpdateStatus = async (status, postId = null, postTitle = null) => {
-        try {
-            setUpdating(true);
-            const token = sessionStorage.getItem('token');
-            const targetPostId = postId || statusModal.postId;
+    const handlePublishDraft = async (postId, postTitle) => {
+        const result = await Swal.fire({
+            title: 'Publish Draft?',
+            text: `Are you sure you want to publish "${postTitle}"?`,
+            icon: 'question',
+            showCancelButton: true,
+            confirmButtonColor: '#FF7A18',
+            cancelButtonColor: '#6b7280',
+            confirmButtonText: 'Yes, publish it!',
+            background: '#0f172a',
+            color: '#e2e8f0',
+        });
 
-            await api.patch(`/posts/${targetPostId}/status`, { status }, { Authorization: `Bearer ${token}` });
-
-            await fetchPendingPosts();
-            if (!postId) closeStatusModal();
-
-            const statusText = status === 1 ? 'approved' : status === 2 ? 'rejected' : 'hidden';
-            toast.success(`Post has been ${statusText} successfully!`);
-        } catch (err) {
-            console.error("Failed to update post status:", err);
-            toast.error("Failed to update story status. Please try again.");
-        } finally {
-            setUpdating(false);
+        if (result.isConfirmed) {
+            try {
+                const token = sessionStorage.getItem('token');
+                const newStatus = isAdmin ? 1 : 0;
+                await api.patch(`/posts/${postId}/status`, { status: newStatus }, { Authorization: `Bearer ${token}` });
+                await fetchDraftPosts();
+                toast.success("Draft published successfully!");
+            } catch (err) {
+                console.error("Failed to publish draft:", err);
+                toast.error("Failed to publish story.");
+            }
         }
     };
 
-  
+    const handleDeleteDraft = async (id, title) => {
+        const result = await Swal.fire({
+            title: 'Delete Draft?',
+            text: `Are you sure you want to delete "${title}"?`,
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#FF7A18',
+            cancelButtonColor: '#d33',
+            confirmButtonText: 'Yes, delete it!',
+            background: '#0f172a',
+            color: '#e2e8f0',
+        });
+
+        if (result.isConfirmed) {
+            try {
+                const token = sessionStorage.getItem('token');
+                await api.delete(`/posts/${id}`, { Authorization: `Bearer ${token}` });
+                await fetchDraftPosts();
+                toast.success("Draft deleted successfully!");
+            } catch (err) {
+                console.error("Failed to delete draft:", err);
+                toast.error("Failed to delete draft.");
+            }
+        }
+    };
+
+const getPlainDescription = (description, media = []) => {
+    if (!description) return "No description available.";
+    const extractFromNode = (node) => {
+        if (!node) return '';
+        if (node.type === 'text') return node.text || '';
+        if (node.children) return node.children.map(extractFromNode).join(' ');
+        return '';
+    };
+    try {
+        const parsed = JSON.parse(description);
+
+       
+        let resolvedBlocks = parsed;
+        if (Array.isArray(parsed) && media && media.length > 0) {
+            const getResolvedUrl = (url) => {
+                if (!url) return '';
+                if (url.startsWith('http')) return url;
+                return `${API_BASE_URL.replace(/\/api$/, '')}${url}`;
+            };
+
+            resolvedBlocks = parsed.map(block => {
+                if (block.type === 'uploadedPhoto' || block.type === 'uploadedVideo') {
+                    let url = block.url;
+                    if (!url && block.fileName) {
+                        const matched = media.find(m => m.url && m.url.endsWith(block.fileName));
+                        if (matched) url = getResolvedUrl(matched.url);
+                    } else if (url && url.startsWith('/uploads/')) {
+                        url = getResolvedUrl(url);
+                    }
+                    return { ...block, url };
+                }
+                return block;
+            });
+        }
+
+        if (Array.isArray(resolvedBlocks)) {
+            const seen = new Set();
+            const text = resolvedBlocks
+                .filter(b => b.type === 'text')
+                .map(b => {
+                    if (!b.content) return '';
+                    try {
+                        const inner = typeof b.content === 'string' ? JSON.parse(b.content) : b.content;
+                        if (inner?.root) return extractFromNode(inner.root);
+                    } catch (_) {}
+                    return typeof b.content === 'string' ? b.content : '';
+                })
+                .map(t => t.replace(/\s+/g, ' ').trim())
+                .filter(t => { if (!t || seen.has(t)) return false; seen.add(t); return true; })
+                .join(' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            return text.slice(0, 120) + (text.length > 120 ? '...' : '') || "No description available.";
+        }
+        if (parsed?.root) {
+            const text = extractFromNode(parsed.root).replace(/\s+/g, ' ').trim();
+            return text.slice(0, 120) + (text.length > 120 ? '...' : '') || "No description available.";
+        }
+        return "No description available.";
+    } catch {
+        return description.slice(0, 120) + (description.length > 120 ? '...' : '');
+    }
+};
+
     const isVideoMedia = (url) => {
         if (!url) return false;
-        return url.includes('youtube.com') ||
-               url.includes('youtu.be') ||
+        return url.includes('youtube.com') || 
+               url.includes('youtu.be') || 
                url.includes('vimeo.com') ||
                url.match(/\.(mp4|webm|ogg|mov|avi|wmv)$/i);
     };
 
-    
     const isEmbedVideo = (url) => {
         if (!url) return false;
         return url.includes('youtube.com') || url.includes('youtu.be') || url.includes('vimeo.com');
@@ -247,76 +300,23 @@ const PendingApproval = () => {
         }
         if (url.includes('vimeo.com')) {
             return `https://player.vimeo.com/video/${url.split('/').pop()}`;
-        } 
+        }
         return url;
-    };
-
-    // ✅ Same logic as Home.jsx's heroMapper excerpt — only take the FIRST text
-    // block and run it through extractTextFromLexical, don't join every block
-    // (that's what was producing "[object Object] [object Object]...")
-    const parseDescription = (desc) => {
-        if (!desc) return "No description available.";
-        try {
-            const blocks = JSON.parse(desc);
-            if (Array.isArray(blocks)) {
-                const firstTextBlock = blocks.find(b => b.type === 'text' && b.content);
-                const text = firstTextBlock ? extractTextFromLexical(firstTextBlock.content) : '';
-                return (text ? text.substring(0, 150) + '...' : "No description available.");
-            }
-        } catch {}
-        return typeof desc === 'string' ? desc.substring(0, 150) : "No description available.";
     };
 
     return (
         <div className="space-y-8">
-            {statusModal.open && (
-                <div className="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-                    <div className="bg-slate-900 border border-white/10 rounded-2xl p-6 max-w-md w-full shadow-2xl">
-                        <h3 className="text-xl font-bold text-white mb-2">Update Post Status</h3>
-                        <p className="text-slate-400 mb-6">
-                            Do you want to update the status of "<span className="text-white">{statusModal.postTitle}</span>"?
-                        </p>
-
-                        <div className="flex flex-col sm:flex-row gap-3">
-                            <button
-                                onClick={() => handleUpdateStatus(1)}
-                                disabled={updating}
-                                className="flex-1 px-4 py-3 bg-green-500/20 hover:bg-green-500/30 text-green-400 font-semibold rounded-xl transition-all border border-green-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
-                            >
-                                {updating ? <Loader2 size={18} className="animate-spin" /> : <CheckCircle size={18} />}
-                                Approve
-                            </button>
-                            <button
-                                onClick={() => handleUpdateStatus(2)}
-                                disabled={updating}
-                                className="flex-1 px-4 py-3 bg-red-500/20 hover:bg-red-500/30 text-red-400 font-semibold rounded-xl transition-all border border-red-500/20 flex items-center justify-center gap-2 disabled:opacity-50"
-                            >
-                                {updating ? <Loader2 size={18} className="animate-spin" /> : <XCircle size={18} />}
-                                Reject
-                            </button>
-                            <button
-                                onClick={closeStatusModal}
-                                disabled={updating}
-                                className="flex-1 px-4 py-3 bg-slate-700/50 hover:bg-slate-700 text-slate-300 font-semibold rounded-xl transition-all border border-white/10 disabled:opacity-50"
-                            >
-                                Cancel
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            )}
-
             <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                 <div>
-                    <h2 className="text-2xl md:text-3xl font-bold text-white">Pending Approval</h2>
-                    <p className="text-slate-400 mt-1 text-sm md:text-base">Review and approve pending stories</p>
+                    <h2 className="text-2xl md:text-3xl font-bold text-white">Draft Posts</h2>
+                    <p className="text-slate-400 mt-1 text-sm md:text-base">Manage your unsaved draft stories</p>
                 </div>
             </div>
 
             {loading ? (
                 <div className="flex flex-col items-center justify-center py-20">
                     <Loader2 size={40} className="animate-spin text-orange-500 mb-4" />
-                    <p className="text-slate-400">Loading pending stories...</p>
+                    <p className="text-slate-400">Loading drafts...</p>
                 </div>
             ) : error ? (
                 <div className="p-6 bg-red-500/10 border border-red-500/20 rounded-2xl text-center text-red-400">
@@ -329,17 +329,16 @@ const PendingApproval = () => {
             ) : posts.length === 0 ? (
                 <div className="p-12 bg-slate-900 border border-white/10 rounded-2xl text-center text-slate-500">
                     <div className="flex justify-center mb-4">
-                        <CheckCircle size={48} className="opacity-20 text-green-500" />
+                        <FileText size={48} className="opacity-20 text-slate-500" />
                     </div>
-                    <p className="text-lg mb-2">No pending stories</p>
-                    <p className="text-sm text-slate-600">All stories have been reviewed</p>
+                    <p className="text-lg mb-2">No draft stories</p>
+                    <p className="text-sm text-slate-600">Your saved drafts will appear here</p>
                 </div>
             ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
                     {posts.map((post) => {
                         const rawMediaUrl = post.media?.[0]?.url || null;
                         const { thumbnail, hasImage } = resolvePostThumbnail(post);
-
 
                         const fullMediaUrl = hasImage ? thumbnail : getImageUrl(rawMediaUrl);
                         const isVideo = hasImage ? false : isVideoMedia(rawMediaUrl);
@@ -364,7 +363,7 @@ const PendingApproval = () => {
                                                 <>
                                                     <video
                                                         src={fullMediaUrl}
-                                                        className="w-full h-full object-cover bg-black"
+                                                        className="w-full h-full  bg-black"
                                                         muted
                                                         preload="metadata"
                                                     />
@@ -379,7 +378,7 @@ const PendingApproval = () => {
                                             <img
                                                 src={fullMediaUrl}
                                                 alt={post.title}
-                                                className="w-full h-full object-cover transition-transform duration-500 group-hover:scale-105"
+                                                className="w-full h-full  transition-transform duration-500 group-hover:scale-105"
                                                 onError={(e) => {
                                                     e.target.onerror = null;
                                                     e.target.src = 'https://placehold.co/600x400/1e293b/475569?text=No+Image';
@@ -401,14 +400,6 @@ const PendingApproval = () => {
                                             {post.postType || 'article'}
                                         </span>
                                     </div>
-
-                                    {post.featured && (
-                                        <div className="absolute top-4 right-4">
-                                            <span className="text-xs font-bold px-3 py-1 rounded-full bg-amber-500/80 border border-amber-500/20 text-white backdrop-blur-md shadow-lg">
-                                                Featured
-                                            </span>
-                                        </div>
-                                    )}
                                 </div>
 
                                 <div className="p-6 flex-1 flex flex-col">
@@ -417,13 +408,9 @@ const PendingApproval = () => {
                                             <span className="text-xs font-medium text-orange-400 bg-orange-500/10 px-2 py-1 rounded-md border border-orange-500/20 uppercase tracking-wider">
                                                 {post.category}
                                             </span>
-                                            <span className="text-xs font-medium px-2 py-1 rounded-md border text-yellow-400 bg-yellow-500/10 border-yellow-500/20">
-                                                Pending
+                                            <span className="text-xs font-medium px-2 py-1 rounded-md border text-slate-400 bg-slate-500/10 border-slate-500/20">
+                                                Draft
                                             </span>
-                                        </div>
-                                        <div className="flex items-center gap-1 text-slate-500 text-xs">
-                                            <Eye size={14} />
-                                            <span>{post.views || 0}</span>
                                         </div>
                                     </div>
 
@@ -432,7 +419,7 @@ const PendingApproval = () => {
                                     </h3>
 
                                     <p className="text-slate-400 text-sm line-clamp-3 mb-6 flex-1">
-                                        {parseDescription(post.description)}
+                                     {getPlainDescription(post.description, post.media)}
                                     </p>
 
                                     <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-auto">
@@ -454,20 +441,19 @@ const PendingApproval = () => {
                                             >
                                                 <Edit2 size={16} />
                                             </button>
-                                            {isAdmin && (
-                                                <button
-                                                    onClick={() => handleUpdateStatus(4, post._id, post.title)}
-                                                    className="p-2 text-slate-400 hover:text-white hover:bg-slate-600 rounded-lg transition-all"
-                                                    title="Hide Post"
-                                                >
-                                                    <EyeOff size={16} />
-                                                </button>
-                                            )}
                                             <button
-                                                onClick={() => openStatusModal(post._id, post.title)}
-                                                className="px-4 py-2 bg-gradient-to-r from-[#FFCC66] to-[#FF7A18] hover:opacity-90 text-slate-900 font-bold rounded-lg transition-all text-sm flex items-center gap-2"
+                                                onClick={() => handlePublishDraft(post._id, post.title)}
+                                                className="px-3 py-2 bg-green-500/20 hover:bg-green-500/30 text-green-400 font-semibold rounded-lg transition-all text-xs flex items-center gap-1 border border-green-500/20"
                                             >
-                                                Review
+                                                <Eye size={14} />
+                                                Publish
+                                            </button>
+                                            <button
+                                                onClick={() => handleDeleteDraft(post._id, post.title)}
+                                                className="p-2 text-slate-400 hover:text-white hover:bg-red-500 rounded-lg transition-all"
+                                                title="Delete"
+                                            >
+                                                <Trash2 size={16} />
                                             </button>
                                         </div>
                                     </div>
@@ -481,4 +467,4 @@ const PendingApproval = () => {
     );
 };
 
-export default PendingApproval;
+export default DraftPosts;

@@ -288,12 +288,7 @@ const Contact = () => {
                                 value: "outreach@nonoisestories.com",
                                 desc: "We reply within 24 hours"
                             },
-                            // {
-                            //     icon: <MapPin size={22} />,
-                            //     label: "Visit us",
-                            //     value: "Urbtech Trade Centre",
-                            //     desc: "Sector 132, Noida"
-                            // },
+                           
                             {
                                 icon: <MessageSquare size={22} />,
                                 label: "Live chat",

@@ -1,7 +1,7 @@
 import { useEffect, useRef } from 'react';
 import { parseContentBlocks } from '../utils/contentBlocks';
 
-// ── YouTube embed ──
+
 const YouTubeBlock = ({ url }) => {
   const ytId = url?.match(/(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/)?.[1];
   if (!ytId) return null;
@@ -20,58 +20,63 @@ const YouTubeBlock = ({ url }) => {
   );
 };
 
-// ── Twitter/X embed ──
+
 const TweetBlock = ({ url }) => {
   const ref = useRef(null);
 
-  // Extract tweet ID from URL
-  const tweetId = url?.match(/status\/(\d+)/)?.[1];
-
   useEffect(() => {
-    if (!tweetId || !ref.current) return;
-    ref.current.innerHTML = '';
+    if (!ref.current) return;
 
-    const loadTwitter = () => {
+    const load = () => {
       if (window.twttr?.widgets) {
-        window.twttr.widgets.createTweet(tweetId, ref.current, {
-          theme: 'dark',
-          align: 'center',
-          dnt: true,
-        });
+        window.twttr.widgets.load(ref.current);
       }
     };
 
-    if (window.twttr) {
-      loadTwitter();
-    } else {
+    if (window.twttr?.widgets) {
+      load();
+    } else if (!document.getElementById('twitter-widget-script')) {
       const script = document.createElement('script');
+      script.id = 'twitter-widget-script';
       script.src = 'https://platform.twitter.com/widgets.js';
       script.async = true;
-      script.onload = loadTwitter;
+      script.onload = load;
       document.body.appendChild(script);
+    } else {
+   
+      const wait = setInterval(() => {
+        if (window.twttr?.widgets) {
+          clearInterval(wait);
+          load();
+        }
+      }, 100);
+      return () => clearInterval(wait);
     }
-  }, [tweetId]);
+  }, [url]);
 
-  if (!tweetId) return (
+  if (!url) return (
     <div className="my-6 p-4 bg-slate-800/50 rounded-xl border border-slate-700 text-slate-400 text-sm">
       Invalid Twitter/X URL
     </div>
   );
 
   return (
-    <div className="my-8 flex justify-center">
-      <div ref={ref} className="w-full max-w-xl min-h-[100px] flex items-center justify-center">
-        <div className="text-slate-500 text-sm animate-pulse">Loading tweet...</div>
-      </div>
+    <div className="my-8 flex justify-center" ref={ref}>
+      <blockquote
+        className="twitter-tweet"
+        data-theme="dark"
+        data-dnt="true"
+        data-align="center"
+      >
+        <a href={url.replace('x.com', 'twitter.com')}>Loading tweet...</a>
+      </blockquote>
     </div>
   );
 };
 
-// ── Instagram embed ──
+
 const InstagramBlock = ({ url }) => {
   const ref = useRef(null);
-
-  // Normalize URL — must end with /
   const normalizedUrl = url?.endsWith('/') ? url : url + '/';
 
   useEffect(() => {
@@ -86,11 +91,14 @@ const InstagramBlock = ({ url }) => {
     if (window.instgrm) {
       loadInstagram();
     } else {
-      const script = document.createElement('script');
-      script.src = 'https://www.instagram.com/embed.js';
-      script.async = true;
-      script.onload = loadInstagram;
-      document.body.appendChild(script);
+      if (!document.getElementById('instagram-embed-script')) {
+        const script = document.createElement('script');
+        script.id = 'instagram-embed-script';
+        script.src = 'https://www.instagram.com/embed.js';
+        script.async = true;
+        script.onload = loadInstagram;
+        document.body.appendChild(script);
+      }
     }
   }, [url]);
 
@@ -106,7 +114,7 @@ const InstagramBlock = ({ url }) => {
   );
 };
 
-// ── Facebook embed ──
+
 const FacebookBlock = ({ url }) => {
   const ref = useRef(null);
 
@@ -122,7 +130,6 @@ const FacebookBlock = ({ url }) => {
     if (window.FB) {
       loadFacebook();
     } else {
-      // Load Facebook SDK
       window.fbAsyncInit = function () {
         window.FB.init({ xfbml: true, version: 'v18.0' });
         loadFacebook();
@@ -150,7 +157,7 @@ const FacebookBlock = ({ url }) => {
   );
 };
 
-// ── Image block ──
+
 const ImageBlock = ({ url }) => (
   <div className="my-8 flex justify-center">
     <img
@@ -163,7 +170,7 @@ const ImageBlock = ({ url }) => (
   </div>
 );
 
-// ── Text block ──
+
 const TextBlock = ({ content, style }) => {
   if (!content?.trim()) return null;
   return (
@@ -177,14 +184,13 @@ const TextBlock = ({ content, style }) => {
   );
 };
 
-// ── Main Renderer ──
+
 const PostDescriptionRenderer = ({ description, textStyle, compact = false }) => {
   if (!description) return null;
 
   const blocks = parseContentBlocks(description);
   const wrapClass = compact ? '' : 'mb-14 md:mb-20';
 
-  // Fallback — plain text
   if (!blocks) {
     const plain = typeof description === 'string' ? description : '';
     return (
@@ -194,7 +200,6 @@ const PostDescriptionRenderer = ({ description, textStyle, compact = false }) =>
     );
   }
 
-  // Render blocks
   return (
     <div className={wrapClass}>
       {blocks.map((block, i) => {

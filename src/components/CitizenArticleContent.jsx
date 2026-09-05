@@ -168,9 +168,7 @@ function MediaBlockPreview({ block }) {
   return null;
 }
 
-/**
- * Renders citizen journalist content with copyable media URLs for editorial review.
- */
+
 export default function CitizenArticleContent({
   value,
   textClassName = 'text-slate-200 text-sm leading-relaxed',

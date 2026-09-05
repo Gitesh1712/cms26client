@@ -2,23 +2,24 @@ import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { useEffect } from 'react';
 import Lenis from 'lenis';
 import { Toaster } from 'react-hot-toast';
-
+import DraftPosts from './pages/dashboard/DraftPosts';
 import Layout from './components/Layout';
 import Home from './pages/Home';
 import Login from './pages/Login';
 import Contact from './pages/Contact';
 import Post from './pages/Post';
+import CategoryPage from './pages/CategoryPage';
 import About from './pages/About';
 import ShortsPage from './pages/Shorts';
 import PrivacyPolicy from './pages/PrivacyPolicy';
 import CitizenJournalist from './pages/CitizenJournalist';
-
-
+import SubscribeAll from './pages/Subscribemodal';
 import DashboardLayout from './components/DashboardLayout';
 import DashboardHome from './pages/dashboard/DashboardHome';
 import AllStories from './pages/dashboard/AllStories';
 import AddStory from './pages/dashboard/AddStory';
 import EditStory from './pages/dashboard/EditStory';
+import PreviewPost from './pages/dashboard/PreviewPost';
 import Categories from './pages/dashboard/Categories';
 import Team from './pages/dashboard/Team';
 import PendingApproval from './pages/dashboard/PendingApproval';
@@ -103,7 +104,9 @@ function App() {
             <Route path="contact" element={<Contact />} />
              <Route path="CitizenJournalist" element={<CitizenJournalist />} />
             <Route path="about" element={<About />} />
+             <Route path="SubscribeAll" element={<SubscribeAll />} />
             <Route path="privacy-policy" element={<PrivacyPolicy />} />
+            <Route path=":category" element={<CategoryPage />} />
             <Route path=":category/:slug" element={<Post />} />
           </Route>
 
@@ -132,6 +135,7 @@ function App() {
             <Route path="stories" element={<AllStories />} />
             <Route path="stories/add" element={<AddStory />} />
             <Route path="stories/edit/:id" element={<EditStory />} />
+             <Route path="stories/preview/:id" element={<PreviewPost />} />  {/* 👈 ye naya route */}
             <Route path="categories" element={<Categories />} />
             <Route path="team" element={<Team />} />
             <Route path="leads" element={<Leads mode="contact" />} />
@@ -142,6 +146,7 @@ function App() {
             <Route path="hidden-posts" element={<HiddenPosts />} />
             <Route path="newsletter" element={<Newsletter />} />
             <Route path="shorts" element={<Shorts />} />
+            <Route path="drafts" element={<DraftPosts />} />
           </Route>
         </Routes>
       </LenisWrapper>

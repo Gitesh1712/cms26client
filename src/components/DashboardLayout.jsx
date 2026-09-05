@@ -3,7 +3,6 @@ import { LayoutDashboard, FileText, FolderOpen, Users, LogOut, Menu, X, Clock, C
 import { useState, useEffect } from 'react';
 import { api } from '../services/api';
 
-
 import useAutoLogout from '../hooks/useAutoLogout';
 import SessionWarning from './SessionWarning';
 
@@ -12,7 +11,6 @@ const DashboardLayout = () => {
     const [isSidebarOpen, setIsSidebarOpen] = useState(true);
     const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-    
     const { showWarning, countdown, resetTimer } = useAutoLogout(15, 2);
 
     const userInfo = JSON.parse(sessionStorage.getItem('userInfo') || '{}');
@@ -27,55 +25,37 @@ const DashboardLayout = () => {
         return () => window.removeEventListener('resize', handleResize);
     }, []);
 
-    // const handleLogout = () => {
-    //     sessionStorage.removeItem('token');
-    //     sessionStorage.removeItem('userInfo');
-    //     navigate('/login');
-    // };
+    const handleLogout = async () => {
+        try {
+            const token = sessionStorage.getItem('token');
 
+            await api.post(
+                '/logout',
+                {},
+                {
+                    Authorization: `Bearer ${token}`
+                }
+            );
 
-const handleLogout = async () => {
-    try {
-        const token = sessionStorage.getItem('token');
+            console.log('Logout API Hit Successfully');
 
-        await api.post(
-            '/logout',
-            {},
-            {
-                Authorization: `Bearer ${token}`
-            }
-        );
+        } catch (error) {
+            console.error('Logout API Error:', error);
+        } finally {
+            sessionStorage.removeItem('token');
+            sessionStorage.removeItem('userInfo');
 
-        console.log('Logout API Hit Successfully');
-
-    } catch (error) {
-        console.error('Logout API Error:', error);
-    } finally {
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('userInfo');
-
-        navigate('/login');
-    }
-};
-
-
-
-
-
-
-
-
-
-
-
+            navigate('/login');
+        }
+    };
 
     const navItems = [
         { icon: LayoutDashboard, label: "Dashboard", path: "/dashboard" },
         { icon: FileText, label: "All Stories", path: "/dashboard/stories" },
+        { icon: Play, label: "Shorts", path: "/dashboard/shorts" },
     ];
-    if(JSON.parse(sessionStorage.getItem('userInfo') || '{}').role === 'admin'){
+    if (JSON.parse(sessionStorage.getItem('userInfo') || '{}').role === 'admin') {
         navItems.push({ icon: FolderOpen, label: "Categories", path: "/dashboard/categories" });
-        navItems.push({ icon: Play, label: "Shorts", path: "/dashboard/shorts" });
         navItems.push({ icon: MessageSquare, label: "Leads", path: "/dashboard/leads" });
         navItems.push({ icon: Newspaper, label: "Citizen Journalist", path: "/dashboard/citizen-journalist" });
         navItems.push({ icon: Clock, label: "Pending Approval", path: "/dashboard/pending-approval" });
@@ -84,6 +64,7 @@ const handleLogout = async () => {
         navItems.push({ icon: EyeOff, label: "Hidden Posts", path: "/dashboard/hidden-posts" });
         navItems.push({ icon: Mail, label: "Newsletter", path: "/dashboard/newsletter" });
         navItems.push({ icon: Users, label: "Team", path: "/dashboard/team" });
+        navItems.push({ icon: FileText, label: "Drafts", path: "/dashboard/drafts" });
     }
 
     const handleNavClick = () => {
@@ -95,12 +76,10 @@ const handleLogout = async () => {
     return (
         <div className="flex h-screen bg-slate-900 text-slate-200 font-sans overflow-hidden">
 
-         
             {showWarning && (
                 <SessionWarning countdown={countdown} onStayLoggedIn={resetTimer} />
             )}
 
-          
             {isMobileMenuOpen && (
                 <div
                     className="fixed inset-0 bg-black/60 backdrop-blur-sm z-30 md:hidden"
@@ -110,13 +89,14 @@ const handleLogout = async () => {
 
             <aside className={`
                 bg-slate-950 border-r border-white/5 transition-all duration-300 flex flex-col z-40
-                fixed inset-y-0 left-0 w-64
+                fixed inset-y-0 left-0 w-64 h-screen
                 md:relative md:flex-shrink-0
                 ${isSidebarOpen ? 'md:w-64' : 'md:w-20'} 
                 ${isMobileMenuOpen ? 'translate-x-0' : '-translate-x-full md:translate-x-0'}
             `}>
-                <div className="p-4 md:p-6 flex items-center justify-between">
-                    <div className={`${!isSidebarOpen && 'hidden'}`}>
+               
+                <div className="p-4 md:p-6 flex items-center justify-between flex-shrink-0">
+                    <div className={`min-w-0 ${!isSidebarOpen && 'hidden'}`}>
                         <div className="font-bold text-lg text-white truncate max-w-[140px]">
                             {userInfo.email || 'User'}
                         </div>
@@ -124,7 +104,7 @@ const handleLogout = async () => {
                             {userInfo.role || 'Member'}
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2 flex-shrink-0">
                         <button
                             onClick={() => setIsMobileMenuOpen(false)}
                             className="md:hidden p-2 hover:bg-white/5 rounded-lg text-slate-400 hover:text-white transition-colors"
@@ -137,7 +117,16 @@ const handleLogout = async () => {
                     </div>
                 </div>
 
-                <nav className="flex-1 px-4 space-y-2 mt-8">
+             
+                <nav
+                    className="flex-1 min-h-0 overflow-y-auto overflow-x-hidden px-4 space-y-2 mt-8
+                    [&::-webkit-scrollbar]:w-1.5
+                    [&::-webkit-scrollbar-track]:bg-transparent
+                    [&::-webkit-scrollbar-thumb]:bg-white/10
+                    [&::-webkit-scrollbar-thumb]:rounded-full
+                    hover:[&::-webkit-scrollbar-thumb]:bg-white/20"
+                    style={{ scrollbarWidth: 'thin', scrollbarColor: 'rgba(255,255,255,0.15) transparent' }}
+                >
                     {navItems.map((item) => (
                         <NavLink
                             key={item.path}
@@ -146,18 +135,19 @@ const handleLogout = async () => {
                             onClick={handleNavClick}
                             className={({ isActive }) => `flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${isActive ? 'bg-gradient-to-r from-[#FFCC66]/20 to-[#FF7A18]/20 text-orange-400' : 'hover:bg-white/5 text-slate-400 hover:text-white'}`}
                         >
-                            <item.icon size={20} className={`${!isSidebarOpen && 'mx-auto'}`} />
+                            <item.icon size={20} className={`flex-shrink-0 ${!isSidebarOpen && 'mx-auto'}`} />
                             <span className={`font-medium whitespace-nowrap ${!isSidebarOpen && 'hidden'}`}>{item.label}</span>
                         </NavLink>
                     ))}
                 </nav>
 
-                <div className="p-4 border-t border-white/5">
+              
+                <div className="p-4 border-t border-white/5 flex-shrink-0">
                     <button
                         onClick={handleLogout}
                         className="flex items-center gap-3 px-4 py-3 rounded-xl w-full text-left transition-all duration-200 hover:bg-red-500/10 text-slate-400 hover:text-red-400 group"
                     >
-                        <LogOut size={20} className={`${!isSidebarOpen && 'mx-auto'}`} />
+                        <LogOut size={20} className={`flex-shrink-0 ${!isSidebarOpen && 'mx-auto'}`} />
                         <span className={`font-medium whitespace-nowrap ${!isSidebarOpen && 'hidden'}`}>Logout</span>
                     </button>
                 </div>

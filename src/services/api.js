@@ -58,14 +58,16 @@ async function request(endpoint, options = {}) {
     const isFormData = body instanceof FormData;
 
     const config = {
-        ...rest,
-        body: isFormData ? body : (body && typeof body === 'object' ? JSON.stringify(body) : body),
-        headers: {
-            ...headers,
-            ...(isFormData ? {} : { 'Content-Type': 'application/json;charset=UTF-8' }),
-        },
-        signal: controller.signal,
-    };
+    ...rest,
+    body: isFormData ? body : (body && typeof body === 'object' ? JSON.stringify(body) : body),
+    headers: {
+        ...headers,
+        ...(isFormData ? {} : { 'Content-Type': 'application/json;charset=UTF-8' }),
+    },
+    credentials: 'include',
+    signal: controller.signal,
+};
+
 
     try {
         const response = await fetch(`${API_BASE_URL}${endpoint}`, config);

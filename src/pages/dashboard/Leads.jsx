@@ -51,7 +51,7 @@ const Leads = ({ mode }) => {
             params.append("page", page);
             params.append("limit", leadsPerPage);
             if (searchTerm) params.append("search", searchTerm);
-            // Citizen journalist: type lives in submissionType on API; fetch all section types, filter in UI
+            
             if (mode === "citizen") {
                 params.append("inquiryType", typePool.join(","));
             } else if (mode === "contact") {
@@ -139,7 +139,7 @@ const Leads = ({ mode }) => {
     return (
         <div className="p-6 md:p-8 min-h-screen">
 
-            {/* ── Header ── */}
+            
             <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-4 mb-8">
                 <div>
                     <h1 className="text-3xl font-bold text-white mb-2">{pageTitle}</h1>
@@ -150,7 +150,7 @@ const Leads = ({ mode }) => {
                 </button>
             </div>
 
-            {/* ── Search + Filter ── */}
+          
             <div className="bg-slate-900 border border-white/10 rounded-2xl p-4 mb-6">
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="relative">
@@ -170,7 +170,7 @@ const Leads = ({ mode }) => {
                 </div>
             </div>
 
-            {/* ── Content ── */}
+        
             {loading ? (
                 <div className="flex items-center justify-center py-20"><Loader2 size={40} className="animate-spin text-orange-500" /></div>
             ) : error ? (

@@ -322,7 +322,7 @@ Previous versions will be archived and available upon request.`
              
                 <div className="mb-12 animate-fadeInUp animate-delay-200">
                     <p className="text-slate-300 leading-relaxed mb-4">
-                        Welcome to <strong className="text-white">No Noise Stories</strong>. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website <strong className="text-orange-400">nonoisestories.cloud</strong>, read our articles, watch our videos, or interact with our services.
+                        Welcome to <strong className="text-white">No Noise Stories</strong>. This Privacy Policy explains how we collect, use, disclose, and safeguard your information when you visit our website <strong className="text-orange-400">nonoisestories.com</strong>, read our articles, watch our videos, or interact with our services.
                     </p>
                     <p className="text-slate-300 leading-relaxed mb-4">
                         We are a digital news platform dedicated to delivering clear, accurate, and impactful stories. As a news organization, we understand the importance of maintaining your trust and protecting your personal information.
@@ -380,13 +380,13 @@ Previous versions will be archived and available upon request.`
                     
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                         <a
-                            href="mailto:contact@nonoisestories.cloud"
+                            href="mailto:contact@nonoisestories.com"
                             className="flex items-center gap-3 p-4 rounded-xl bg-slate-900/50 border border-white/5 hover:border-orange-500/30 transition-all group"
                         >
                             <Mail className="text-orange-400 flex-shrink-0" size={20} />
                             <div>
                                 <div className="text-slate-400 text-xs mb-1">Email</div>
-                                <div className="text-white text-sm font-medium group-hover:text-orange-400 transition-colors">contact@nonoisestories.cloud</div>
+                                <div className="text-white text-sm font-medium group-hover:text-orange-400 transition-colors">contact@nonoisestories.com</div>
                             </div>
                         </a>
                         

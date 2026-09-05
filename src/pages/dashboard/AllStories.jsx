@@ -4,7 +4,6 @@ import { useNavigate, useSearchParams } from 'react-router-dom';
 import { api } from '../../services/api';
 import Swal from 'sweetalert2';
 
-
 import {
     DndContext,
     closestCenter,
@@ -47,8 +46,71 @@ const getEmbedUrl = (url) => {
     return url;
 };
 
-
-const SortableCard = ({ post, getCategoryName, handleEditStory, handleDeleteStory, isAdmin }) => {
+const getPlainDescription = (description, media = []) => {
+    if (!description) return "No description available.";
+    const extractFromNode = (node) => {
+        if (!node) return '';
+        if (node.type === 'text') return node.text || '';
+        if (node.children) return node.children.map(extractFromNode).join(' ');
+        return '';
+    };
+    try {
+        const parsed = JSON.parse(description);
+        
+     
+        let resolvedBlocks = parsed;
+        if (Array.isArray(parsed) && media && media.length > 0) {
+            const API_BASE_URL = import.meta.env.VITE_API_URL || '';
+            const getResolvedUrl = (url) => {
+                if (!url) return '';
+                if (url.startsWith('http')) return url;
+                return `${API_BASE_URL.replace(/\/api$/, '')}${url}`;
+            };
+            
+            resolvedBlocks = parsed.map(block => {
+                if (block.type === 'uploadedPhoto' || block.type === 'uploadedVideo') {
+                    let url = block.url;
+                    if (!url && block.fileName) {
+                        const matched = media.find(m => m.url && m.url.endsWith(block.fileName));
+                        if (matched) url = getResolvedUrl(matched.url);
+                    } else if (url && url.startsWith('/uploads/')) {
+                        url = getResolvedUrl(url);
+                    }
+                    return { ...block, url };
+                }
+                return block;
+            });
+        }
+        
+        if (Array.isArray(resolvedBlocks)) {
+            const seen = new Set();
+            const text = resolvedBlocks
+                .filter(b => b.type === 'text')
+                .map(b => {
+                    if (!b.content) return '';
+                    try {
+                        const inner = typeof b.content === 'string' ? JSON.parse(b.content) : b.content;
+                        if (inner?.root) return extractFromNode(inner.root);
+                    } catch (_) {}
+                    return typeof b.content === 'string' ? b.content : '';
+                })
+                .map(t => t.replace(/\s+/g, ' ').trim())
+                .filter(t => { if (!t || seen.has(t)) return false; seen.add(t); return true; })
+                .join(' ')
+                .replace(/\s+/g, ' ')
+                .trim();
+            return text.slice(0, 120) + (text.length > 120 ? '...' : '') || "No description available.";
+        }
+        if (parsed?.root) {
+            const text = extractFromNode(parsed.root).replace(/\s+/g, ' ').trim();
+            return text.slice(0, 120) + (text.length > 120 ? '...' : '') || "No description available.";
+        }
+        return "No description available.";
+    } catch {
+        return description.slice(0, 120) + (description.length > 120 ? '...' : '');
+    }
+};
+const SortableCard = ({ post, getCategoryName, handleEditStory, handleDeleteStory, isAdmin, onPreview }) => {
     const {
         attributes,
         listeners,
@@ -65,14 +127,37 @@ const SortableCard = ({ post, getCategoryName, handleEditStory, handleDeleteStor
         zIndex: isDragging ? 999 : 'auto',
     };
 
+ 
+    const getThumbnailFromDescription = () => {
+        if (!post.description) return null;
+        try {
+            const blocks = JSON.parse(post.description);
+            if (Array.isArray(blocks)) {
+                const uploadedBlock = blocks.find(b => 
+                    (b.type === 'uploadedPhoto' || b.type === 'uploadedVideo') && b.url
+                );
+                if (uploadedBlock && uploadedBlock.url) {
+                    return uploadedBlock.url.startsWith('http')
+                        ? uploadedBlock.url
+                        : `${import.meta.env.VITE_API_URL}${uploadedBlock.url}`;
+                }
+            }
+        } catch (e) {
+            console.error('Failed to parse description for thumbnail:', e);
+        }
+        return null;
+    };
+
+    const mediaUrl = post.media?.[0]?.url;
+    const thumbnailFromDesc = getThumbnailFromDescription();
+    const finalThumbnail = mediaUrl || thumbnailFromDesc;
+
     return (
         <div ref={setNodeRef} style={style}>
-          
             <div
                 className="bg-slate-900 border border-white/10 rounded-2xl overflow-hidden group hover:border-orange-500/30 transition-all duration-300 hover:shadow-2xl hover:shadow-orange-500/10 flex flex-col h-full"
                 style={{ cursor: isDragging ? 'grabbing' : 'default' }}
             >
-           
                 <div
                     {...attributes}
                     {...listeners}
@@ -86,13 +171,12 @@ const SortableCard = ({ post, getCategoryName, handleEditStory, handleDeleteStor
                     </div>
                 </div>
 
-             
                 <div className="aspect-video relative overflow-hidden bg-slate-800">
-                    {post.media?.[0]?.url ? (
-                        isVideoUrl(post.media[0].url) ? (
-                            isEmbedVideo(post.media[0].url) ? (
+                    {finalThumbnail ? (
+                        isVideoUrl(finalThumbnail) ? (
+                            isEmbedVideo(finalThumbnail) ? (
                                 <iframe
-                                    src={getEmbedUrl(post.media[0].url)}
+                                    src={getEmbedUrl(finalThumbnail)}
                                     className="w-full h-full"
                                     frameBorder="0"
                                     allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
@@ -102,9 +186,9 @@ const SortableCard = ({ post, getCategoryName, handleEditStory, handleDeleteStor
                             ) : (
                                 <>
                                     <video
-                                        src={post.media[0].url.startsWith('http')
-                                            ? post.media[0].url
-                                            : `${import.meta.env.VITE_API_URL}${post.media[0].url}`}
+                                        src={finalThumbnail.startsWith('http')
+                                            ? finalThumbnail
+                                            : `${import.meta.env.VITE_API_URL}${finalThumbnail}`}
                                         className="w-full h-full object-cover bg-black"
                                         muted preload="metadata"
                                     />
@@ -115,9 +199,9 @@ const SortableCard = ({ post, getCategoryName, handleEditStory, handleDeleteStor
                             )
                         ) : (
                             (() => {
-                                const imageUrl = post.media[0].url.startsWith('http')
-                                    ? post.media[0].url
-                                    : `${import.meta.env.VITE_API_URL}${post.media[0].url}`;
+                                const imageUrl = finalThumbnail.startsWith('http')
+                                    ? finalThumbnail
+                                    : `${import.meta.env.VITE_API_URL}${finalThumbnail}`;
                                 const youtubeId = getYoutubeId(imageUrl);
                                 if (youtubeId) {
                                     return (
@@ -149,9 +233,6 @@ const SortableCard = ({ post, getCategoryName, handleEditStory, handleDeleteStor
                     )}
                 </div>
 
-
-
-
                 <div className="p-6 flex-1 flex flex-col">
                     <div className="flex items-center justify-between mb-3">
                         <div className="flex items-center gap-2">
@@ -179,7 +260,7 @@ const SortableCard = ({ post, getCategoryName, handleEditStory, handleDeleteStor
                     </h3>
 
                     <p className="text-slate-400 text-sm line-clamp-3 mb-6 flex-1">
-                        {post.description || "No description available."}
+                       {getPlainDescription(post.description, post.media)}
                     </p>
 
                     <div className="flex items-center justify-between pt-4 border-t border-white/5 mt-auto">
@@ -187,6 +268,13 @@ const SortableCard = ({ post, getCategoryName, handleEditStory, handleDeleteStor
                             By <span className="text-slate-300">{post.author}</span>
                         </div>
                         <div className="flex gap-2">
+                            <button
+                                onClick={() => onPreview(post)}
+                                className="p-2 text-slate-400 hover:text-white hover:bg-orange-500 rounded-lg transition-all"
+                                title="Preview"
+                            >
+                                <Eye size={16} />
+                            </button>
                             <button
                                 onClick={() => handleEditStory(post._id)}
                                 className="p-2 text-slate-400 hover:text-white hover:bg-blue-500 rounded-lg transition-all"
@@ -210,7 +298,6 @@ const SortableCard = ({ post, getCategoryName, handleEditStory, handleDeleteStor
         </div>
     );
 };
-
 const AllStories = () => {
     const navigate = useNavigate();
     const [searchParams, setSearchParams] = useSearchParams();
@@ -223,10 +310,9 @@ const AllStories = () => {
 
     const activeCategoryId = searchParams.get('category') || '';
 
-   
     const sensors = useSensors(
         useSensor(PointerSensor, {
-            activationConstraint: { distance: 8 }, 
+            activationConstraint: { distance: 8 },
         })
     );
 
@@ -289,6 +375,10 @@ const AllStories = () => {
         navigate(`edit/${id}`);
     };
 
+    const handlePreviewStory = (post) => {
+        navigate(`/dashboard/stories/preview/${post._id}`);
+    };
+
     const handleDeleteStory = async (id) => {
         const result = await Swal.fire({
             title: 'Are you sure?',
@@ -321,46 +411,29 @@ const AllStories = () => {
         }
     };
 
+    const handleDragEnd = async (event) => {
+        const { active, over } = event;
+        if (!over || active.id === over.id) return;
 
-  const handleDragEnd = async (event) => {
-    const { active, over } = event;
-    if (!over || active.id === over.id) return;
+        const globalOldIndex = posts.findIndex(p => p._id === active.id);
+        const globalOverIndex = posts.findIndex(p => p._id === over.id);
+        if (globalOldIndex === -1 || globalOverIndex === -1) return;
 
-    const oldIndex = filteredPosts.findIndex(p => p._id === active.id);
-    const newIndex = filteredPosts.findIndex(p => p._id === over.id);
-    if (oldIndex === -1 || newIndex === -1) return;
+        const reorderedGlobal = arrayMove(posts, globalOldIndex, globalOverIndex);
+        setPosts(reorderedGlobal);
 
-    const reordered = arrayMove(filteredPosts, oldIndex, newIndex);
-
-   
-    if (activeCategoryId) {
-        setPosts(prev => {
-            const reorderedIds = reordered.map(p => p._id);
-            return [
-                ...prev.filter(p => !reorderedIds.includes(p._id)),
-                ...reordered
-            ];
-        });
-    } else {
-        setPosts(arrayMove(posts, 
-            posts.findIndex(p => p._id === active.id),
-            posts.findIndex(p => p._id === over.id)
-        ));
-    }
-
-   
-    try {
-        const token = sessionStorage.getItem('token');
-        await api.put(
-            '/posts/reorder',
-            { orderedIds: reordered.map(p => p._id) },
-            { Authorization: `Bearer ${token}` }
-        );
-    } catch (err) {
-        console.error('Reorder failed:', err);
-        fetchPosts();
-    }
-};
+        try {
+            const token = sessionStorage.getItem('token');
+            await api.put(
+                '/posts/reorder',
+                { orderedIds: reorderedGlobal.map(p => p._id) },
+                { Authorization: `Bearer ${token}` }
+            );
+        } catch (err) {
+            console.error('Reorder failed:', err);
+            fetchPosts();
+        }
+    };
 
     return (
         <div className="space-y-8">
@@ -460,7 +533,6 @@ const AllStories = () => {
                     </button>
                 </div>
             ) : (
-             
                 <DndContext
                     sensors={sensors}
                     collisionDetection={closestCenter}
@@ -479,6 +551,7 @@ const AllStories = () => {
                                     handleEditStory={handleEditStory}
                                     handleDeleteStory={handleDeleteStory}
                                     isAdmin={isAdmin}
+                                    onPreview={handlePreviewStory}
                                 />
                             ))}
                         </div>

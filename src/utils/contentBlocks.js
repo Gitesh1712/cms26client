@@ -23,7 +23,7 @@ export function parseContentBlocks(description) {
     .replace(/[\u201C\u201D]/g, '"')
     .replace(/[\u2018\u2019]/g, "'");
 
-  // HTML entities from some APIs
+ 
   if (raw.includes('&quot;') || raw.includes('&#34;')) {
     raw = raw
       .replace(/&quot;/g, '"')
@@ -44,7 +44,7 @@ export function parseContentBlocks(description) {
       if (typeof parsed === 'string') parsed = JSON.parse(parsed);
       if (isBlockArray(parsed)) return parsed;
     } catch {
-      /* try next */
+    
     }
   }
 
@@ -90,7 +90,7 @@ const MEDIA_TYPE_LABELS = {
   link: 'Link',
 };
 
-/** URLs from JSON blocks + plain text (for dashboard copy when creating posts). */
+
 export function extractMediaUrls(value) {
   const items = [];
   const seen = new Set();
@@ -132,7 +132,7 @@ export function extractMediaUrls(value) {
   return items;
 }
 
-/** Match dashboard / API filter to a lead (inquiryType or submissionType). */
+
 export function leadMatchesFilter(lead, filterType) {
   if (!filterType || filterType === 'all') return true;
   const t = String(lead?.inquiryType || lead?.submissionType || '').trim();
